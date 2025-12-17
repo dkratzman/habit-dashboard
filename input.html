@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Habit Input</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+</head>
+<body>
+  <h1>Daily Habit Input</h1>
+
+  <p>
+    <a href="index.html">← Back to Dashboard</a>
+  </p>
+
+  <section>
+    <h2>Enter Today&apos;s Data</h2>
+    <form id="dailyForm">
+      <!-- Date -->
+      <div class="form-row">
+        <label for="date">Date</label>
+        <input type="date" id="date" required>
+      </div>
+
+      <!-- Time Up: buttons 4:00a–11:00a every 30 mins -->
+      <div class="form-row">
+        <label>Time Up</label>
+        <div class="button-group" data-input-id="timeUp">
+          <!-- 4:00a to 11:00a, 30 min intervals -->
+          <button type="button" class="btn-option" data-value="4:00a">4:00a</button>
+          <button type="button" class="btn-option" data-value="4:30a">4:30a</button>
+          <button type="button" class="btn-option" data-value="5:00a">5:00a</button>
+          <button type="button" class="btn-option" data-value="5:30a">5:30a</button>
+          <button type="button" class="btn-option" data-value="6:00a">6:00a</button>
+          <button type="button" class="btn-option" data-value="6:30a">6:30a</button>
+          <button type="button" class="btn-option" data-value="7:00a">7:00a</button>
+          <button type="button" class="btn-option" data-value="7:30a">7:30a</button>
+          <button type="button" class="btn-option" data-value="8:00a">8:00a</button>
+          <button type="button" class="btn-option" data-value="8:30a">8:30a</button>
+          <button type="button" class="btn-option" data-value="9:00a">9:00a</button>
+          <button type="button" class="btn-option" data-value="9:30a">9:30a</button>
+          <button type="button" class="btn-option" data-value="10:00a">10:00a</button>
+          <button type="button" class="btn-option" data-value="10:30a">10:30a</button>
+          <button type="button" class="btn-option" data-value="11:00a">11:00a</button>
+        </div>
+        <input type="hidden" id="timeUp">
+      </div>
+
+      <!-- Time in Bed: buttons 8:00p–3:30a every 30 mins -->
+      <div class="form-row">
+        <label>Time in Bed</label>
+        <div class="button-group" data-input-id="timeBed">
+          <!-- 8:00p to 11:30p -->
+          <button type="button" class="btn-option" data-value="8:00p">8:00p</button>
+          <button type="button" class="btn-option" data-value="8:30p">8:30p</button>
+          <button type="button" class="btn-option" data-value="9:00p">9:00p</button>
+          <button type="button" class="btn-option" data-value="9:30p">9:30p</button>
+          <button type="button" class="btn-option" data-value="10:00p">10:00p</button>
+          <button type="button" class="btn-option" data-value="10:30p">10:30p</button>
+          <button type="button" class="btn-option" data-value="11:00p">11:00p</button>
+          <button type="button" class="btn-option" data-value="11:30p">11:30p</button>
+          <!-- After midnight (a) -->
+          <button type="button" class="btn-option" data-value="12:00a">12:00a</button>
+          <button type="button" class="btn-option" data-value="12:30a">12:30a</button>
+          <button type="button" class="btn-option" data-value="1:00a">1:00a</button>
+          <button type="button" class="btn-option" data-value="1:30a">1:30a</button>
+          <button type="button" class="btn-option" data-value="2:00a">2:00a</button>
+          <button type="button" class="btn-option" data-value="2:30a">2:30a</button>
+          <button type="button" class="btn-option" data-value="3:00a">3:00a</button>
+          <button type="button" class="btn-option" data-value="3:30a">3:30a</button>
+        </div>
+        <input type="hidden" id="timeBed">
+      </div>
+
+      <!-- Yes/No Habits -->
+      <fieldset class="form-group">
+        <legend>Habits (Yes/No)</legend>
+
+        <div class="form-row">
+          <label>Workout today?</label>
+          <div class="button-group" data-input-id="workout">
+            <button type="button" class="btn-option" data-value="Yes">Yes</button>
+            <button type="button" class="btn-option selected" data-value="No">No</button>
+          </div>
+          <input type="hidden" id="workout" value="No">
+        </div>
+
+        <div class="form-row">
+          <label>Journal or vlog today?</label>
+          <div class="button-group" data-input-id="journal">
+            <button type="button" class="btn-option" data-value="Yes">Yes</button>
+            <button type="button" class="btn-option selected" data-value="No">No</button>
+          </div>
+          <input type="hidden" id="journal" value="No">
+        </div>
+
+        <div class="form-row">
+          <label>Read / Audiobook today?</label>
+          <div class="button-group" data-input-id="read">
+            <button type="button" class="btn-option" data-value="Yes">Yes</button>
+            <button type="button" class="btn-option selected" data-value="No">No</button>
+          </div>
+          <input type="hidden" id="read" value="No">
+        </div>
+
+        <div class="form-row">
+          <label>Drink today?</label>
+          <div class="button-group" data-input-id="drink">
+            <button type="button" class="btn-option" data-value="Yes">Yes</button>
+            <button type="button" class="btn-option selected" data-value="No">No</button>
+          </div>
+          <input type="hidden" id="drink" value="No">
+        </div>
+
+        <div class="form-row">
+          <label>Less than 2 hours of media?</label>
+          <div class="button-group" data-input-id="media">
+            <button type="button" class="btn-option" data-value="Yes">Yes</button>
+            <button type="button" class="btn-option selected" data-value="No">No</button>
+          </div>
+          <input type="hidden" id="media" value="No">
+        </div>
+
+        <div class="form-row">
+          <label>Practice piano today?</label>
+          <div class="button-group" data-input-id="piano">
+            <button type="button" class="btn-option" data-value="Yes">Yes</button>
+            <button type="button" class="btn-option selected" data-value="No">No</button>
+          </div>
+          <input type="hidden" id="piano" value="No">
+        </div>
+
+        <div class="form-row">
+          <label>Go into office today?</label>
+          <div class="button-group" data-input-id="office">
+            <button type="button" class="btn-option" data-value="Yes">Yes</button>
+            <button type="button" class="btn-option selected" data-value="No">No</button>
+          </div>
+          <input type="hidden" id="office" value="No">
+        </div>
+
+        <div class="form-row">
+          <label>Hit work goal today?</label>
+          <div class="button-group" data-input-id="hitGoal">
+            <button type="button" class="btn-option" data-value="Yes">Yes</button>
+            <button type="button" class="btn-option selected" data-value="No">No</button>
+          </div>
+          <input type="hidden" id="hitGoal" value="No">
+        </div>
+      </fieldset>
+
+      <!-- Hours worked / personal: buttons 0–14 -->
+      <div class="form-row">
+        <label>Hours worked today</label>
+        <div class="button-group wrap" data-input-id="hoursWorked">
+          <!-- 0 through 14 -->
+          <button type="button" class="btn-option selected" data-value="0">0</button>
+          <button type="button" class="btn-option" data-value="1">1</button>
+          <button type="button" class="btn-option" data-value="2">2</button>
+          <button type="button" class="btn-option" data-value="3">3</button>
+          <button type="button" class="btn-option" data-value="4">4</button>
+          <button type="button" class="btn-option" data-value="5">5</button>
+          <button type="button" class="btn-option" data-value="6">6</button>
+          <button type="button" class="btn-option" data-value="7">7</button>
+          <button type="button" class="btn-option" data-value="8">8</button>
+          <button type="button" class="btn-option" data-value="9">9</button>
+          <button type="button" class="btn-option" data-value="10">10</button>
+          <button type="button" class="btn-option" data-value="11">11</button>
+          <button type="button" class="btn-option" data-value="12">12</button>
+          <button type="button" class="btn-option" data-value="13">13</button>
+          <button type="button" class="btn-option" data-value="14">14</button>
+        </div>
+        <input type="hidden" id="hoursWorked" value="0">
+      </div>
+
+      <div class="form-row">
+        <label>Hours on personal work / learning / development</label>
+        <div class="button-group wrap" data-input-id="hoursPersonal">
+          <!-- 0 through 14 -->
+          <button type="button" class="btn-option selected" data-value="0">0</button>
+          <button type="button" class="btn-option" data-value="1">1</button>
+          <button type="button" class="btn-option" data-value="2">2</button>
+          <button type="button" class="btn-option" data-value="3">3</button>
+          <button type="button" class="btn-option" data-value="4">4</button>
+          <button type="button" class="btn-option" data-value="5">5</button>
+          <button type="button" class="btn-option" data-value="6">6</button>
+          <button type="button" class="btn-option" data-value="7">7</button>
+          <button type="button" class="btn-option" data-value="8">8</button>
+          <button type="button" class="btn-option" data-value="9">9</button>
+          <button type="button" class="btn-option" data-value="10">10</button>
+          <button type="button" class="btn-option" data-value="11">11</button>
+          <button type="button" class="btn-option" data-value="12">12</button>
+          <button type="button" class="btn-option" data-value="13">13</button>
+          <button type="button" class="btn-option" data-value="14">14</button>
+        </div>
+        <input type="hidden" id="hoursPersonal" value="0">
+      </div>
+
+      <!-- Ratings 1–5 -->
+      <fieldset class="form-group">
+        <legend>Ratings (1–5)</legend>
+
+        <div class="form-row">
+          <label>Overall feeling</label>
+          <div class="button-group" data-input-id="overall">
+            <button type="button" class="btn-option" data-value="1">1</button>
+            <button type="button" class="btn-option" data-value="2">2</button>
+            <button type="button" class="btn-option selected" data-value="3">3</button>
+            <button type="button" class="btn-option" data-value="4">4</button>
+            <button type="button" class="btn-option" data-value="5">5</button>
+          </div>
+          <input type="hidden" id="overall" value="3">
+        </div>
+
+        <div class="form-row">
+          <label>Physical feeling</label>
+          <div class="button-group" data-input-id="physical">
+            <button type="button" class="btn-option" data-value="1">1</button>
+            <button type="button" class="btn-option" data-value="2">2</button>
+            <button type="button" class="btn-option selected" data-value="3">3</button>
+            <button type="button" class="btn-option" data-value="4">4</button>
+            <button type="button" class="btn-option" data-value="5">5</button>
+          </div>
+          <input type="hidden" id="physical" value="3">
+        </div>
+
+        <div class="form-row">
+          <label>Mental feeling</label>
+          <div class="button-group" data-input-id="mental">
+            <button type="button" class="btn-option" data-value="1">1</button>
+            <button type="button" class="btn-option" data-value="2">2</button>
+            <button type="button" class="btn-option selected" data-value="3">3</button>
+            <button type="button" class="btn-option" data-value="4">4</button>
+            <button type="button" class="btn-option" data-value="5">5</button>
+          </div>
+          <input type="hidden" id="mental" value="3">
+        </div>
+
+        <div class="form-row">
+          <label>Energy</label>
+          <div class="button-group" data-input-id="energy">
+            <button type="button" class="btn-option" data-value="1">1</button>
+            <button type="button" class="btn-option" data-value="2">2</button>
+            <button type="button" class="btn-option selected" data-value="3">3</button>
+            <button type="button" class="btn-option" data-value="4">4</button>
+            <button type="button" class="btn-option" data-value="5">5</button>
+          </div>
+          <input type="hidden" id="energy" value="3">
+        </div>
+      </fieldset>
+
+      <!-- Keyword / Summary -->
+      <div class="form-row">
+        <label for="keyword">Daily keyword</label>
+        <input type="text" id="keyword" placeholder="e.g. Work, Learning, Lake">
+      </div>
+
+      <div class="form-row">
+        <label for="summary">Daily summary</label>
+        <textarea id="summary" rows="3" placeholder="Short description of the day"></textarea>
+      </div>
+
+      <button type="submit">Save Entry</button>
+      <p id="saveStatus" class="save-status"></p>
+    </form>
+  </section>
+
+  <section>
+    <h2>Recent Local Entries (this browser only)</h2>
+    <div class="daily-list-container">
+      <table class="daily-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Keyword</th>
+            <th>Overall</th>
+          </tr>
+        </thead>
+        <tbody id="localEntriesBody">
+          <!-- Filled by input.js -->
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <script src="input.js"></script>
+</body>
+</html>

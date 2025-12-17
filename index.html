@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Habit Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+  <h1>Habit Dashboard</h1>
+
+
+<div id="userBar" style="display:flex; gap:12px; align-items:center;">
+  <span id="userEmail"></span>
+  <button id="logoutBtn">Log out</button>
+</div>
+
+<p>
+  <a href="input.html">➕ Add Today’s Entry</a>
+</p>
+
+
+<div class="filter-bar">
+  <div>
+    <label for="startMonth">Start month:</label>
+    <input type="month" id="startMonth">
+  </div>
+  <div>
+    <label for="endMonth">End month:</label>
+    <input type="month" id="endMonth">
+  </div>
+  <div class="filter-buttons">
+    <button id="applyFilter">Apply</button>
+    <button id="resetFilter">Reset</button>
+  </div>
+</div>
+
+
+<section>
+  <h2>Ratings Over Time</h2>
+  <canvas id="ratingsChart"></canvas>
+</section>
+
+<section>
+  <h2>Sleep Times (Time Up & Time in Bed)</h2>
+  <canvas id="sleepChart"></canvas>
+</section>
+
+
+<section>
+  <h2>Workout Consistency (by Month)</h2>
+  <canvas id="habitChart"></canvas>
+</section>
+
+<section>
+  <h2>Daily Notes</h2>
+  <div class="daily-list-container">
+    <table class="daily-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Keyword</th>
+          <th>Summary</th>
+          <th>Overall</th>
+        </tr>
+      </thead>
+      <tbody id="dailyTableBody"></tbody>
+    </table>
+  </div>
+</section>
+
+  <!-- Supabase JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Main dashboard logic (Supabase client is created inside here) -->
+  <script src="script.js"></script>
+</body>
+</html>
+
+</body>
+</html>
+
