@@ -115,7 +115,7 @@ function setupFormSubmit() {
 function buildEntryFromForm(userId) {
   return {
     // Timestamp comes from HTML id="date"
-    timestamp: new Date(document.getElementById("date").value).toISOString(),
+    timestamp: document.getElementById("date").value,
 
     // Time selectors
     time_up: document.getElementById("timeUp").value || null,

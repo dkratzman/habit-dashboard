@@ -34,7 +34,7 @@ async function loadDataFromSupabase() {
       .map(mapRow)
       // TEMP: don't filter anything out yet
       // .filter(d => !isNaN(d.date) && !isNaN(d.overallFeeling))
-      .sort((a, b) => a.date - b.date);
+      .sort((a, b) => a.date.localeCompare(b.date));
 
     // 🔍 See what one mapped entry looks like
     console.log('First mapped entry:', allData[0]);
@@ -61,12 +61,24 @@ async function requireDashboardAuth() {
 
 requireDashboardAuth();
 
+function formatDate(dateString) {
+  if (!dateString) return '';
 
-requireDashboardAuth();
+  // Handle both "YYYY-MM-DD" and full ISO strings
+  const cleanDate = dateString.split('T')[0]; // take only YYYY-MM-DD
+  const [year, month, day] = cleanDate.split('-');
+
+  // Return MM/DD/YY
+  return `${month}/${day}/${year.slice(-2)}`;
+}
+
+
 
 // ---- Map DB row → internal format used by charts ----
 function mapRow(row) {
-  const date = new Date(row.timestamp);
+  const date = row.timestamp; // "YYYY-MM-DD" (keep raw, sortable)
+
+;
 
   const overallFeeling  = Number(row.overall_feeling);
   const physicalFeeling = row.physical_feeling != null ? Number(row.physical_feeling) : null;
@@ -183,13 +195,13 @@ function getFilteredData() {
   let endDate = null;
 
   if (startInput && startInput.value) {
-    const [y, m] = startInput.value.split('-').map(Number);
-    startDate = new Date(y, m - 1, 1);
+    startDate = `${startInput.value}-01`; // YYYY-MM-01
   }
 
   if (endInput && endInput.value) {
-    const [y, m] = endInput.value.split('-').map(Number);
-    endDate = new Date(y, m, 0);
+    const [y, m] = endInput.value.split('-');
+    const lastDay = new Date(Number(y), Number(m), 0).getDate();
+    endDate = `${endInput.value}-${String(lastDay).padStart(2, '0')}`;
   }
 
   if (!startDate && !endDate) {
@@ -197,24 +209,19 @@ function getFilteredData() {
   }
 
   return allData.filter(d => {
-    const dayOnly = new Date(d.date.getFullYear(), d.date.getMonth(), d.date.getDate());
-    if (startDate && dayOnly < startDate) return false;
-    if (endDate && dayOnly > endDate) return false;
+    if (startDate && d.date < startDate) return false;
+    if (endDate && d.date > endDate) return false;
     return true;
   });
 }
 
+
 // ---------- Build all charts + daily notes ----------
 function buildCharts(data) {
-  const sorted = [...data].sort((a, b) => a.date - b.date);
+  const sorted = [...data].sort((a, b) => a.date.localeCompare(b.date));
 
-  const labels = sorted.map(d =>
-    d.date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: '2-digit'
-    })
-  );
+  const labels = sorted.map(d => formatDate(d.date));
+
 
   const feelingValues  = sorted.map(d => d.overallFeeling);
   const physicalValues = sorted.map(d => d.physicalFeeling);
@@ -376,9 +383,9 @@ function buildCharts(data) {
   const monthGroups = {};
 
   sorted.forEach(d => {
-    const year = d.date.getFullYear();
-    const month = String(d.date.getMonth() + 1).padStart(2, '0');
+    const [year, month] = d.date.split('-');
     const key = `${year}-${month}`;
+
 
     if (!monthGroups[key]) {
       monthGroups[key] = {
@@ -475,11 +482,8 @@ function buildCharts(data) {
       const tr = document.createElement('tr');
 
       const dateTd = document.createElement('td');
-      dateTd.textContent = d.date.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-      });
+      dateTd.textContent = formatDate(d.date);
+
 
       const keywordTd = document.createElement('td');
       keywordTd.textContent = d.dailyKeyword || '';
