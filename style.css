@@ -1,3 +1,7 @@
+/* =========================
+   Base Layout & Typography
+========================= */
+
 body {
   font-family: Arial, sans-serif;
   padding: 20px;
@@ -13,12 +17,25 @@ section {
   margin: 40px auto;
   max-width: 800px;
 }
+
+/* =========================
+   Charts
+========================= */
+
+.chart-container {
+  width: 100%;
+  height: 420px; /* desktop default */
+  position: relative;
+}
+
 canvas {
   width: 100% !important;
   display: block;
 }
 
-
+/* =========================
+   Filter Bar
+========================= */
 
 .filter-bar {
   display: flex;
@@ -41,7 +58,6 @@ canvas {
   font-size: 0.95rem;
 }
 
-
 .filter-buttons {
   display: flex;
   gap: 8px;
@@ -58,6 +74,10 @@ canvas {
 .filter-buttons button:hover {
   background: #e5e7eb;
 }
+
+/* =========================
+   Daily Notes Table
+========================= */
 
 .daily-list-container {
   max-width: 900px;
@@ -99,6 +119,10 @@ canvas {
   background: #f9fafb;
 }
 
+/* =========================
+   Forms
+========================= */
+
 .habit-form {
   max-width: 800px;
   margin: 0 auto 40px;
@@ -109,8 +133,7 @@ canvas {
 }
 
 .form-group {
-  margin-top: 16px;
-  margin-bottom: 12px;
+  margin: 16px 0 12px;
   border: 1px solid #e5e7eb;
   padding: 12px 12px 4px;
   border-radius: 8px;
@@ -164,15 +187,14 @@ form button[type="submit"]:hover {
   color: #16a34a;
 }
 
+/* =========================
+   Button Groups
+========================= */
+
 .button-group {
   display: flex;
-  flex-wrap: nowrap;
-  gap: 4px;
   flex-wrap: wrap;
-}
-
-.button-group.wrap {
-  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .btn-option {
@@ -184,20 +206,20 @@ form button[type="submit"]:hover {
   cursor: pointer;
 }
 
+.btn-option:hover {
+  background: #e5e7eb;
+}
+
 .btn-option.selected {
   background-color: #2563eb;
   color: white;
   border-color: #2563eb;
 }
 
+/* =========================
+   Mobile Adjustments
+========================= */
 
-.btn-option:hover {
-  background: #e5e7eb;
-}
-
-/* -------------------------
-   Mobile Improvements
-------------------------- */
 @media (max-width: 768px) {
 
   body {
@@ -212,93 +234,26 @@ form button[type="submit"]:hover {
     font-size: 1.2rem;
   }
 
-  .container {
-    padding: 12px;
+  section {
+    margin: 20px auto;
   }
 
   button,
   .btn-option {
-    min-height: 44px; /* Apple recommended tap target */
+    min-height: 44px; /* Apple tap target */
     font-size: 1rem;
   }
 
-  .button-group {
-    gap: 8px;
-  }
-
-
-}
-
-@media (max-width: 768px) {
-
-  .row,
-  .dashboard-row {
-    flex-direction: column;
-  }
-
-}
-@media (max-width: 768px) {
-
-  .daily-table {
-    font-size: 0.9rem;
-  }
-
-  .daily-table td,
-  .daily-table th {
+  .daily-table th,
+  .daily-table td {
     padding: 6px;
   }
 
-}
-@media (max-width: 768px) {
-
-  .button-group.wrap {
-    flex-wrap: wrap;
-  }
-
-  .btn-option {
-    padding: 10px 14px;
-  }
-
-}
-/* -------------------------
-   Mobile chart sizing
-------------------------- */
-@media (max-width: 768px) {
   .chart-container {
-  max-width: 800px;
-  margin: 0 auto;
-  position: relative;
-}
-.chart-container canvas {
-  width: 100% !important;
-  height: 100% !important;
-  display: block;
-}
-
-@media (max-width: 768px) {
-  .chart-container {
-    height: 450px;   /* ✅ good mobile height */
+    height: 320px; /* perfect phone height */
   }
 }
 
-}
-@media (max-width: 768px) {
-  section {
-    margin: 20px auto; /* reduce vertical gaps */
-  }
-}
-
-.chart-container {
-  width: 100%;
-  height: 420px; /* desktop default */
-}
-
-/* Mobile only */
-@media (max-width: 768px) {
-  .chart-container {
-    height: 320px; /* 👈 perfect phone height */
-  }
-}
 
 
 
