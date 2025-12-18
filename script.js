@@ -288,6 +288,7 @@ function buildCharts(data) {
       options: {
         responsive: true,
         interaction: { mode: 'nearest', intersect: false },
+        maintainAspectRatio: false,
         plugins: {
           legend: { position: 'top' },
           tooltip: {
@@ -341,6 +342,7 @@ function buildCharts(data) {
       },
       options: {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
           legend: { position: 'top' },
           tooltip: {
@@ -453,6 +455,7 @@ function buildCharts(data) {
       },
       options: {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
           tooltip: {
             callbacks: {
