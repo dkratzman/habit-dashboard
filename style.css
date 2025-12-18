@@ -276,7 +276,7 @@ form button[type="submit"]:hover {
 
 @media (max-width: 768px) {
   .chart-container {
-    height: 360px;   /* ✅ good mobile height */
+    height: 450px;   /* ✅ good mobile height */
   }
 }
 
