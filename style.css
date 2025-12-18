@@ -265,14 +265,27 @@ form button[type="submit"]:hover {
 @media (max-width: 768px) {
   .chart-container {
   max-width: 800px;
-  margin: 0 auto 32px;
+  margin: 0 auto;
+  position: relative;
+}
+.chart-container canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
 }
 
 @media (max-width: 768px) {
   .chart-container {
-    height: 380px;   /* ← good mobile height */
+    height: 260px;   /* ✅ good mobile height */
   }
 }
+
 }
+@media (max-width: 768px) {
+  section {
+    margin: 20px auto; /* reduce vertical gaps */
+  }
+}
+
 
 
