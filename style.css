@@ -259,4 +259,16 @@ form button[type="submit"]:hover {
   }
 
 }
+/* -------------------------
+   Mobile chart sizing
+------------------------- */
+@media (max-width: 768px) {
+
+  .chart-container {
+    min-height: 400px;   /* try 360–420 */
+    margin-bottom: 32px;
+  }
+
+}
+
 
