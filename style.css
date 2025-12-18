@@ -196,3 +196,72 @@ form button[type="submit"]:hover {
   background: #e5e7eb;
 }
 
+/* -------------------------
+   Mobile Improvements
+------------------------- */
+@media (max-width: 768px) {
+
+  body {
+    font-size: 16px;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.2rem;
+  }
+
+  .container {
+    padding: 12px;
+  }
+
+  button,
+  .btn-option {
+    min-height: 44px; /* Apple recommended tap target */
+    font-size: 1rem;
+  }
+
+  .button-group {
+    gap: 8px;
+  }
+
+  canvas {
+    height: 300px !important;
+  }
+
+}
+
+@media (max-width: 768px) {
+
+  .row,
+  .dashboard-row {
+    flex-direction: column;
+  }
+
+}
+@media (max-width: 768px) {
+
+  .daily-table {
+    font-size: 0.9rem;
+  }
+
+  .daily-table td,
+  .daily-table th {
+    padding: 6px;
+  }
+
+}
+@media (max-width: 768px) {
+
+  .button-group.wrap {
+    flex-wrap: wrap;
+  }
+
+  .btn-option {
+    padding: 10px 14px;
+  }
+
+}
+
