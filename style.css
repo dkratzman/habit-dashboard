@@ -227,9 +227,6 @@ form button[type="submit"]:hover {
     gap: 8px;
   }
 
-  canvas {
-    height: 300px !important;
-  }
 
 }
 
