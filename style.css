@@ -1,12 +1,33 @@
 /* =========================
+   Theme Variables
+========================= */
+
+:root {
+  --bg-color: #fcfcfc;
+  --text-color: #333;
+  --card-bg: #ffffff;
+  --border-color: #e5e7eb;
+  --muted-bg: #f3f4f6;
+  --table-alt: #f9fafb;
+}
+
+body.dark {
+  --bg-color: #0f172a;
+  --text-color: #e5e7eb;
+  --card-bg: #1e293b;
+  --border-color: #334155;
+  --muted-bg: #334155;
+  --table-alt: #1e293b;
+}
+/* =========================
    Base Layout & Typography
 ========================= */
 
 body {
   font-family: Arial, sans-serif;
   padding: 20px;
-  background: #fcfcfc;
-  color: #333;
+  background: var(--bg-color);
+  color: var(--text-color);
 }
 
 h1 {
@@ -66,8 +87,8 @@ canvas {
 .filter-buttons button {
   padding: 6px 12px;
   border-radius: 6px;
-  border: 1px solid #ccc;
-  background: #f3f4f6;
+  background-color: var(--muted-bg);
+  border-color: var(--border-color);
   cursor: pointer;
 }
 
@@ -86,7 +107,8 @@ canvas {
   overflow-y: auto;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
-  background: #fff;
+  background: var(--bg-color);
+  color: var(--text-color);
 }
 
 .daily-table {
@@ -98,13 +120,14 @@ canvas {
 .daily-table thead {
   position: sticky;
   top: 0;
-  background: #f9fafb;
+  background: var(--table-alt);
   z-index: 1;
 }
 
 .daily-table th,
 .daily-table td {
   padding: 8px 10px;
+  background: var(--table-alt);
   border-bottom: 1px solid #e5e7eb;
   vertical-align: top;
 }
@@ -116,8 +139,13 @@ canvas {
 }
 
 .daily-table tr:nth-child(even) td {
-  background: #f9fafb;
+  background: var(--table-alt);
 }
+
+body.dark .daily-table tr:nth-child(even) td {
+  background: #0f172a; /* subtle contrast, not black */
+}
+
 
 /* =========================
    Forms
@@ -200,8 +228,8 @@ form button[type="submit"]:hover {
 .btn-option {
   padding: 8px 12px;
   margin: 4px;
-  border: 1px solid #ccc;
-  background-color: #f3f4f6;
+  background-color: var(--muted-bg);
+  border-color: var(--border-color);
   border-radius: 6px;
   cursor: pointer;
 }
@@ -254,6 +282,26 @@ form button[type="submit"]:hover {
   }
 }
 
+/* =========================
+   Dark mode table fixes
+========================= */
+
+body.dark .daily-list-container {
+  border-color: var(--border-color);
+}
+
+body.dark .daily-table td,
+body.dark .daily-table th {
+  border-bottom: 1px solid var(--border-color);
+}
+
+body.dark .daily-table thead {
+  background: #020617; /* darker than card bg */
+}
+
+body.dark .daily-table th {
+  color: #ffffff;      /* keep headers white */
+}
 
 
 
