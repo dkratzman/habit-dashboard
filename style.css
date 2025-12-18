@@ -263,12 +263,16 @@ form button[type="submit"]:hover {
    Mobile chart sizing
 ------------------------- */
 @media (max-width: 768px) {
-
   .chart-container {
-    min-height: 400px;   /* try 360–420 */
-    margin-bottom: 32px;
-  }
-
+  max-width: 800px;
+  margin: 0 auto 32px;
 }
+
+@media (max-width: 768px) {
+  .chart-container {
+    height: 380px;   /* ← good mobile height */
+  }
+}
+
 
 
