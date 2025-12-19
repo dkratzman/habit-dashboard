@@ -6,14 +6,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+  <script src="supabaseClient.js"></script>
 </head>
 <body>
   <h1>Daily Habit Input</h1>
+<div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+  <button id="darkModeToggle">🌙 Dark Mode</button>
+</div>
 
-  <p>
-    <a href="index.html">← Back to Dashboard</a>
-  </p>
+  <div class="page-actions">
+  <a href="index.html" class="btn-secondary">
+    ← Back to Dashboard
+  </a>
+</div>
+
 
   <section>
     <h2>Enter Today&apos;s Data</h2>
@@ -286,5 +292,8 @@
   </section>
 
   <script src="input.js"></script>
+  <script src="theme.js"></script>
+
+
 </body>
 </html>

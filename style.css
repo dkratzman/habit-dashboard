@@ -19,6 +19,26 @@ body.dark {
   --muted-bg: #334155;
   --table-alt: #1e293b;
 }
+/* Dark mode buttons */
+body.dark .btn-primary {
+  background-color: #2563eb;
+  border-color: #1d4ed8;
+}
+
+body.dark .btn-primary:hover {
+  background-color: #1d4ed8;
+}
+
+body.dark .btn-secondary {
+  background-color: #1f2937;
+  color: #f9fafb;
+  border-color: #374151;
+}
+
+body.dark .btn-secondary:hover {
+  background-color: #374151;
+}
+
 /* =========================
    Base Layout & Typography
 ========================= */
@@ -243,6 +263,63 @@ form button[type="submit"]:hover {
   color: white;
   border-color: #2563eb;
 }
+/* -------------------------
+   Page action buttons
+------------------------- */
+.page-actions {
+  display: flex;
+  justify-content: center;
+  margin: 16px 0 24px;
+}
+
+.page-actions a {
+  text-decoration: none;
+}
+
+/* Primary action (Add Entry) */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 10px;
+  background-color: #3b82f6;
+  color: #ffffff;
+  border: 1px solid #2563eb;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.05s ease;
+}
+
+.btn-primary:hover {
+  background-color: #2563eb;
+}
+
+.btn-primary:active {
+  transform: translateY(1px);
+}
+
+/* Secondary action (Back button) */
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border-radius: 10px;
+  background-color: #f3f4f6;
+  color: #1f2937;
+  border: 1px solid #d1d5db;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.btn-secondary:hover {
+  background-color: #e5e7eb;
+}
+
 
 /* =========================
    Mobile Adjustments

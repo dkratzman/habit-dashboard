@@ -8,6 +8,7 @@ const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxYnRwZHR2c2dtcGVkZGRuZXJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyOTMwNTAsImV4cCI6MjA4MDg2OTA1MH0.z9qLJ2zJZSwq3NPC98fEQDm3vPY8YKgG6Z43cfn28vs";
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+//const supabaseClient = window.supabaseClient;
 
 // -------------------------
 // State
@@ -46,6 +47,10 @@ async function requireDashboardAuth() {
   if (userEmailEl) userEmailEl.textContent = `Logged in as ${user.email}`;
 
   return true;
+}
+// Called by theme.js when theme changes
+function rebuildChartsForTheme() {
+  buildCharts(getFilteredData());
 }
 
 // -------------------------
@@ -97,23 +102,23 @@ function mapRow(row) {
 // -------------------------
 function parseTimeToHours(str) {
   if (!str) return null;
-  let s = str.toString().trim().toLowerCase();
 
+  let s = str.toString().trim().toLowerCase();
   let isPM = false;
   let isAM = false;
 
-  if (s.endsWith("am")) {
+  if (s.endsWith('am')) {
     isAM = true;
-    s = s.replace(/am$/, "").trim();
-  } else if (s.endsWith("pm")) {
+    s = s.replace(/am$/, '').trim();
+  } else if (s.endsWith('pm')) {
     isPM = true;
-    s = s.replace(/pm$/, "").trim();
-  } else if (s.endsWith("a")) {
+    s = s.replace(/pm$/, '').trim();
+  } else if (s.endsWith('a')) {
     isAM = true;
-    s = s.replace(/a$/, "").trim();
-  } else if (s.endsWith("p")) {
+    s = s.replace(/a$/, '').trim();
+  } else if (s.endsWith('p')) {
     isPM = true;
-    s = s.replace(/p$/, "").trim();
+    s = s.replace(/p$/, '').trim();
   }
 
   const match = s.match(/(\d{1,2}):(\d{2})/);
@@ -125,8 +130,14 @@ function parseTimeToHours(str) {
   if (isPM && hours < 12) hours += 12;
   if (isAM && hours === 12) hours = 0;
 
-  return hours + minutes / 60;
+  let value = hours + minutes / 60;
+
+  // 🔑 Shift early-morning times into "next day"
+  if (value < 12) value += 24;
+
+  return value;
 }
+
 
 // -------------------------
 // Filters
@@ -284,21 +295,22 @@ function buildCharts(data) {
         },
         scales: {
           y: {
-            beginAtZero: false,
-            min: 0,
-            max: 24,
+            min: 20,   // 8:00 PM
+            max: 35,   // 11:00 AM next day
             ticks: {
-              color: chartTheme.textColor,
               callback: (value) => {
-                const h = Number(value);
-                const ampm = h >= 12 ? "pm" : "am";
+                let h = value % 24;
+                const ampm = h >= 12 ? 'pm' : 'am';
                 const displayHour = ((h + 11) % 12) + 1;
                 return `${displayHour}${ampm}`;
-              },
+              }
             },
-            grid: { color: chartTheme.gridColor },
-            title: { display: true, text: "Time of Day", color: chartTheme.textColor },
+            title: {
+              display: true,
+              text: 'Sleep Time Window'
+            }
           },
+
           x: {
             ticks: { color: chartTheme.textColor },
             grid: { color: chartTheme.gridColor },

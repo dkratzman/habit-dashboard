@@ -17,9 +17,12 @@
   <button id="logoutBtn">Log out</button>
 </div>
 
-<p>
-  <a href="input.html">➕ Add Today’s Entry</a>
-</p>
+<div class="page-actions">
+  <a href="input.html" class="btn-primary">
+    ➕ Add Today’s Entry
+  </a>
+</div>
+
 
 
 <div class="filter-bar">
@@ -79,14 +82,16 @@
 
   <!-- Supabase JS SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+  <script src="supabaseClient.js"></script>
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <!-- Main dashboard logic (Supabase client is created inside here) -->
   <script src="script.js"></script>
-</body>
-</html>
+
+  <script src="theme.js"></script>
+<script src="script.js"></script>
+
 
 </body>
 </html>
