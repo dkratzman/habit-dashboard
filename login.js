@@ -1,13 +1,4 @@
-// --------------------------------------
-// Supabase Setup (same as other files)
-// --------------------------------------
-const SUPABASE_URL = "https://jqbtpdtvsgmpedddnerp.supabase.co";
-const SUPABASE_ANON_KEY ="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxYnRwZHR2c2dtcGVkZGRuZXJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyOTMwNTAsImV4cCI6MjA4MDg2OTA1MH0.z9qLJ2zJZSwq3NPC98fEQDm3vPY8YKgG6Z43cfn28vs";
-// Create Supabase client
-const supabaseClient = supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
+
 
 // --------------------------------------
 // Check existing session
@@ -45,20 +36,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // If login fails, try signing up
     if (error) {
-      const signupResult = await supabaseClient.auth.signUp({
-        email,
-        password
-      });
+  status.textContent = error.message;
+  console.error(error);
+  return;
+}
 
-      if (signupResult.error) {
-        status.textContent = signupResult.error.message;
-        console.error(signupResult.error);
-        return;
-      }
-
-      status.textContent = "Account created! You can now log in.";
-      return;
-    }
 
 // Login success
 status.textContent = "Logged in successfully!";

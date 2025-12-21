@@ -1,30 +1,27 @@
+
+
+console.log("input.js loaded");
+
 // --------------------------------------
-// Supabase Setup
+// Auth Helpers
 // --------------------------------------
-const SUPABASE_URL = "https://jqbtpdtvsgmpedddnerp.supabase.co";
-const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxYnRwZHR2c2dtcGVkZGRuZXJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyOTMwNTAsImV4cCI6MjA4MDg2OTA1MH0.z9qLJ2zJZSwq3NPC98fEQDm3vPY8YKgG6Z43cfn28vs";
-
-
-
 async function getCurrentUserId() {
-  const { data } = await supabaseClient.auth.getUser();
-  return data?.user?.id || null;
+  const { data, error } = await supabaseClient.auth.getUser();
+  if (error || !data?.user) return null;
+  return data.user.id;
 }
 
 async function requireInputAuth() {
   const { data } = await supabaseClient.auth.getSession();
-
   if (!data.session) {
     window.location.href = "login.html";
-    return;
   }
 }
 
 requireInputAuth();
 
 // --------------------------------------
-// Main Initialization
+// Main Init
 // --------------------------------------
 document.addEventListener("DOMContentLoaded", () => {
   setupAllButtonGroups();
@@ -32,25 +29,18 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // --------------------------------------
-// Button Group Logic (Universal)
+// Button Groups
 // --------------------------------------
 function setupButtonGroup(group) {
-  const inputId = group.dataset.inputId;     // e.g. "timeUp"
+  const inputId = group.dataset.inputId;
   const hiddenInput = document.getElementById(inputId);
   const buttons = group.querySelectorAll(".btn-option");
 
-  buttons.forEach((btn) => {
+  buttons.forEach(btn => {
     btn.addEventListener("click", () => {
-      // Remove selected from siblings
-      buttons.forEach((b) => b.classList.remove("selected"));
-
-      // Add selected to clicked one
+      buttons.forEach(b => b.classList.remove("selected"));
       btn.classList.add("selected");
-
-      // Store value
       hiddenInput.value = btn.dataset.value;
-
-      console.log(`${inputId} selected:`, hiddenInput.value);
     });
   });
 }
@@ -58,67 +48,83 @@ function setupButtonGroup(group) {
 function setupAllButtonGroups() {
   document
     .querySelectorAll(".button-group")
-    .forEach((group) => setupButtonGroup(group));
+    .forEach(setupButtonGroup);
 }
 
 // --------------------------------------
 // Form Submission
 // --------------------------------------
-
 function setupFormSubmit() {
   const form = document.getElementById("dailyForm");
-  const status = document.getElementById("saveStatus");
 
   if (!form) {
-    console.error("ERROR: dailyForm not found");
+    console.error("dailyForm not found");
     return;
   }
 
   form.addEventListener("submit", async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  const userId = await getCurrentUserId();
+    try {
+      const userId = await getCurrentUserId();
 
-  if (!userId) {
-    status.textContent = "You must be logged in to save entries.";
-    status.style.color = "red";
-    return; // ✅ legal here
-  }
+      if (!userId) {
+        showSaveStatus("You are not logged in.", true);
+        return;
+      }
 
-  const entry = buildEntryFromForm(userId);
+      const entry = buildEntryFromForm(userId);
+      console.log("Submitting entry:", entry);
 
-  console.log("Submitting entry:", entry);
+      const { error } = await supabaseClient
+        .from("daily_entries")
+        .insert([entry]);
 
-  const { error } = await supabaseClient
-    .from("daily_entries")
-    .insert([entry]);
+      if (error) {
+        console.error("Insert error:", error);
+        showSaveStatus("Error saving entry.", true);
+        return;
+      }
 
-  if (error) {
-    console.error("Insert error:", error);
-    status.textContent = "Error saving entry.";
-    status.style.color = "red";
-  } else {
-    status.textContent = "Entry saved successfully!";
-    status.style.color = "green";
-    form.reset();
-  }
-});
+      showSaveStatus("Entry saved successfully!");
+      form.reset();
 
+      document
+        .querySelectorAll(".btn-option.selected")
+        .forEach(btn => btn.classList.remove("selected"));
+
+    } catch (err) {
+      console.error("Unexpected submit error:", err);
+      showSaveStatus("Unexpected error occurred.", true);
+    }
+  });
 }
 
 // --------------------------------------
-// Build Database Row From Form
+// Status Message Helper
+// --------------------------------------
+function showSaveStatus(message, isError = false) {
+  const status = document.getElementById("saveStatus");
+  if (!status) return;
+
+  status.textContent = message;
+  status.style.color = isError ? "#dc2626" : "#16a34a";
+
+  setTimeout(() => {
+    status.textContent = "";
+  }, 3000);
+}
+
+// --------------------------------------
+// Build DB Row
 // --------------------------------------
 function buildEntryFromForm(userId) {
   return {
-    // Timestamp comes from HTML id="date"
     timestamp: document.getElementById("date").value,
 
-    // Time selectors
     time_up: document.getElementById("timeUp").value || null,
     time_in_bed: document.getElementById("timeBed").value || null,
 
-    // Yes/No habits (button groups)
     worked_out: getHidden("workout"),
     journaled: getHidden("journal"),
     read_books: getHidden("read"),
@@ -128,25 +134,24 @@ function buildEntryFromForm(userId) {
     office: getHidden("office"),
     hit_goal: getHidden("hitGoal"),
 
-    // Hours worked / personal
     hours_worked: Number(document.getElementById("hoursWorked").value),
     hours_personal: Number(document.getElementById("hoursPersonal").value),
 
-    // Ratings
     overall_feeling: Number(document.getElementById("overall").value),
     physical_feeling: Number(document.getElementById("physical").value),
     mental_feeling: Number(document.getElementById("mental").value),
     energy: Number(document.getElementById("energy").value),
 
-    // Keyword + Summary
-    keyword: document.getElementById("keyword").value.trim(),
-    summary: document.getElementById("summary").value.trim(),
+    keyword: document.getElementById("keyword").value.trim() || null,
+    summary: document.getElementById("summary").value.trim() || null,
 
     user_id: userId
   };
 }
 
-// Helper for hidden Yes/No fields
+// --------------------------------------
+// Helpers
+// --------------------------------------
 function getHidden(id) {
   const v = document.getElementById(id)?.value;
   if (v === "Yes") return true;
@@ -154,8 +159,3 @@ function getHidden(id) {
   return null;
 }
 
-
-function getNumber(id) {
-  const v = document.getElementById(id).value;
-  return v ? Number(v) : null;
-}

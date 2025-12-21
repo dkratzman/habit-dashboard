@@ -80,17 +80,22 @@
   </div>
 </section>
 
-  <!-- Supabase JS SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Global Supabase client (must be first) -->
+<script src="supabaseClient.js"></script>
 
-  <!-- Main dashboard logic (Supabase client is created inside here) -->
-  <script src="script.js"></script>
+<!-- Theme (defines savedTheme ONCE) -->
+<script src="theme.js"></script>
 
-  <script src="theme.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Dashboard logic -->
 <script src="script.js"></script>
+
+
+
 
 
 </body>
