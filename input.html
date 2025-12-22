@@ -7,7 +7,9 @@
   <link rel="stylesheet" href="style.css">
 
   
-</head>
+<body>
+
+  </head>
 <header class="app-header">
   <div class="header-left">
     <a href="index.html">Habit Dashboard</a>
@@ -19,11 +21,6 @@
     <button id="logoutBtn">Log out</button>
   </div>
 </header>
-
-
-
-<body>
-  
 
   <div class="page-actions">
   <a href="index.html" class="btn-secondary">
@@ -95,7 +92,7 @@
       <fieldset class="form-group">
         <legend>Habits (Yes/No)</legend>
 
-        <div class="form-row">
+        <div class="form-row inline">
           <label>Workout today?</label>
           <div class="button-group" data-input-id="workout">
             <button type="button" class="btn-option" data-value="Yes">Yes</button>
@@ -104,7 +101,7 @@
           <input type="hidden" id="workout" value="No">
         </div>
 
-        <div class="form-row">
+        <div class="form-row inline">
           <label>Journal or vlog today?</label>
           <div class="button-group" data-input-id="journal">
             <button type="button" class="btn-option" data-value="Yes">Yes</button>
@@ -113,7 +110,7 @@
           <input type="hidden" id="journal" value="No">
         </div>
 
-        <div class="form-row">
+        <div class="form-row inline">
           <label>Read / Audiobook today?</label>
           <div class="button-group" data-input-id="read">
             <button type="button" class="btn-option" data-value="Yes">Yes</button>
@@ -122,7 +119,7 @@
           <input type="hidden" id="read" value="No">
         </div>
 
-        <div class="form-row">
+        <div class="form-row inline">
           <label>Drink today?</label>
           <div class="button-group" data-input-id="drink">
             <button type="button" class="btn-option" data-value="Yes">Yes</button>
@@ -131,7 +128,7 @@
           <input type="hidden" id="drink" value="No">
         </div>
 
-        <div class="form-row">
+        <div class="form-row inline">
           <label>Less than 2 hours of media?</label>
           <div class="button-group" data-input-id="media">
             <button type="button" class="btn-option" data-value="Yes">Yes</button>
@@ -140,7 +137,7 @@
           <input type="hidden" id="media" value="No">
         </div>
 
-        <div class="form-row">
+        <div class="form-row inline">
           <label>Practice piano today?</label>
           <div class="button-group" data-input-id="piano">
             <button type="button" class="btn-option" data-value="Yes">Yes</button>
@@ -149,7 +146,7 @@
           <input type="hidden" id="piano" value="No">
         </div>
 
-        <div class="form-row">
+        <div class="form-row inline">
           <label>Go into office today?</label>
           <div class="button-group" data-input-id="office">
             <button type="button" class="btn-option" data-value="Yes">Yes</button>
@@ -158,7 +155,7 @@
           <input type="hidden" id="office" value="No">
         </div>
 
-        <div class="form-row">
+        <div class="form-row inline">
           <label>Hit work goal today?</label>
           <div class="button-group" data-input-id="hitGoal">
             <button type="button" class="btn-option" data-value="Yes">Yes</button>
@@ -219,7 +216,7 @@
       <fieldset class="form-group">
         <legend>Ratings (1–5)</legend>
 
-        <div class="form-row">
+        <div class="form-row inline">
           <label>Overall feeling</label>
           <div class="button-group" data-input-id="overall">
             <button type="button" class="btn-option" data-value="1">1</button>
@@ -231,7 +228,7 @@
           <input type="hidden" id="overall" value="3">
         </div>
 
-        <div class="form-row">
+        <div class="form-row inline">
           <label>Physical feeling</label>
           <div class="button-group" data-input-id="physical">
             <button type="button" class="btn-option" data-value="1">1</button>
@@ -243,7 +240,7 @@
           <input type="hidden" id="physical" value="3">
         </div>
 
-        <div class="form-row">
+        <div class="form-row inline">
           <label>Mental feeling</label>
           <div class="button-group" data-input-id="mental">
             <button type="button" class="btn-option" data-value="1">1</button>
@@ -255,7 +252,7 @@
           <input type="hidden" id="mental" value="3">
         </div>
 
-        <div class="form-row">
+        <div class="form-row inline">
           <label>Energy</label>
           <div class="button-group" data-input-id="energy">
             <button type="button" class="btn-option" data-value="1">1</button>
@@ -284,23 +281,35 @@
     </form>
   </section>
 
-  <section>
-    <h2>Recent Local Entries (this browser only)</h2>
-    <div class="daily-list-container">
-      <table class="daily-table">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Keyword</th>
-            <th>Overall</th>
-          </tr>
-        </thead>
-        <tbody id="localEntriesBody">
-          <!-- Filled by input.js -->
-        </tbody>
-      </table>
-    </div>
-  </section>
+<section>
+  <h2>Last Submission Summary</h2>
+
+  <div class="daily-list-container">
+    <table class="daily-table">
+      <thead>
+        <tr>
+          <th>Field</th>
+          <th>Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Date</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>Overall Feeling</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>Keyword</td>
+          <td>—</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
 
 <!-- Supabase SDK -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

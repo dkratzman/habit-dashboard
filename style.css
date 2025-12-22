@@ -19,25 +19,6 @@ body.dark {
   --muted-bg: #334155;
   --table-alt: #1e293b;
 }
-/* Dark mode buttons */
-body.dark .btn-primary {
-  background-color: #2563eb;
-  border-color: #1d4ed8;
-}
-
-body.dark .btn-primary:hover {
-  background-color: #1d4ed8;
-}
-
-body.dark .btn-secondary {
-  background-color: #1f2937;
-  color: #f9fafb;
-  border-color: #374151;
-}
-
-body.dark .btn-secondary:hover {
-  background-color: #374151;
-}
 
 /* =========================
    Base Layout & Typography
@@ -65,7 +46,7 @@ section {
 
 .chart-container {
   width: 100%;
-  height: 420px; /* desktop default */
+  height: 420px;
   position: relative;
 }
 
@@ -73,6 +54,56 @@ canvas {
   width: 100% !important;
   display: block;
 }
+
+/* =========================
+   Chart Controls
+========================= */
+
+.chart-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 8px 0 6px;
+}
+
+.control-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.control-label {
+  font-size: 0.85rem;
+  opacity: 0.75;
+  margin-right: 4px;
+}
+
+.control-btn {
+  padding: 4px 10px;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--muted-bg);
+  cursor: pointer;
+}
+
+.control-btn.active {
+  background: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}
+
+.chart-helper {
+  font-size: 0.8rem;
+  opacity: 0.7;
+  margin-bottom: 8px;
+}
+
+/* Dark mode */
+body.dark .control-btn {
+  color: #f9fafb;
+}
+
 
 /* =========================
    Filter Bar
@@ -117,7 +148,7 @@ canvas {
 }
 
 /* =========================
-   Daily Notes Table
+   Tables
 ========================= */
 
 .daily-list-container {
@@ -125,10 +156,9 @@ canvas {
   margin: 20px auto 40px;
   max-height: 300px;
   overflow-y: auto;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   background: var(--bg-color);
-  color: var(--text-color);
 }
 
 .daily-table {
@@ -147,62 +177,37 @@ canvas {
 .daily-table th,
 .daily-table td {
   padding: 8px 10px;
-  background: var(--table-alt);
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color);
   vertical-align: top;
 }
 
 .daily-table th {
   text-align: left;
   font-weight: 600;
-  color: #374151;
 }
 
-.daily-table tr:nth-child(even) td {
-  background: var(--table-alt);
+body.dark .daily-table thead {
+  background: #020617;
 }
 
-body.dark .daily-table tr:nth-child(even) td {
-  background: #0f172a; /* subtle contrast, not black */
+body.dark .daily-table th {
+  color: #ffffff;
 }
-
 
 /* =========================
-   Forms
+   Forms — Base
 ========================= */
-
-.habit-form {
-  max-width: 800px;
-  margin: 0 auto 40px;
-  padding: 16px 20px;
-  border-radius: 10px;
-  background: #ffffff;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-}
-
-.form-group {
-  margin: 16px 0 12px;
-  border: 1px solid #e5e7eb;
-  padding: 12px 12px 4px;
-  border-radius: 8px;
-}
-
-.form-group legend {
-  padding: 0 6px;
-  font-weight: 600;
-  font-size: 0.95rem;
-}
 
 .form-row {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .form-row label {
-  font-size: 0.9rem;
-  color: #374151;
+  font-size: 0.95rem;
+  font-weight: 600;
 }
 
 .form-row input,
@@ -214,42 +219,39 @@ body.dark .daily-table tr:nth-child(even) td {
   border: 1px solid #d1d5db;
 }
 
-form button[type="submit"] {
-  margin-top: 8px;
-  padding: 8px 16px;
-  border-radius: 6px;
-  border: 1px solid #2563eb;
-  background: #3b82f6;
-  color: white;
-  font-size: 0.95rem;
-  cursor: pointer;
+.form-group {
+  margin: 28px 0 22px;
+  padding-left: 12px;
+  border-left: 3px solid var(--border-color);
 }
 
-form button[type="submit"]:hover {
-  background: #2563eb;
+.form-group legend {
+  padding: 0 6px;
+  font-size: 1rem;
+  font-weight: 700;
 }
 
-.save-status {
-  margin-top: 8px;
-  font-size: 0.9rem;
-  color: #16a34a;
+/* Dark mode form text */
+body.dark .form-row label,
+body.dark .form-group legend {
+  color: #f9fafb;
 }
 
 /* =========================
-   Button Groups
+   Button Groups (Decisions)
 ========================= */
 
 .button-group {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
 
 .btn-option {
-  padding: 8px 12px;
-  margin: 4px;
+  padding: 6px 10px;
+  font-size: 0.9rem;
   background-color: var(--muted-bg);
-  border-color: var(--border-color);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   cursor: pointer;
 }
@@ -263,20 +265,42 @@ form button[type="submit"]:hover {
   color: white;
   border-color: #2563eb;
 }
-/* -------------------------
-   Page action buttons
-------------------------- */
-.page-actions {
-  display: flex;
-  justify-content: center;
-  margin: 16px 0 24px;
+
+/* =========================
+   Inline Fast-Decision Rows
+========================= */
+
+.form-row.inline {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 8px 10px;
+  border-radius: 8px;
 }
 
-.page-actions a {
-  text-decoration: none;
+.form-row.inline label {
+  flex: 1;
+  margin-bottom: 0;
 }
 
-/* Primary action (Add Entry) */
+.form-row.inline .button-group {
+  flex: 0 0 auto;
+}
+
+/* Zebra shading to prevent skipped rows */
+.form-row.inline:nth-of-type(odd) {
+  background-color: var(--muted-bg);
+}
+
+body.dark .form-row.inline:nth-of-type(odd) {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* =========================
+   Primary / Secondary Buttons
+========================= */
+
 .btn-primary {
   display: inline-flex;
   align-items: center;
@@ -289,18 +313,12 @@ form button[type="submit"]:hover {
   color: #ffffff;
   border: 1px solid #2563eb;
   cursor: pointer;
-  transition: background-color 0.15s ease, transform 0.05s ease;
 }
 
 .btn-primary:hover {
   background-color: #2563eb;
 }
 
-.btn-primary:active {
-  transform: translateY(1px);
-}
-
-/* Secondary action (Back button) */
 .btn-secondary {
   display: inline-flex;
   align-items: center;
@@ -313,154 +331,35 @@ form button[type="submit"]:hover {
   color: #1f2937;
   border: 1px solid #d1d5db;
   cursor: pointer;
-  transition: background-color 0.15s ease;
 }
 
 .btn-secondary:hover {
   background-color: #e5e7eb;
 }
 
+/* Dark mode buttons */
+body.dark .btn-primary {
+  background-color: #2563eb;
+}
 
-/* =========================
-   Mobile Adjustments
-========================= */
-
-@media (max-width: 768px) {
-
-  body {
-    font-size: 16px;
-  }
-
-  h1 {
-    font-size: 1.5rem;
-  }
-
-  h2 {
-    font-size: 1.2rem;
-  }
-
-  section {
-    margin: 20px auto;
-  }
-
-  button,
-  .btn-option {
-    min-height: 44px; /* Apple tap target */
-    font-size: 1rem;
-  }
-
-  .daily-table th,
-  .daily-table td {
-    padding: 6px;
-  }
-
-  .chart-container {
-    height: 320px; /* perfect phone height */
-  }
+body.dark .btn-secondary {
+  background-color: #1f2937;
+  color: #f9fafb;
+  border-color: #374151;
 }
 
 /* =========================
-   Dark mode table fixes
+   Page Actions
 ========================= */
 
-body.dark .daily-list-container {
-  border-color: var(--border-color);
-}
-
-body.dark .daily-table td,
-body.dark .daily-table th {
-  border-bottom: 1px solid var(--border-color);
-}
-
-body.dark .daily-table thead {
-  background: #020617; /* darker than card bg */
-}
-
-body.dark .daily-table th {
-  color: #ffffff;      /* keep headers white */
-}
-
-/* =========================
-   Auth Pages (Login / Signup)
-========================= */
-
-.auth-page {
-  min-height: 100vh;
+.page-actions {
   display: flex;
-  align-items: center;
   justify-content: center;
+  margin: 16px 0 24px;
 }
 
-.auth-container {
-  width: 100%;
-  padding: 20px;
-}
-
-.auth-card {
-  max-width: 420px;
-  margin: 0 auto;
-  padding: 28px 32px 32px;
-  border-radius: 16px;
-  background: var(--card-bg);
-  border: 1px solid var(--border-color);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-  text-align: center;
-}
-
-.auth-card h1 {
-  margin-bottom: 4px;
-}
-
-.auth-subtitle {
-  font-size: 0.95rem;
-  color: #6b7280;
-  margin-bottom: 20px;
-}
-
-/* Toggle tabs */
-.auth-toggle {
-  display: flex;
-  margin-bottom: 20px;
-  border-radius: 10px;
-  overflow: hidden;
-  border: 1px solid var(--border-color);
-}
-
-.auth-tab {
-  flex: 1;
-  padding: 10px 0;
-  font-size: 0.95rem;
-  background: var(--muted-bg);
-  border: none;
-  cursor: pointer;
-}
-
-.auth-tab.active {
-  background: #3b82f6;
-  color: white;
-  font-weight: 600;
-}
-
-/* Submit */
-.auth-submit {
-  width: 100%;
-  margin-top: 12px;
-}
-
-/* Helper text */
-.auth-helper {
-  margin-top: 14px;
-  font-size: 0.85rem;
-  color: #6b7280;
-}
-
-.auth-status {
-  margin-top: 10px;
-  font-size: 0.85rem;
-}
-.signup-only,
-.signin-only {
-  transition: all 0.15s ease;
+.page-actions a {
+  text-decoration: none;
 }
 
 /* =========================
@@ -514,23 +413,76 @@ body.dark .daily-table th {
   background: #e5e7eb;
 }
 
+body.dark .header-right button {
+  color: #f9fafb;
+}
+
 body.dark .header-right button:hover {
   background: #334155;
 }
 
-/* Mobile */
+/* =========================
+   Auth Pages
+========================= */
+
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-card {
+  max-width: 420px;
+  padding: 28px 32px 32px;
+  border-radius: 16px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  text-align: center;
+}
+
+.auth-toggle {
+  display: flex;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+.auth-tab {
+  flex: 1;
+  padding: 10px 0;
+  font-size: 0.95rem;
+  background: var(--muted-bg);
+  border: none;
+  cursor: pointer;
+}
+
+.auth-tab.active {
+  background: #3b82f6;
+  color: white;
+  font-weight: 600;
+}
+
+/* =========================
+   Mobile Adjustments
+========================= */
+
 @media (max-width: 768px) {
-  .app-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
+  section {
+    margin: 20px auto;
   }
 
-  .header-right {
-    width: 100%;
-    justify-content: space-between;
-    flex-wrap: wrap;
+  .form-row.inline {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .chart-container {
+    height: 320px;
   }
 }
+
 
 

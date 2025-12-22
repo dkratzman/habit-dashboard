@@ -14,11 +14,14 @@ let hoursChart = null;
 // Time Allocation config (logic only)
 // -------------------------
 const HOURS_CHART_CONFIG = {
-  stacked: false,       // grouped by default
-  weekly: false,        // daily by default
+  stacked: false,
+  weekly: false,
   workGoal: 8,
   personalGoal: 2,
 };
+
+// expose config for UX debugging
+window.HOURS_CHART_CONFIG = HOURS_CHART_CONFIG;
 
 // -------------------------
 // Chart theme helper
@@ -86,10 +89,20 @@ function aggregateWeeklyHours(data) {
     const date = isoDateToLocalDate(d.date);
     if (!date) return;
 
-    const key = `${date.getFullYear()}-W${getISOWeek(date)}`;
+    const monday = new Date(date);
+    const day = monday.getDay() || 7;
+    monday.setDate(monday.getDate() - day + 1);
+    monday.setHours(0, 0, 0, 0);
+
+    const key = monday.toISOString().slice(0, 10);
 
     if (!weeks[key]) {
-      weeks[key] = { count: 0, work: 0, personal: 0 };
+      weeks[key] = {
+        count: 0,
+        work: 0,
+        personal: 0,
+        label: `Week of ${monday.getMonth() + 1}/${monday.getDate()}`
+      };
     }
 
     weeks[key].count++;
@@ -100,18 +113,10 @@ function aggregateWeeklyHours(data) {
   const keys = Object.keys(weeks).sort();
 
   return {
-    labels: keys,
+    labels: keys.map(k => weeks[k].label),
     work: keys.map(k => weeks[k].work / weeks[k].count),
     personal: keys.map(k => weeks[k].personal / weeks[k].count),
   };
-}
-
-function getISOWeek(date) {
-  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-  const dayNum = d.getUTCDay() || 7;
-  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-  return Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
 }
 
 // -------------------------
@@ -232,112 +237,36 @@ function buildCharts(data) {
   const sorted = [...data].sort((a, b) => a.date.localeCompare(b.date));
   const labels = sorted.map(d => formatDate(d.date));
 
-  /* ---------------- RATINGS ---------------- */
-  ratingsChart = new Chart(document.getElementById("ratingsChart"), {
-    type: "line",
-    data: {
-      labels,
-      datasets: [
-        { label: "Overall", data: sorted.map(d => d.overallFeeling), borderColor: "#3b82f6", tension: 0.3 },
-        { label: "Physical", data: sorted.map(d => d.physicalFeeling), borderColor: "#f97316", tension: 0.3 },
-        { label: "Mental", data: sorted.map(d => d.mentalFeeling), borderColor: "#22c55e", tension: 0.3 },
-        { label: "Energy", data: sorted.map(d => d.energyFeeling), borderColor: "#a855f7", tension: 0.3 },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { labels: { color: theme.textColor } } },
-      scales: {
-        x: { ticks: { color: theme.textColor }, grid: { color: theme.gridColor } },
-        y: { ticks: { color: theme.textColor }, grid: { color: theme.gridColor } },
-      },
-    },
-  });
+  /* RATINGS */
+  ratingsChart = new Chart(document.getElementById("ratingsChart"), { /* unchanged */ type:"line",data:{labels,datasets:[{label:"Overall",data:sorted.map(d=>d.overallFeeling),borderColor:"#3b82f6",tension:0.3},{label:"Physical",data:sorted.map(d=>d.physicalFeeling),borderColor:"#f97316",tension:0.3},{label:"Mental",data:sorted.map(d=>d.mentalFeeling),borderColor:"#22c55e",tension:0.3},{label:"Energy",data:sorted.map(d=>d.energyFeeling),borderColor:"#a855f7",tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:theme.textColor}}},scales:{x:{ticks:{color:theme.textColor},grid:{color:theme.gridColor}},y:{ticks:{color:theme.textColor},grid:{color:theme.gridColor}}}}});
 
-  /* ---------------- SLEEP ---------------- */
-  sleepChart = new Chart(document.getElementById("sleepChart"), {
-    type: "line",
-    data: {
-      labels,
-      datasets: [
-        { label: "Time Up", data: sorted.map(d => d.timeUpHours), borderColor: "#0ea5e9", tension: 0.3 },
-        { label: "Time in Bed", data: sorted.map(d => d.timeInBedHours), borderColor: "#ef4444", tension: 0.3 },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { labels: { color: theme.textColor } } },
-      scales: {
-        y: {
-          min: 20,
-          max: 35,
-          ticks: {
-            color: theme.textColor,
-            callback: v => {
-              const h = v % 24;
-              const ampm = h >= 12 ? "pm" : "am";
-              return `${((h + 11) % 12) + 1}${ampm}`;
-            },
-          },
-          grid: { color: theme.gridColor },
-        },
-        x: { ticks: { color: theme.textColor }, grid: { color: theme.gridColor } },
-      },
-    },
-  });
+  /* SLEEP */
+  sleepChart = new Chart(document.getElementById("sleepChart"), { /* unchanged */ type:"line",data:{labels,datasets:[{label:"Time Up",data:sorted.map(d=>d.timeUpHours),borderColor:"#0ea5e9",tension:0.3},{label:"Time in Bed",data:sorted.map(d=>d.timeInBedHours),borderColor:"#ef4444",tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:theme.textColor}}},scales:{y:{min:20,max:35,ticks:{color:theme.textColor,callback:v=>{const h=v%24;const ampm=h>=12?"pm":"am";return`${((h+11)%12)+1}${ampm}`;}},grid:{color:theme.gridColor}},x:{ticks:{color:theme.textColor},grid:{color:theme.gridColor}}}}});
 
-  /* ---------------- HABITS ---------------- */
+  /* HABITS */
   const monthGroups = {};
   sorted.forEach(d => {
-    const [y, m] = d.date.split("-");
-    const key = `${y}-${m}`;
-    if (!monthGroups[key]) {
-      monthGroups[key] = { total: 0, workout: 0, journal: 0, read: 0, drink: 0, media: 0, piano: 0, office: 0, goal: 0 };
-    }
-    const g = monthGroups[key];
+    const [y,m]=d.date.split("-");
+    const key=`${y}-${m}`;
+    if(!monthGroups[key])monthGroups[key]={total:0,workout:0,journal:0,read:0,drink:0,media:0,piano:0,office:0,goal:0};
+    const g=monthGroups[key];
     g.total++;
-    if (d.workoutYes) g.workout++;
-    if (d.journalYes) g.journal++;
-    if (d.readYes) g.read++;
-    if (d.drinkYes) g.drink++;
-    if (d.mediaYes) g.media++;
-    if (d.pianoYes) g.piano++;
-    if (d.officeYes) g.office++;
-    if (d.goalYes) g.goal++;
+    if(d.workoutYes)g.workout++;
+    if(d.journalYes)g.journal++;
+    if(d.readYes)g.read++;
+    if(d.drinkYes)g.drink++;
+    if(d.mediaYes)g.media++;
+    if(d.pianoYes)g.piano++;
+    if(d.officeYes)g.office++;
+    if(d.goalYes)g.goal++;
   });
 
-  const keys = Object.keys(monthGroups).sort();
-  const pct = (v, t) => (t ? (v / t) * 100 : 0);
+  const keys=Object.keys(monthGroups).sort();
+  const pct=(v,t)=>(t?(v/t)*100:0);
 
-  habitChart = new Chart(document.getElementById("habitChart"), {
-    type: "bar",
-    data: {
-      labels: keys.map(k => new Date(k + "-01").toLocaleDateString("en-US", { month: "short", year: "numeric" })),
-      datasets: [
-        { label: "Workout", data: keys.map(k => pct(monthGroups[k].workout, monthGroups[k].total)), backgroundColor: "#10b981" },
-        { label: "Journal", data: keys.map(k => pct(monthGroups[k].journal, monthGroups[k].total)), backgroundColor: "#3b82f6" },
-        { label: "Read", data: keys.map(k => pct(monthGroups[k].read, monthGroups[k].total)), backgroundColor: "#6366f1" },
-        { label: "Drink", data: keys.map(k => pct(monthGroups[k].drink, monthGroups[k].total)), backgroundColor: "#ef4444" },
-        { label: "< 2 hrs Media", data: keys.map(k => pct(monthGroups[k].media, monthGroups[k].total)), backgroundColor: "#f59e0b" },
-        { label: "Piano", data: keys.map(k => pct(monthGroups[k].piano, monthGroups[k].total)), backgroundColor: "#a855f7" },
-        { label: "Office", data: keys.map(k => pct(monthGroups[k].office, monthGroups[k].total)), backgroundColor: "#0ea5e9" },
-        { label: "Hit Goal", data: keys.map(k => pct(monthGroups[k].goal, monthGroups[k].total)), backgroundColor: "#22c55e" },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { labels: { color: theme.textColor } } },
-      scales: {
-        y: { max: 100, ticks: { color: theme.textColor, callback: v => `${v}%` }, grid: { color: theme.gridColor } },
-        x: { ticks: { color: theme.textColor }, grid: { color: theme.gridColor } },
-      },
-    },
-  });
+  habitChart=new Chart(document.getElementById("habitChart"),{type:"bar",data:{labels:keys.map(k=>new Date(k+"-01").toLocaleDateString("en-US",{month:"short",year:"numeric"})),datasets:[{label:"Workout",data:keys.map(k=>pct(monthGroups[k].workout,monthGroups[k].total)),backgroundColor:"#10b981"},{label:"Journal",data:keys.map(k=>pct(monthGroups[k].journal,monthGroups[k].total)),backgroundColor:"#3b82f6"},{label:"Read",data:keys.map(k=>pct(monthGroups[k].read,monthGroups[k].total)),backgroundColor:"#6366f1"},{label:"Drink",data:keys.map(k=>pct(monthGroups[k].drink,monthGroups[k].total)),backgroundColor:"#ef4444"},{label:"< 2 hrs Media",data:keys.map(k=>pct(monthGroups[k].media,monthGroups[k].total)),backgroundColor:"#f59e0b"},{label:"Piano",data:keys.map(k=>pct(monthGroups[k].piano,monthGroups[k].total)),backgroundColor:"#a855f7"},{label:"Office",data:keys.map(k=>pct(monthGroups[k].office,monthGroups[k].total)),backgroundColor:"#0ea5e9"},{label:"Hit Goal",data:keys.map(k=>pct(monthGroups[k].goal,monthGroups[k].total)),backgroundColor:"#22c55e"}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:theme.textColor}}},scales:{y:{max:100,ticks:{color:theme.textColor,callback:v=>`${v}%`},grid:{color:theme.gridColor}},x:{ticks:{color:theme.textColor},grid:{color:theme.gridColor}}}}});
 
-  /* ---------------- TIME ALLOCATION ---------------- */
+  /* TIME ALLOCATION */
   const hoursCanvas = document.getElementById("hoursChart");
   if (hoursCanvas) {
     let workData = sorted.map(d => d.hoursWorked);
@@ -360,13 +289,13 @@ function buildCharts(data) {
             label: "Work Hours",
             data: workData,
             backgroundColor: "#3b82f6",
-            stack: HOURS_CHART_CONFIG.stacked ? "stack1" : undefined,
+            stack: HOURS_CHART_CONFIG.stacked ? "time" : undefined,
           },
           {
             label: "Personal Project Hours",
             data: personalData,
             backgroundColor: "#10b981",
-            stack: HOURS_CHART_CONFIG.stacked ? "stack1" : undefined,
+            stack: HOURS_CHART_CONFIG.stacked ? "time" : undefined,
           },
           {
             label: "Work Goal",
@@ -391,8 +320,18 @@ function buildCharts(data) {
         maintainAspectRatio: false,
         plugins: { legend: { labels: { color: theme.textColor } } },
         scales: {
-          y: { min: 0, max: 14, ticks: { color: theme.textColor }, grid: { color: theme.gridColor } },
-          x: { ticks: { color: theme.textColor }, grid: { color: theme.gridColor } },
+          x: {
+            stacked: HOURS_CHART_CONFIG.stacked,
+            ticks: { color: theme.textColor },
+            grid: { color: theme.gridColor },
+          },
+          y: {
+            stacked: HOURS_CHART_CONFIG.stacked,
+            min: 0,
+            max: 14,
+            ticks: { color: theme.textColor },
+            grid: { color: theme.gridColor },
+          },
         },
       },
     });
@@ -424,4 +363,5 @@ document.getElementById("logoutBtn")?.addEventListener("click", async () => {
   await supabaseClient.auth.signOut();
   window.location.href = "login.html";
 });
+
 

@@ -58,6 +58,42 @@
 </section>
 
 <section>
+  <h2>Time Allocation</h2>
+
+  <div class="chart-controls">
+    <div class="control-group">
+      <span class="control-label">View</span>
+      <button class="control-btn active" data-toggle="weekly" data-value="false">
+        Daily
+      </button>
+      <button class="control-btn" data-toggle="weekly" data-value="true">
+        Weekly
+      </button>
+    </div>
+
+    <div class="control-group">
+      <span class="control-label">Bars</span>
+      <button class="control-btn active" data-toggle="stacked" data-value="false">
+        Grouped
+      </button>
+      <button class="control-btn" data-toggle="stacked" data-value="true">
+        Stacked
+      </button>
+    </div>
+  </div>
+
+  <p class="chart-helper">
+    Compare how you allocate time between work and personal projects.
+  </p>
+
+  <div class="chart-container">
+    <canvas id="hoursChart"></canvas>
+  </div>
+</section>
+
+
+
+<section>
   <h2>Habit Chart</h2>
   <div class="chart-container">
     <canvas id="habitChart"></canvas>
@@ -96,6 +132,69 @@
 <!-- Dashboard logic -->
 <script src="script.js"></script>
 
+<script>
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest(".control-btn");
+    if (!btn) return;
+
+    // Ensure shared config exists
+    if (typeof window.HOURS_CHART_CONFIG !== "object") {
+      console.warn("HOURS_CHART_CONFIG not found on window");
+      return;
+    }
+
+    const key = btn.dataset.toggle;      // "weekly" or "stacked"
+    const value = btn.dataset.value === "true";
+
+    // 🔑 MUTATE SHARED CONFIG (DO NOT REDECLARE)
+    if (key in HOURS_CHART_CONFIG) {
+      HOURS_CHART_CONFIG[key] = value;
+      console.log(`HOURS_CHART_CONFIG.${key} =`, value);
+    } else {
+      console.warn(`Unknown HOURS_CHART_CONFIG key: ${key}`);
+      return;
+    }
+
+    // Update active button styles within this control group only
+    const group = btn.parentElement;
+    group.querySelectorAll(".control-btn").forEach(b =>
+      b.classList.remove("active")
+    );
+    btn.classList.add("active");
+
+    // Rebuild charts using existing pipeline
+    if (typeof buildCharts === "function" && typeof getFilteredData === "function") {
+      buildCharts(getFilteredData());
+    } else {
+      console.warn("buildCharts or getFilteredData not available");
+    }
+  });
+</script>
+
+<script>
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest(".control-btn");
+    if (!btn) return;
+
+    const key = btn.dataset.toggle;
+    const value = btn.dataset.value === "true";
+
+    // Flip existing config flag
+    if (window.HOURS_CHART_CONFIG && key in HOURS_CHART_CONFIG) {
+      HOURS_CHART_CONFIG[key] = value;
+    }
+
+    // Update active states within the group
+    btn.parentElement.querySelectorAll(".control-btn")
+      .forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    // Rebuild charts using existing pipeline
+    if (typeof buildCharts === "function") {
+      buildCharts(getFilteredData());
+    }
+  });
+</script>
 
 
 
