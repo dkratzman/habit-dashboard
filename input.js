@@ -1,5 +1,3 @@
-
-
 console.log("input.js loaded");
 
 // --------------------------------------
@@ -18,15 +16,34 @@ async function requireInputAuth() {
   }
 }
 
+// Enforce auth immediately
 requireInputAuth();
 
 // --------------------------------------
 // Main Init
 // --------------------------------------
 document.addEventListener("DOMContentLoaded", () => {
+  setupLogout();
   setupAllButtonGroups();
   setupFormSubmit();
 });
+
+// --------------------------------------
+// Logout
+// --------------------------------------
+function setupLogout() {
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (!logoutBtn) return;
+
+  logoutBtn.addEventListener("click", async () => {
+    try {
+      await supabaseClient.auth.signOut();
+      window.location.href = "login.html";
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
+  });
+}
 
 // --------------------------------------
 // Button Groups

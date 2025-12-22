@@ -3,43 +3,77 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login</title>
+  <title>Login · Habit Dashboard</title>
 
   <link rel="stylesheet" href="style.css" />
-  
 </head>
-<body>
 
-  <h1>Habit Tracker Login</h1>
+<body class="auth-page">
 
-  <form id="loginForm">
-    <div class="form-row">
-      <label>Email</label>
-      <input type="email" id="email" required />
+  <div class="auth-container">
+    <div class="auth-card">
+
+      <h1>Habit Dashboard</h1>
+      <p class="auth-subtitle">
+        Track your habits. Build momentum.
+      </p>
+
+      <form id="loginForm" data-mode="signin">
+
+        <!-- Email -->
+        <div class="form-row">
+          <label>Email</label>
+          <input type="email" id="email" placeholder="you@example.com" required />
+        </div>
+
+        <!-- Password -->
+        <div class="form-row">
+          <label>Password</label>
+          <input type="password" id="password" placeholder="••••••••" required />
+        </div>
+
+        <!-- Confirm password (signup only) -->
+        <div class="form-row signup-only" style="display:none;">
+          <label>Confirm Password</label>
+          <input type="password" id="confirmPassword" placeholder="••••••••" />
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="btn-primary auth-submit">
+          Sign In
+        </button>
+
+      </form>
+
+      <!-- Toggle links -->
+      <div class="auth-helper">
+        <span class="signin-only">
+          New here?
+          <button id="showSignup" class="link-button">Create an account</button>
+        </span>
+
+        <span class="signup-only" style="display:none;">
+          Already have an account?
+          <button id="showSignin" class="link-button">Back to sign in</button>
+        </span>
+      </div>
+
+      <p id="loginStatus" class="auth-status"></p>
+
     </div>
+  </div>
 
-    <div class="form-row">
-      <label>Password</label>
-      <input type="password" id="password" required />
-    </div>
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <button type="submit">Log In / Sign Up</button>
-  </form>
+  <!-- Global Supabase client -->
+  <script src="supabaseClient.js"></script>
 
-  <p id="loginStatus"></p>
+  <!-- Theme -->
+  <script src="theme.js"></script>
 
-<!-- Supabase SDK -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<!-- Global Supabase client -->
-<script src="supabaseClient.js"></script>
-
-<!-- Theme -->
-<script src="theme.js"></script>
-
-<!-- Login logic -->
-<script src="login.js"></script>
-
+  <!-- Login logic -->
+  <script src="login.js"></script>
 
 </body>
 </html>

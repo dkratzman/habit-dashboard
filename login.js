@@ -1,53 +1,107 @@
-
-
 // --------------------------------------
-// Check existing session
-// --------------------------------------
-//async function checkSession() {
-//  const { data } = await supabaseClient.auth.getSession();
-
-//  if (data.session) {
-//    console.log("Already logged in:", data.session.user);
-//    window.location.href = "index.html";
-//  }
-//}
-
-
-// --------------------------------------
-// Login Logic
+// Login / Signup Page Logic
 // --------------------------------------
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("loginForm");
   const status = document.getElementById("loginStatus");
 
+  const showSignupBtn = document.getElementById("showSignup");
+  const showSigninBtn = document.getElementById("showSignin");
+
+  const signupOnlyEls = document.querySelectorAll(".signup-only");
+  const signinOnlyEls = document.querySelectorAll(".signin-only");
+
+  function setMode(mode) {
+    form.dataset.mode = mode;
+    form.reset();
+    status.textContent = "";
+
+    if (mode === "signup") {
+      signupOnlyEls.forEach(el => el.style.display = "block");
+      signinOnlyEls.forEach(el => el.style.display = "none");
+      form.querySelector(".auth-submit").textContent = "Create Account";
+    } else {
+      signupOnlyEls.forEach(el => el.style.display = "none");
+      signinOnlyEls.forEach(el => el.style.display = "inline");
+      form.querySelector(".auth-submit").textContent = "Sign In";
+    }
+  }
+
+  // Default
+  setMode("signin");
+
+  // Toggle buttons
+  showSignupBtn?.addEventListener("click", () => setMode("signup"));
+  showSigninBtn?.addEventListener("click", () => setMode("signin"));
+
+  // Submit handler
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const email = document.getElementById("email").value;
+    const mode = form.dataset.mode;
+    const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value;
+    const confirmPassword = document.getElementById("confirmPassword")?.value;
 
-    status.textContent = "Signing in...";
+    status.textContent = "Working...";
 
-    // Try logging in first
-    let { data, error } = await supabaseClient.auth.signInWithPassword({
-      email,
-      password
-    });
+    try {
+      if (!email || !password) {
+        status.textContent = "Email and password are required.";
+        return;
+      }
 
-    // If login fails, try signing up
-    if (error) {
-  status.textContent = error.message;
-  console.error(error);
-  return;
-}
+      // -------------------------
+      // SIGN UP
+      // -------------------------
+      if (mode === "signup") {
+        if (password.length < 6) {
+          status.textContent = "Password must be at least 6 characters.";
+          return;
+        }
 
+        if (password !== confirmPassword) {
+          status.textContent = "Passwords do not match.";
+          return;
+        }
 
-// Login success
-status.textContent = "Logged in successfully!";
-console.log("User session:", data);
+        const { error } = await supabaseClient.auth.signUp({
+          email,
+          password
+        });
 
-// Redirect to dashboard
-window.location.href = "index.html";
+        if (error) {
+          status.textContent = error.message;
+          return;
+        }
 
+        status.textContent = "Account created! Redirecting...";
+        setTimeout(() => {
+          window.location.href = "index.html";
+        }, 800);
+
+        return;
+      }
+
+      // -------------------------
+      // SIGN IN
+      // -------------------------
+      const { error } = await supabaseClient.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) {
+        status.textContent = error.message;
+        return;
+      }
+
+      status.textContent = "Signed in successfully!";
+      window.location.href = "index.html";
+
+    } catch (err) {
+      console.error(err);
+      status.textContent = "Unexpected error occurred.";
+    }
   });
 });

@@ -380,5 +380,157 @@ body.dark .daily-table th {
   color: #ffffff;      /* keep headers white */
 }
 
+/* =========================
+   Auth Pages (Login / Signup)
+========================= */
+
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-container {
+  width: 100%;
+  padding: 20px;
+}
+
+.auth-card {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 28px 32px 32px;
+  border-radius: 16px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  text-align: center;
+}
+
+.auth-card h1 {
+  margin-bottom: 4px;
+}
+
+.auth-subtitle {
+  font-size: 0.95rem;
+  color: #6b7280;
+  margin-bottom: 20px;
+}
+
+/* Toggle tabs */
+.auth-toggle {
+  display: flex;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+.auth-tab {
+  flex: 1;
+  padding: 10px 0;
+  font-size: 0.95rem;
+  background: var(--muted-bg);
+  border: none;
+  cursor: pointer;
+}
+
+.auth-tab.active {
+  background: #3b82f6;
+  color: white;
+  font-weight: 600;
+}
+
+/* Submit */
+.auth-submit {
+  width: 100%;
+  margin-top: 12px;
+}
+
+/* Helper text */
+.auth-helper {
+  margin-top: 14px;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.auth-status {
+  margin-top: 10px;
+  font-size: 0.85rem;
+}
+.signup-only,
+.signin-only {
+  transition: all 0.15s ease;
+}
+
+/* =========================
+   App Header
+========================= */
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1100px;
+  margin: 0 auto 24px;
+  padding: 12px 18px;
+  border-radius: 14px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+}
+
+.header-left {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.header-left a {
+  text-decoration: none;
+  color: var(--text-color);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.9rem;
+}
+
+#userEmail {
+  opacity: 0.85;
+  white-space: nowrap;
+}
+
+.header-right button {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  border: 1px solid var(--border-color);
+  background: var(--muted-bg);
+  cursor: pointer;
+}
+
+.header-right button:hover {
+  background: #e5e7eb;
+}
+
+body.dark .header-right button:hover {
+  background: #334155;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .app-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .header-right {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+}
 
 

@@ -8,11 +8,22 @@
 
   
 </head>
+<header class="app-header">
+  <div class="header-left">
+    <a href="index.html">Habit Dashboard</a>
+  </div>
+
+  <div class="header-right">
+    <span id="userEmail"></span>
+    <button id="darkModeToggle">🌙 Light Mode</button>
+    <button id="logoutBtn">Log out</button>
+  </div>
+</header>
+
+
+
 <body>
-  <h1>Daily Habit Input</h1>
-<div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
-  <button id="darkModeToggle">🌙 Dark Mode</button>
-</div>
+  
 
   <div class="page-actions">
   <a href="index.html" class="btn-secondary">
@@ -296,6 +307,22 @@
 
 <!-- Global Supabase client -->
 <script src="supabaseClient.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", async () => {
+    const { data } = await supabaseClient.auth.getSession();
+
+    if (!data.session) {
+      window.location.href = "login.html";
+      return;
+    }
+
+    const userEmailEl = document.getElementById("userEmail");
+    if (userEmailEl) {
+      userEmailEl.textContent = `Logged in as ${data.session.user.email}`;
+    }
+  });
+</script>
 
 <!-- Theme -->
 <script src="theme.js"></script>
