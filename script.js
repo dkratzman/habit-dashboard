@@ -20,7 +20,6 @@ const HOURS_CHART_CONFIG = {
   personalGoal: 2,
 };
 
-// expose config for UX debugging
 window.HOURS_CHART_CONFIG = HOURS_CHART_CONFIG;
 
 // -------------------------
@@ -33,6 +32,38 @@ function getChartTheme() {
     gridColor: isDark ? "rgba(255,255,255,0.15)" : "#e5e7eb",
   };
 }
+
+// -------------------------
+// Average marker label plugin
+// Draws value text next to the right-side average markers
+// -------------------------
+const averageLabelPlugin = {
+  id: "averageLabelPlugin",
+  afterDatasetsDraw(chart) {
+    const { ctx } = chart;
+    ctx.save();
+
+    chart.data.datasets.forEach((ds, i) => {
+      if (!ds || !ds._isAverageMarker) return;
+
+      const meta = chart.getDatasetMeta(i);
+      const lastPoint = meta?.data?.[meta.data.length - 1];
+      if (!lastPoint) return;
+
+      const labelText = ds._labelText;
+      if (!labelText) return;
+
+      ctx.fillStyle = ds.borderColor || "#000";
+      ctx.font = "12px sans-serif";
+      ctx.textAlign = "left";
+      ctx.textBaseline = "middle";
+
+      ctx.fillText(labelText, lastPoint.x + 8, lastPoint.y);
+    });
+
+    ctx.restore();
+  },
+};
 
 // -------------------------
 // Auth guard
@@ -77,6 +108,20 @@ function formatDate(dateString) {
   if (!dateString) return "";
   const [y, m, d] = normalizeDateOnlyISO(dateString).split("-");
   return `${m}/${d}/${y.slice(-2)}`;
+}
+
+function formatTimeFromHours(v) {
+  if (v == null || Number.isNaN(v)) return "";
+  const h24 = ((Math.floor(v) % 24) + 24) % 24;
+  let mins = Math.round((v - Math.floor(v)) * 60);
+  let hh = h24;
+  if (mins === 60) {
+    mins = 0;
+    hh = (hh + 1) % 24;
+  }
+  const ampm = hh >= 12 ? "pm" : "am";
+  const h12 = ((hh + 11) % 12) + 1;
+  return `${h12}:${String(mins).padStart(2, "0")}${ampm}`;
 }
 
 // -------------------------
@@ -236,35 +281,150 @@ function buildCharts(data) {
 
   const sorted = [...data].sort((a, b) => a.date.localeCompare(b.date));
   const labels = sorted.map(d => formatDate(d.date));
+  const n = labels.length;
+
+  // averages
+  const avg = arr => {
+    const v = arr.filter(x => x != null && !Number.isNaN(x));
+    return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null;
+  };
+
+  const avgOverall = avg(sorted.map(d => d.overallFeeling));
+  const avgPhysical = avg(sorted.map(d => d.physicalFeeling));
+  const avgMental = avg(sorted.map(d => d.mentalFeeling));
+  const avgEnergy = avg(sorted.map(d => d.energyFeeling));
+
+  const avgTimeUp = avg(sorted.map(d => d.timeUpHours));
+  const avgTimeBed = avg(sorted.map(d => d.timeInBedHours));
+
+  const markerData = (value) => {
+    if (!n) return [];
+    const arr = new Array(n).fill(null);
+    arr[n - 1] = value;
+    return arr;
+  };
+
+  const legendFilter = (legendItem, chartData) => {
+    const ds = chartData.datasets?.[legendItem.datasetIndex];
+    return !(ds && ds._isAverageMarker);
+  };
 
   /* RATINGS */
-  ratingsChart = new Chart(document.getElementById("ratingsChart"), { /* unchanged */ type:"line",data:{labels,datasets:[{label:"Overall",data:sorted.map(d=>d.overallFeeling),borderColor:"#3b82f6",tension:0.3},{label:"Physical",data:sorted.map(d=>d.physicalFeeling),borderColor:"#f97316",tension:0.3},{label:"Mental",data:sorted.map(d=>d.mentalFeeling),borderColor:"#22c55e",tension:0.3},{label:"Energy",data:sorted.map(d=>d.energyFeeling),borderColor:"#a855f7",tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:theme.textColor}}},scales:{x:{ticks:{color:theme.textColor},grid:{color:theme.gridColor}},y:{ticks:{color:theme.textColor},grid:{color:theme.gridColor}}}}});
+  ratingsChart = new Chart(document.getElementById("ratingsChart"), {
+    type: "line",
+    plugins: [averageLabelPlugin],
+    data: {
+      labels,
+      datasets: [
+        { label: "Overall", data: sorted.map(d => d.overallFeeling), borderColor: "#3b82f6", tension: 0.3 },
+        { label: "Physical", data: sorted.map(d => d.physicalFeeling), borderColor: "#f97316", tension: 0.3 },
+        { label: "Mental", data: sorted.map(d => d.mentalFeeling), borderColor: "#22c55e", tension: 0.3 },
+        { label: "Energy", data: sorted.map(d => d.energyFeeling), borderColor: "#a855f7", tension: 0.3 },
+
+        { label: "Avg", data: markerData(avgOverall), borderColor: "#93c5fd", pointRadius: 4, showLine: false, _isAverageMarker: true, _labelText: avgOverall != null ? avgOverall.toFixed(1) : "" },
+        { label: "Avg", data: markerData(avgPhysical), borderColor: "#fdba74", pointRadius: 4, showLine: false, _isAverageMarker: true, _labelText: avgPhysical != null ? avgPhysical.toFixed(1) : "" },
+        { label: "Avg", data: markerData(avgMental), borderColor: "#86efac", pointRadius: 4, showLine: false, _isAverageMarker: true, _labelText: avgMental != null ? avgMental.toFixed(1) : "" },
+        { label: "Avg", data: markerData(avgEnergy), borderColor: "#d8b4fe", pointRadius: 4, showLine: false, _isAverageMarker: true, _labelText: avgEnergy != null ? avgEnergy.toFixed(1) : "" },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: { padding: { right: 48 } }, // ✅ prevents average label clipping
+      plugins: {
+        legend: { labels: { color: theme.textColor, filter: legendFilter } },
+      },
+      scales: {
+        x: { ticks: { color: theme.textColor }, grid: { color: theme.gridColor } },
+        y: { ticks: { color: theme.textColor }, grid: { color: theme.gridColor } },
+      },
+    },
+  });
 
   /* SLEEP */
-  sleepChart = new Chart(document.getElementById("sleepChart"), { /* unchanged */ type:"line",data:{labels,datasets:[{label:"Time Up",data:sorted.map(d=>d.timeUpHours),borderColor:"#0ea5e9",tension:0.3},{label:"Time in Bed",data:sorted.map(d=>d.timeInBedHours),borderColor:"#ef4444",tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:theme.textColor}}},scales:{y:{min:20,max:35,ticks:{color:theme.textColor,callback:v=>{const h=v%24;const ampm=h>=12?"pm":"am";return`${((h+11)%12)+1}${ampm}`;}},grid:{color:theme.gridColor}},x:{ticks:{color:theme.textColor},grid:{color:theme.gridColor}}}}});
+  sleepChart = new Chart(document.getElementById("sleepChart"), {
+    type: "line",
+    plugins: [averageLabelPlugin],
+    data: {
+      labels,
+      datasets: [
+        { label: "Time Up", data: sorted.map(d => d.timeUpHours), borderColor: "#0ea5e9", tension: 0.3 },
+        { label: "Time in Bed", data: sorted.map(d => d.timeInBedHours), borderColor: "#ef4444", tension: 0.3 },
+
+        { label: "Avg", data: markerData(avgTimeUp), borderColor: "#7dd3fc", pointRadius: 4, showLine: false, _isAverageMarker: true, _labelText: formatTimeFromHours(avgTimeUp) },
+        { label: "Avg", data: markerData(avgTimeBed), borderColor: "#fca5a5", pointRadius: 4, showLine: false, _isAverageMarker: true, _labelText: formatTimeFromHours(avgTimeBed) },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: { padding: { right: 48 } }, // ✅ prevents average label clipping
+      plugins: {
+        legend: { labels: { color: theme.textColor, filter: legendFilter } },
+      },
+      scales: {
+        y: {
+          min: 20,
+          max: 35,
+          ticks: {
+            color: theme.textColor,
+            callback: v => formatTimeFromHours(v),
+          },
+          grid: { color: theme.gridColor },
+        },
+        x: { ticks: { color: theme.textColor }, grid: { color: theme.gridColor } },
+      },
+    },
+  });
 
   /* HABITS */
   const monthGroups = {};
   sorted.forEach(d => {
-    const [y,m]=d.date.split("-");
-    const key=`${y}-${m}`;
-    if(!monthGroups[key])monthGroups[key]={total:0,workout:0,journal:0,read:0,drink:0,media:0,piano:0,office:0,goal:0};
-    const g=monthGroups[key];
+    const [y, m] = d.date.split("-");
+    const key = `${y}-${m}`;
+    if (!monthGroups[key]) {
+      monthGroups[key] = { total: 0, workout: 0, journal: 0, read: 0, drink: 0, media: 0, piano: 0, office: 0, goal: 0 };
+    }
+    const g = monthGroups[key];
     g.total++;
-    if(d.workoutYes)g.workout++;
-    if(d.journalYes)g.journal++;
-    if(d.readYes)g.read++;
-    if(d.drinkYes)g.drink++;
-    if(d.mediaYes)g.media++;
-    if(d.pianoYes)g.piano++;
-    if(d.officeYes)g.office++;
-    if(d.goalYes)g.goal++;
+    if (d.workoutYes) g.workout++;
+    if (d.journalYes) g.journal++;
+    if (d.readYes) g.read++;
+    if (d.drinkYes) g.drink++;
+    if (d.mediaYes) g.media++;
+    if (d.pianoYes) g.piano++;
+    if (d.officeYes) g.office++;
+    if (d.goalYes) g.goal++;
   });
 
-  const keys=Object.keys(monthGroups).sort();
-  const pct=(v,t)=>(t?(v/t)*100:0);
+  const keys = Object.keys(monthGroups).sort();
+  const pct = (v, t) => (t ? (v / t) * 100 : 0);
 
-  habitChart=new Chart(document.getElementById("habitChart"),{type:"bar",data:{labels:keys.map(k=>new Date(k+"-01").toLocaleDateString("en-US",{month:"short",year:"numeric"})),datasets:[{label:"Workout",data:keys.map(k=>pct(monthGroups[k].workout,monthGroups[k].total)),backgroundColor:"#10b981"},{label:"Journal",data:keys.map(k=>pct(monthGroups[k].journal,monthGroups[k].total)),backgroundColor:"#3b82f6"},{label:"Read",data:keys.map(k=>pct(monthGroups[k].read,monthGroups[k].total)),backgroundColor:"#6366f1"},{label:"Drink",data:keys.map(k=>pct(monthGroups[k].drink,monthGroups[k].total)),backgroundColor:"#ef4444"},{label:"< 2 hrs Media",data:keys.map(k=>pct(monthGroups[k].media,monthGroups[k].total)),backgroundColor:"#f59e0b"},{label:"Piano",data:keys.map(k=>pct(monthGroups[k].piano,monthGroups[k].total)),backgroundColor:"#a855f7"},{label:"Office",data:keys.map(k=>pct(monthGroups[k].office,monthGroups[k].total)),backgroundColor:"#0ea5e9"},{label:"Hit Goal",data:keys.map(k=>pct(monthGroups[k].goal,monthGroups[k].total)),backgroundColor:"#22c55e"}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:theme.textColor}}},scales:{y:{max:100,ticks:{color:theme.textColor,callback:v=>`${v}%`},grid:{color:theme.gridColor}},x:{ticks:{color:theme.textColor},grid:{color:theme.gridColor}}}}});
+  habitChart = new Chart(document.getElementById("habitChart"), {
+    type: "bar",
+    data: {
+      labels: keys.map(k => new Date(k + "-01").toLocaleDateString("en-US", { month: "short", year: "numeric" })),
+      datasets: [
+        { label: "Workout", data: keys.map(k => pct(monthGroups[k].workout, monthGroups[k].total)), backgroundColor: "#10b981" },
+        { label: "Journal", data: keys.map(k => pct(monthGroups[k].journal, monthGroups[k].total)), backgroundColor: "#3b82f6" },
+        { label: "Read", data: keys.map(k => pct(monthGroups[k].read, monthGroups[k].total)), backgroundColor: "#6366f1" },
+        { label: "Drink", data: keys.map(k => pct(monthGroups[k].drink, monthGroups[k].total)), backgroundColor: "#ef4444" },
+        { label: "< 2 hrs Media", data: keys.map(k => pct(monthGroups[k].media, monthGroups[k].total)), backgroundColor: "#f59e0b" },
+        { label: "Piano", data: keys.map(k => pct(monthGroups[k].piano, monthGroups[k].total)), backgroundColor: "#a855f7" },
+        { label: "Office", data: keys.map(k => pct(monthGroups[k].office, monthGroups[k].total)), backgroundColor: "#0ea5e9" },
+        { label: "Hit Goal", data: keys.map(k => pct(monthGroups[k].goal, monthGroups[k].total)), backgroundColor: "#22c55e" },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: theme.textColor } } },
+      scales: {
+        y: { max: 100, ticks: { color: theme.textColor, callback: v => `${v}%` }, grid: { color: theme.gridColor } },
+        x: { ticks: { color: theme.textColor }, grid: { color: theme.gridColor } },
+      },
+    },
+  });
 
   /* TIME ALLOCATION */
   const hoursCanvas = document.getElementById("hoursChart");
@@ -285,34 +445,10 @@ function buildCharts(data) {
       data: {
         labels: hoursLabels,
         datasets: [
-          {
-            label: "Work Hours",
-            data: workData,
-            backgroundColor: "#3b82f6",
-            stack: HOURS_CHART_CONFIG.stacked ? "time" : undefined,
-          },
-          {
-            label: "Personal Project Hours",
-            data: personalData,
-            backgroundColor: "#10b981",
-            stack: HOURS_CHART_CONFIG.stacked ? "time" : undefined,
-          },
-          {
-            label: "Work Goal",
-            type: "line",
-            data: new Array(hoursLabels.length).fill(HOURS_CHART_CONFIG.workGoal),
-            borderColor: "#93c5fd",
-            borderDash: [5, 5],
-            pointRadius: 0,
-          },
-          {
-            label: "Personal Goal",
-            type: "line",
-            data: new Array(hoursLabels.length).fill(HOURS_CHART_CONFIG.personalGoal),
-            borderColor: "#6ee7b7",
-            borderDash: [5, 5],
-            pointRadius: 0,
-          },
+          { label: "Work Hours", data: workData, backgroundColor: "#3b82f6", stack: HOURS_CHART_CONFIG.stacked ? "time" : undefined },
+          { label: "Personal Project Hours", data: personalData, backgroundColor: "#10b981", stack: HOURS_CHART_CONFIG.stacked ? "time" : undefined },
+          { label: "Work Goal", type: "line", data: new Array(hoursLabels.length).fill(HOURS_CHART_CONFIG.workGoal), borderColor: "#93c5fd", borderDash: [5, 5], pointRadius: 0 },
+          { label: "Personal Goal", type: "line", data: new Array(hoursLabels.length).fill(HOURS_CHART_CONFIG.personalGoal), borderColor: "#6ee7b7", borderDash: [5, 5], pointRadius: 0 },
         ],
       },
       options: {
@@ -320,18 +456,8 @@ function buildCharts(data) {
         maintainAspectRatio: false,
         plugins: { legend: { labels: { color: theme.textColor } } },
         scales: {
-          x: {
-            stacked: HOURS_CHART_CONFIG.stacked,
-            ticks: { color: theme.textColor },
-            grid: { color: theme.gridColor },
-          },
-          y: {
-            stacked: HOURS_CHART_CONFIG.stacked,
-            min: 0,
-            max: 14,
-            ticks: { color: theme.textColor },
-            grid: { color: theme.gridColor },
-          },
+          x: { stacked: HOURS_CHART_CONFIG.stacked, ticks: { color: theme.textColor }, grid: { color: theme.gridColor } },
+          y: { stacked: HOURS_CHART_CONFIG.stacked, min: 0, max: 14, ticks: { color: theme.textColor }, grid: { color: theme.gridColor } },
         },
       },
     });
@@ -363,5 +489,3 @@ document.getElementById("logoutBtn")?.addEventListener("click", async () => {
   await supabaseClient.auth.signOut();
   window.location.href = "login.html";
 });
-
-
