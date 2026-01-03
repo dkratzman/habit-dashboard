@@ -125,7 +125,7 @@ function formatTimeFromHours(v) {
 }
 
 // -------------------------
-// Weekly aggregation (hours only)
+// Weekly aggregation (hours only) - used by Time Allocation chart
 // -------------------------
 function aggregateWeeklyHours(data) {
   const weeks = {};
@@ -330,7 +330,7 @@ function buildCharts(data) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      layout: { padding: { right: 48 } }, // ✅ prevents average label clipping
+      layout: { padding: { right: 48 } },
       plugins: {
         legend: { labels: { color: theme.textColor, filter: legendFilter } },
       },
@@ -358,7 +358,7 @@ function buildCharts(data) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      layout: { padding: { right: 48 } }, // ✅ prevents average label clipping
+      layout: { padding: { right: 48 } },
       plugins: {
         legend: { labels: { color: theme.textColor, filter: legendFilter } },
       },
@@ -465,6 +465,133 @@ function buildCharts(data) {
 }
 
 // -------------------------
+// Weekly Summary (Data Only)
+// -------------------------
+function computeWeeklySummary(data) {
+  // "last 7 completed days" = yesterday back 6 more days (exclude today)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const endCurrent = new Date(today);
+  endCurrent.setDate(endCurrent.getDate() - 1); // yesterday 00:00
+
+  const startCurrent = new Date(endCurrent);
+  startCurrent.setDate(startCurrent.getDate() - 6);
+
+  const endPrevious = new Date(startCurrent);
+  endPrevious.setDate(endPrevious.getDate() - 1);
+
+  const startPrevious = new Date(endPrevious);
+  startPrevious.setDate(startPrevious.getDate() - 6);
+
+  const inRange = (d, start, end) => {
+    const dt = isoDateToLocalDate(d.date);
+    if (!dt) return false;
+    dt.setHours(0, 0, 0, 0);
+    return dt >= start && dt <= end;
+  };
+
+  const currentDays = data.filter(d => inRange(d, startCurrent, endCurrent));
+  const previousDays = data.filter(d => inRange(d, startPrevious, endPrevious));
+
+  const safeAvg = (arr) => {
+    const v = arr.filter(x => x != null && !Number.isNaN(x));
+    return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null;
+  };
+
+  const safeDelta = (cur, prev) => {
+    if (cur == null || prev == null || Number.isNaN(cur) || Number.isNaN(prev)) return null;
+    return cur - prev;
+  };
+
+  const safeCount = (arr, predicate) => arr.reduce((sum, x) => sum + (predicate(x) ? 1 : 0), 0);
+
+  const summarizePeriod = (days) => {
+    const ratings = {
+      overallAvg: safeAvg(days.map(d => d.overallFeeling)),
+      physicalAvg: safeAvg(days.map(d => d.physicalFeeling)),
+      mentalAvg: safeAvg(days.map(d => d.mentalFeeling)),
+      energyAvg: safeAvg(days.map(d => d.energyFeeling)),
+    };
+
+    const sleep = {
+      avgTimeInBedHours: safeAvg(days.map(d => d.timeInBedHours)),
+      avgTimeUpHours: safeAvg(days.map(d => d.timeUpHours)),
+    };
+
+    const timeAllocation = {
+      avgWorkHoursPerDay: safeAvg(days.map(d => d.hoursWorked)),
+      avgPersonalHoursPerDay: safeAvg(days.map(d => d.hoursPersonal)),
+      daysMeetingWorkGoal: safeCount(days, d => (d.hoursWorked ?? 0) >= HOURS_CHART_CONFIG.workGoal),
+      daysMeetingPersonalGoal: safeCount(days, d => (d.hoursPersonal ?? 0) >= HOURS_CHART_CONFIG.personalGoal),
+    };
+
+    // All binary habits currently tracked
+    const habits = {
+      workouts: safeCount(days, d => !!d.workoutYes),
+      journaling: safeCount(days, d => !!d.journalYes),
+      reading: safeCount(days, d => !!d.readYes),
+      drinking: safeCount(days, d => !!d.drinkYes),
+      lowMedia: safeCount(days, d => !!d.mediaYes),
+      piano: safeCount(days, d => !!d.pianoYes),
+      office: safeCount(days, d => !!d.officeYes),
+      hitGoal: safeCount(days, d => !!d.goalYes),
+    };
+
+    return {
+      window: {
+        startISO: normalizeDateOnlyISO(startCurrent),
+        endISO: normalizeDateOnlyISO(endCurrent),
+        daysIncluded: days.length,
+      },
+      ratings,
+      sleep: {
+        ...sleep,
+        avgTimeInBedLabel: formatTimeFromHours(sleep.avgTimeInBedHours),
+        avgTimeUpLabel: formatTimeFromHours(sleep.avgTimeUpHours),
+      },
+      timeAllocation,
+      habits,
+    };
+  };
+
+  const current = summarizePeriod(currentDays);
+  const previous = summarizePeriod(previousDays);
+
+  const deltas = {
+    ratings: {
+      overallAvg: safeDelta(current.ratings.overallAvg, previous.ratings.overallAvg),
+      physicalAvg: safeDelta(current.ratings.physicalAvg, previous.ratings.physicalAvg),
+      mentalAvg: safeDelta(current.ratings.mentalAvg, previous.ratings.mentalAvg),
+      energyAvg: safeDelta(current.ratings.energyAvg, previous.ratings.energyAvg),
+    },
+    sleep: {
+      avgTimeInBedHours: safeDelta(current.sleep.avgTimeInBedHours, previous.sleep.avgTimeInBedHours),
+      avgTimeUpHours: safeDelta(current.sleep.avgTimeUpHours, previous.sleep.avgTimeUpHours),
+    },
+    timeAllocation: {
+      avgWorkHoursPerDay: safeDelta(current.timeAllocation.avgWorkHoursPerDay, previous.timeAllocation.avgWorkHoursPerDay),
+      avgPersonalHoursPerDay: safeDelta(current.timeAllocation.avgPersonalHoursPerDay, previous.timeAllocation.avgPersonalHoursPerDay),
+      daysMeetingWorkGoal: safeDelta(current.timeAllocation.daysMeetingWorkGoal, previous.timeAllocation.daysMeetingWorkGoal),
+      daysMeetingPersonalGoal: safeDelta(current.timeAllocation.daysMeetingPersonalGoal, previous.timeAllocation.daysMeetingPersonalGoal),
+    },
+    habits: {
+      workouts: safeDelta(current.habits.workouts, previous.habits.workouts),
+      journaling: safeDelta(current.habits.journaling, previous.habits.journaling),
+      reading: safeDelta(current.habits.reading, previous.habits.reading),
+      drinking: safeDelta(current.habits.drinking, previous.habits.drinking),
+      lowMedia: safeDelta(current.habits.lowMedia, previous.habits.lowMedia),
+      piano: safeDelta(current.habits.piano, previous.habits.piano),
+      office: safeDelta(current.habits.office, previous.habits.office),
+      hitGoal: safeDelta(current.habits.hitGoal, previous.habits.hitGoal),
+    },
+  };
+
+  const weeklySummary = { current, previous, deltas };
+  return weeklySummary;
+}
+
+// -------------------------
 // Load data
 // -------------------------
 window.addEventListener("load", async () => {
@@ -480,7 +607,41 @@ window.addEventListener("load", async () => {
   allData = data.map(mapRow);
   setupFilters();
   buildCharts(allData);
+
+  // Weekly Summary is computed after data loads. No UI yet.
+  window.weeklySummary = computeWeeklySummary(allData);
+  console.log("📊 weeklySummary", window.weeklySummary);
 });
+// -------------------------
+// Weekly Summary UI Compatibility Layer
+// (prevents renderWeeklySummary crashes)
+// -------------------------
+if (window.weeklySummary?.current) {
+  const c = window.weeklySummary.current;
+
+  window.wsOverall   = c.ratings?.overallAvg ?? null;
+  window.wsEnergy    = c.ratings?.energyAvg ?? null;
+  window.wsMental    = c.ratings?.mentalAvg ?? null;
+  window.wsPhysical  = c.ratings?.physicalAvg ?? null;
+
+  window.wsTimeInBed = c.sleep?.avgTimeInBedHours ?? null;
+  window.wsTimeUp    = c.sleep?.avgTimeUpHours ?? null;
+
+  window.wsWorkAvg   = c.timeAllocation?.avgWorkHoursPerDay ?? null;
+  window.wsPersonalAvg = c.timeAllocation?.avgPersonalHoursPerDay ?? null;
+
+  window.wsWorkGoalDays     = c.timeAllocation?.daysMeetingWorkGoal ?? 0;
+  window.wsPersonalGoalDays = c.timeAllocation?.daysMeetingPersonalGoal ?? 0;
+
+  window.wsWorkout  = c.habits?.workouts ?? 0;
+  window.wsJournal  = c.habits?.journaling ?? 0;
+  window.wsRead     = c.habits?.reading ?? 0;
+  window.wsDrink    = c.habits?.drinking ?? 0;
+  window.wsMedia    = c.habits?.lowMedia ?? 0;
+  window.wsPiano    = c.habits?.piano ?? 0;
+  window.wsOffice   = c.habits?.office ?? 0;
+  window.wsGoal     = c.habits?.hitGoal ?? 0;
+}
 
 // -------------------------
 // Logout
@@ -489,3 +650,4 @@ document.getElementById("logoutBtn")?.addEventListener("click", async () => {
   await supabaseClient.auth.signOut();
   window.location.href = "login.html";
 });
+

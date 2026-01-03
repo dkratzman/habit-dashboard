@@ -1,18 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Habit Dashboard</title>
-  <link rel="stylesheet" href="style.css">
-
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+
 <header class="app-header">
   <div class="header-left">
     <a href="index.html">Habit Dashboard</a>
   </div>
-
   <div class="header-right">
     <span id="userEmail"></span>
     <button id="darkModeToggle">🌙 Dark Mode</button>
@@ -21,20 +20,17 @@
 </header>
 
 <div class="page-actions">
-  <a href="input.html" class="btn-secondary">
-    + Add Entry
-  </a>
+  <a href="input.html" class="btn-secondary">+ Add Entry</a>
 </div>
-
 
 <div class="filter-bar">
   <div>
     <label for="startMonth">Start month:</label>
-    <input type="month" id="startMonth">
+    <input type="month" id="startMonth" />
   </div>
   <div>
     <label for="endMonth">End month:</label>
-    <input type="month" id="endMonth">
+    <input type="month" id="endMonth" />
   </div>
   <div class="filter-buttons">
     <button id="applyFilter">Apply</button>
@@ -42,6 +38,53 @@
   </div>
 </div>
 
+<!-- =========================
+     WEEKLY SUMMARY
+========================= -->
+<section class="weekly-summary">
+  <h2>Weekly Summary</h2>
+
+  <div class="summary-grid">
+
+    <div class="summary-card">
+      <h3>Overall Snapshot</h3>
+      <ul>
+        <li>Overall: <span id="ws-overall"></span></li>
+        <li>Energy: <span id="ws-energy"></span></li>
+        <li>Mental: <span id="ws-mental"></span></li>
+        <li>Physical: <span id="ws-physical"></span></li>
+      </ul>
+    </div>
+
+    <div class="summary-card">
+      <h3>Sleep & Recovery</h3>
+      <ul>
+        <li>Time in Bed: <span id="ws-bed"></span></li>
+        <li>Time Up: <span id="ws-up"></span></li>
+      </ul>
+    </div>
+
+    <div class="summary-card">
+      <h3>Time Allocation</h3>
+      <ul>
+        <li>Work Avg: <span id="ws-work"></span></li>
+        <li>Personal Avg: <span id="ws-personal"></span></li>
+        <li>Work Goal Days: <span id="ws-work-goal"></span></li>
+        <li>Personal Goal Days: <span id="ws-personal-goal"></span></li>
+      </ul>
+    </div>
+
+    <div class="summary-card">
+      <h3>Habits</h3>
+      <ul id="ws-habits"></ul>
+    </div>
+
+  </div>
+</section>
+
+<!-- =========================
+     CHARTS
+========================= -->
 
 <section>
   <h2>Ratings Over Time</h2>
@@ -60,38 +103,11 @@
 <section>
   <h2>Time Allocation</h2>
 
-  <div class="chart-controls">
-    <div class="control-group">
-      <span class="control-label">View</span>
-      <button class="control-btn active" data-toggle="weekly" data-value="false">
-        Daily
-      </button>
-      <button class="control-btn" data-toggle="weekly" data-value="true">
-        Weekly
-      </button>
-    </div>
-
-    <div class="control-group">
-      <span class="control-label">Bars</span>
-      <button class="control-btn active" data-toggle="stacked" data-value="false">
-        Grouped
-      </button>
-      <button class="control-btn" data-toggle="stacked" data-value="true">
-        Stacked
-      </button>
-    </div>
-  </div>
-
-  <p class="chart-helper">
-    Compare how you allocate time between work and personal projects.
-  </p>
 
   <div class="chart-container">
     <canvas id="hoursChart"></canvas>
   </div>
 </section>
-
-
 
 <section>
   <h2>Habit Chart</h2>
@@ -99,7 +115,6 @@
     <canvas id="habitChart"></canvas>
   </div>
 </section>
-
 
 <section>
   <h2>Daily Notes</h2>
@@ -118,86 +133,106 @@
   </div>
 </section>
 
-<!-- Supabase SDK -->
+<!-- =========================
+     SCRIPTS (ORDER MATTERS)
+========================= -->
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<!-- Global Supabase client (must be first) -->
 <script src="supabaseClient.js"></script>
-
-<!-- Theme (defines savedTheme ONCE) -->
 <script src="theme.js"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<!-- Dashboard logic -->
 <script src="script.js"></script>
 
 <script>
-  document.addEventListener("click", (e) => {
-    const btn = e.target.closest(".control-btn");
-    if (!btn) return;
-
-    // Ensure shared config exists
-    if (typeof window.HOURS_CHART_CONFIG !== "object") {
-      console.warn("HOURS_CHART_CONFIG not found on window");
-      return;
-    }
-
-    const key = btn.dataset.toggle;      // "weekly" or "stacked"
-    const value = btn.dataset.value === "true";
-
-    // 🔑 MUTATE SHARED CONFIG (DO NOT REDECLARE)
-    if (key in HOURS_CHART_CONFIG) {
-      HOURS_CHART_CONFIG[key] = value;
-      console.log(`HOURS_CHART_CONFIG.${key} =`, value);
-    } else {
-      console.warn(`Unknown HOURS_CHART_CONFIG key: ${key}`);
-      return;
-    }
-
-    // Update active button styles within this control group only
-    const group = btn.parentElement;
-    group.querySelectorAll(".control-btn").forEach(b =>
-      b.classList.remove("active")
-    );
-    btn.classList.add("active");
-
-    // Rebuild charts using existing pipeline
-    if (typeof buildCharts === "function" && typeof getFilteredData === "function") {
-      buildCharts(getFilteredData());
-    } else {
-      console.warn("buildCharts or getFilteredData not available");
-    }
-  });
+  // UX default: Time Allocation chart should start stacked
+  if (window.HOURS_CHART_CONFIG) {
+    window.HOURS_CHART_CONFIG.stacked = true;
+  }
 </script>
 
+
+<!-- Weekly Summary Renderer -->
+<script>
+  function safe(v) { return v == null || v === "" ? "—" : v; }
+
+  function renderDelta(d) {
+    if (d == null || d === 0) return `<span class="delta neutral">–</span>`;
+    const cls = d > 0 ? "up" : "down";
+    return `<span class="delta ${cls}">${d > 0 ? "↑" : "↓"} ${Math.abs(d).toFixed(1)}</span>`;
+  }
+
+  function waitForWeeklySummary() {
+    if (!window.weeklySummary) {
+      setTimeout(waitForWeeklySummary, 150);
+      return;
+    }
+
+    const { current, deltas } = window.weeklySummary;
+    const incomplete = (current?.daysIncluded ?? current?.window?.daysIncluded ?? 0) < 7;
+    const d = (x) => incomplete ? "" : renderDelta(x);
+
+    document.getElementById("ws-overall").innerHTML =
+      `${safe(current.ratings?.overall)} ${d(deltas.ratings?.overall)}`;
+
+    document.getElementById("ws-energy").innerHTML =
+      `${safe(current.ratings?.energy)} ${d(deltas.ratings?.energy)}`;
+
+    document.getElementById("ws-mental").innerHTML =
+      `${safe(current.ratings?.mental)} ${d(deltas.ratings?.mental)}`;
+
+    document.getElementById("ws-physical").innerHTML =
+      `${safe(current.ratings?.physical)} ${d(deltas.ratings?.physical)}`;
+
+    document.getElementById("ws-bed").innerHTML =
+      `${safe(current.sleep?.timeInBed)} ${d(deltas.sleep?.timeInBed)}`;
+
+    document.getElementById("ws-up").innerHTML =
+      `${safe(current.sleep?.timeUp)} ${d(deltas.sleep?.timeUp)}`;
+
+    document.getElementById("ws-work").innerHTML =
+      `${safe(current.timeAllocation?.avgWorkHours)} ${d(deltas.timeAllocation?.avgWorkHours)}`;
+
+    document.getElementById("ws-personal").innerHTML =
+      `${safe(current.timeAllocation?.avgPersonalHours)} ${d(deltas.timeAllocation?.avgPersonalHours)}`;
+
+    document.getElementById("ws-work-goal").textContent =
+      safe(current.timeAllocation?.workGoalDays);
+
+    document.getElementById("ws-personal-goal").textContent =
+      safe(current.timeAllocation?.personalGoalDays);
+
+    const habitsEl = document.getElementById("ws-habits");
+    habitsEl.innerHTML = "";
+
+    Object.entries(current.habits || {}).forEach(([k, v]) => {
+      habitsEl.innerHTML += `<li>${k}: ${safe(v)} days ${d(deltas.habits?.[k])}</li>`;
+    });
+  }
+
+  waitForWeeklySummary();
+</script>
+
+<!-- Time Allocation Button Wiring -->
 <script>
   document.addEventListener("click", (e) => {
     const btn = e.target.closest(".control-btn");
-    if (!btn) return;
+    if (!btn || !window.HOURS_CHART_CONFIG) return;
 
     const key = btn.dataset.toggle;
     const value = btn.dataset.value === "true";
-
-    // Flip existing config flag
-    if (window.HOURS_CHART_CONFIG && key in HOURS_CHART_CONFIG) {
-      HOURS_CHART_CONFIG[key] = value;
+    if (key in window.HOURS_CHART_CONFIG) {
+      window.HOURS_CHART_CONFIG[key] = value;
     }
 
-    // Update active states within the group
     btn.parentElement.querySelectorAll(".control-btn")
       .forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
 
-    // Rebuild charts using existing pipeline
-    if (typeof buildCharts === "function") {
+    if (window.buildCharts && window.getFilteredData) {
       buildCharts(getFilteredData());
     }
   });
 </script>
-
-
-
 
 </body>
 </html>
