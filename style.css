@@ -104,7 +104,6 @@ body.dark .control-btn {
   color: #f9fafb;
 }
 
-
 /* =========================
    Filter Bar
 ========================= */
@@ -483,12 +482,24 @@ body.dark .header-right button:hover {
     height: 320px;
   }
 }
+
 /* =========================
    Weekly Summary
 ========================= */
 
 .weekly-summary {
   margin-top: 20px;
+}
+
+.weekly-summary-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.weekly-summary-legend {
+  display: none; /* optional; keeping minimal noise */
 }
 
 .summary-grid {
@@ -507,25 +518,60 @@ body.dark .header-right button:hover {
 
 .summary-card h3 {
   font-size: 0.95rem;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   opacity: 0.85;
 }
 
-.summary-card ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+/* Compact table layout */
+.ws-table {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.summary-card li {
+.ws-row {
+  display: grid;
+  grid-template-columns: 1.2fr 0.7fr 0.7fr 0.6fr;
+  gap: 10px;
+  align-items: center;
   font-size: 0.9rem;
-  margin-bottom: 4px;
+  padding: 6px 8px;
+  border-radius: 8px;
+}
+
+.ws-row.ws-head {
+  opacity: 0.7;
+  font-size: 0.8rem;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.ws-row:nth-child(even):not(.ws-head) {
+  background: var(--muted-bg);
+}
+
+body.dark .ws-row:nth-child(even):not(.ws-head) {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.ws-name {
+  font-weight: 600;
+}
+
+.ws-cur,
+.ws-prev {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.ws-delta {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
 /* Deltas */
 .delta {
-  margin-left: 6px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .delta.up {
@@ -539,6 +585,22 @@ body.dark .header-right button:hover {
 .delta.neutral {
   opacity: 0.6;
 }
+
+.ws-note {
+  margin-top: 10px;
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+/* Mobile: keep readable */
+@media (max-width: 520px) {
+  .ws-row {
+    grid-template-columns: 1.2fr 0.8fr 0.8fr 0.6fr;
+    gap: 8px;
+    font-size: 0.88rem;
+  }
+}
+
 
 
 

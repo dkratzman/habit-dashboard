@@ -21,7 +21,9 @@
 
 <div class="page-actions">
   <a href="input.html" class="btn-secondary">+ Add Entry</a>
+  <a href="data.html" class="btn-secondary">View Raw Data</a>
 </div>
+
 
 <div class="filter-bar">
   <div>
@@ -42,41 +44,140 @@
      WEEKLY SUMMARY
 ========================= -->
 <section class="weekly-summary">
-  <h2>Weekly Summary</h2>
+  <div class="weekly-summary-header">
+    <h2>Weekly Summary</h2>
+    <div class="weekly-summary-legend">
+      <span class="legend-label">Last 7</span>
+      <span class="legend-label">Prior 7</span>
+      <span class="legend-label">Δ</span>
+    </div>
+  </div>
 
   <div class="summary-grid">
 
+    <!-- Overall Snapshot -->
     <div class="summary-card">
       <h3>Overall Snapshot</h3>
-      <ul>
-        <li>Overall: <span id="ws-overall"></span></li>
-        <li>Energy: <span id="ws-energy"></span></li>
-        <li>Mental: <span id="ws-mental"></span></li>
-        <li>Physical: <span id="ws-physical"></span></li>
-      </ul>
+      <div class="ws-table" id="ws-ratings-table">
+        <div class="ws-row ws-head">
+          <div class="ws-name">Metric</div>
+          <div class="ws-cur">Last 7</div>
+          <div class="ws-prev">Prior 7</div>
+          <div class="ws-delta">Δ</div>
+        </div>
+
+        <div class="ws-row">
+          <div class="ws-name">Overall</div>
+          <div class="ws-cur" id="ws-overall-cur">—</div>
+          <div class="ws-prev" id="ws-overall-prev">—</div>
+          <div class="ws-delta" id="ws-overall-delta">—</div>
+        </div>
+
+        <div class="ws-row">
+          <div class="ws-name">Energy</div>
+          <div class="ws-cur" id="ws-energy-cur">—</div>
+          <div class="ws-prev" id="ws-energy-prev">—</div>
+          <div class="ws-delta" id="ws-energy-delta">—</div>
+        </div>
+
+        <div class="ws-row">
+          <div class="ws-name">Mental</div>
+          <div class="ws-cur" id="ws-mental-cur">—</div>
+          <div class="ws-prev" id="ws-mental-prev">—</div>
+          <div class="ws-delta" id="ws-mental-delta">—</div>
+        </div>
+
+        <div class="ws-row">
+          <div class="ws-name">Physical</div>
+          <div class="ws-cur" id="ws-physical-cur">—</div>
+          <div class="ws-prev" id="ws-physical-prev">—</div>
+          <div class="ws-delta" id="ws-physical-delta">—</div>
+        </div>
+      </div>
     </div>
 
+    <!-- Sleep -->
     <div class="summary-card">
       <h3>Sleep & Recovery</h3>
-      <ul>
-        <li>Time in Bed: <span id="ws-bed"></span></li>
-        <li>Time Up: <span id="ws-up"></span></li>
-      </ul>
+      <div class="ws-table" id="ws-sleep-table">
+        <div class="ws-row ws-head">
+          <div class="ws-name">Metric</div>
+          <div class="ws-cur">Last 7</div>
+          <div class="ws-prev">Prior 7</div>
+          <div class="ws-delta">Δ</div>
+        </div>
+
+        <div class="ws-row">
+          <div class="ws-name">Time in Bed</div>
+          <div class="ws-cur" id="ws-bed-cur">—</div>
+          <div class="ws-prev" id="ws-bed-prev">—</div>
+          <div class="ws-delta" id="ws-bed-delta">—</div>
+        </div>
+
+        <div class="ws-row">
+          <div class="ws-name">Time Up</div>
+          <div class="ws-cur" id="ws-up-cur">—</div>
+          <div class="ws-prev" id="ws-up-prev">—</div>
+          <div class="ws-delta" id="ws-up-delta">—</div>
+        </div>
+      </div>
+      <div class="ws-note">Times are averages across each 7-day window.</div>
     </div>
 
+    <!-- Time Allocation -->
     <div class="summary-card">
       <h3>Time Allocation</h3>
-      <ul>
-        <li>Work Avg: <span id="ws-work"></span></li>
-        <li>Personal Avg: <span id="ws-personal"></span></li>
-        <li>Work Goal Days: <span id="ws-work-goal"></span></li>
-        <li>Personal Goal Days: <span id="ws-personal-goal"></span></li>
-      </ul>
+      <div class="ws-table" id="ws-time-table">
+        <div class="ws-row ws-head">
+          <div class="ws-name">Metric</div>
+          <div class="ws-cur">Last 7</div>
+          <div class="ws-prev">Prior 7</div>
+          <div class="ws-delta">Δ</div>
+        </div>
+
+        <div class="ws-row">
+          <div class="ws-name">Work Avg (hrs/day)</div>
+          <div class="ws-cur" id="ws-work-cur">—</div>
+          <div class="ws-prev" id="ws-work-prev">—</div>
+          <div class="ws-delta" id="ws-work-delta">—</div>
+        </div>
+
+        <div class="ws-row">
+          <div class="ws-name">Personal Avg (hrs/day)</div>
+          <div class="ws-cur" id="ws-personal-cur">—</div>
+          <div class="ws-prev" id="ws-personal-prev">—</div>
+          <div class="ws-delta" id="ws-personal-delta">—</div>
+        </div>
+
+        <div class="ws-row">
+          <div class="ws-name">Days meeting work goal</div>
+          <div class="ws-cur" id="ws-work-goal-cur">—</div>
+          <div class="ws-prev" id="ws-work-goal-prev">—</div>
+          <div class="ws-delta" id="ws-work-goal-delta">—</div>
+        </div>
+
+        <div class="ws-row">
+          <div class="ws-name">Days meeting personal goal</div>
+          <div class="ws-cur" id="ws-personal-goal-cur">—</div>
+          <div class="ws-prev" id="ws-personal-goal-prev">—</div>
+          <div class="ws-delta" id="ws-personal-goal-delta">—</div>
+        </div>
+      </div>
     </div>
 
+    <!-- Habits -->
     <div class="summary-card">
       <h3>Habits</h3>
-      <ul id="ws-habits"></ul>
+      <div class="ws-table" id="ws-habits-table">
+        <div class="ws-row ws-head">
+          <div class="ws-name">Habit</div>
+          <div class="ws-cur">Last 7</div>
+          <div class="ws-prev">Prior 7</div>
+          <div class="ws-delta">Δ</div>
+        </div>
+
+        <div id="ws-habits-rows"></div>
+      </div>
     </div>
 
   </div>
@@ -102,8 +203,6 @@
 
 <section>
   <h2>Time Allocation</h2>
-
-
   <div class="chart-container">
     <canvas id="hoursChart"></canvas>
   </div>
@@ -136,7 +235,6 @@
 <!-- =========================
      SCRIPTS (ORDER MATTERS)
 ========================= -->
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabaseClient.js"></script>
 <script src="theme.js"></script>
@@ -144,21 +242,39 @@
 <script src="script.js"></script>
 
 <script>
-  // UX default: Time Allocation chart should start stacked
+  // UX default: Time Allocation chart should start stacked (no buttons)
   if (window.HOURS_CHART_CONFIG) {
     window.HOURS_CHART_CONFIG.stacked = true;
   }
 </script>
 
-
-<!-- Weekly Summary Renderer -->
+<!-- Weekly Summary Renderer (UI ONLY) -->
 <script>
   function safe(v) { return v == null || v === "" ? "—" : v; }
 
+  // Same delta styling logic as habits tile: arrow + color class
   function renderDelta(d) {
     if (d == null || d === 0) return `<span class="delta neutral">–</span>`;
     const cls = d > 0 ? "up" : "down";
     return `<span class="delta ${cls}">${d > 0 ? "↑" : "↓"} ${Math.abs(d).toFixed(1)}</span>`;
+  }
+
+  function setText(id, text) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+  }
+  function setHTML(id, html) {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = html;
+  }
+
+  // Defensive getter: supports either "new keys" or older keys if they ever appear
+  function pick(obj, keys) {
+    for (const k of keys) {
+      const v = obj?.[k];
+      if (v !== undefined && v !== null) return v;
+    }
+    return null;
   }
 
   function waitForWeeklySummary() {
@@ -167,73 +283,146 @@
       return;
     }
 
-    const { current, deltas } = window.weeklySummary;
-    const incomplete = (current?.daysIncluded ?? current?.window?.daysIncluded ?? 0) < 7;
+    // 1) Safe console log once
+    if (!window.__WS_LOGGED__) {
+      console.log("Weekly Summary (render):", window.weeklySummary);
+      window.__WS_LOGGED__ = true;
+    }
+
+    const { current, previous, deltas } = window.weeklySummary;
+
+    // daysIncluded is nested under current.window.daysIncluded per your object
+    const daysIncluded = current?.daysIncluded ?? current?.window?.daysIncluded ?? 0;
+    const incomplete = typeof daysIncluded === "number" && daysIncluded < 7;
     const d = (x) => incomplete ? "" : renderDelta(x);
 
-    document.getElementById("ws-overall").innerHTML =
-      `${safe(current.ratings?.overall)} ${d(deltas.ratings?.overall)}`;
+    // ---- Overall Snapshot (uses *Avg keys)
+    const curOverall = pick(current?.ratings, ["overallAvg", "overall"]);
+    const prevOverall = pick(previous?.ratings, ["overallAvg", "overall"]);
+    const deltaOverall = pick(deltas?.ratings, ["overallAvg", "overall"]);
 
-    document.getElementById("ws-energy").innerHTML =
-      `${safe(current.ratings?.energy)} ${d(deltas.ratings?.energy)}`;
+    const curEnergy = pick(current?.ratings, ["energyAvg", "energy"]);
+    const prevEnergy = pick(previous?.ratings, ["energyAvg", "energy"]);
+    const deltaEnergy = pick(deltas?.ratings, ["energyAvg", "energy"]);
 
-    document.getElementById("ws-mental").innerHTML =
-      `${safe(current.ratings?.mental)} ${d(deltas.ratings?.mental)}`;
+    const curMental = pick(current?.ratings, ["mentalAvg", "mental"]);
+    const prevMental = pick(previous?.ratings, ["mentalAvg", "mental"]);
+    const deltaMental = pick(deltas?.ratings, ["mentalAvg", "mental"]);
 
-    document.getElementById("ws-physical").innerHTML =
-      `${safe(current.ratings?.physical)} ${d(deltas.ratings?.physical)}`;
+    const curPhysical = pick(current?.ratings, ["physicalAvg", "physical"]);
+    const prevPhysical = pick(previous?.ratings, ["physicalAvg", "physical"]);
+    const deltaPhysical = pick(deltas?.ratings, ["physicalAvg", "physical"]);
 
-    document.getElementById("ws-bed").innerHTML =
-      `${safe(current.sleep?.timeInBed)} ${d(deltas.sleep?.timeInBed)}`;
+    setText("ws-overall-cur", curOverall == null ? "—" : curOverall.toFixed(2));
+    setText("ws-overall-prev", prevOverall == null ? "—" : prevOverall.toFixed(2));
+    setHTML("ws-overall-delta", d(deltaOverall));
 
-    document.getElementById("ws-up").innerHTML =
-      `${safe(current.sleep?.timeUp)} ${d(deltas.sleep?.timeUp)}`;
+    setText("ws-energy-cur", curEnergy == null ? "—" : curEnergy.toFixed(2));
+    setText("ws-energy-prev", prevEnergy == null ? "—" : prevEnergy.toFixed(2));
+    setHTML("ws-energy-delta", d(deltaEnergy));
 
-    document.getElementById("ws-work").innerHTML =
-      `${safe(current.timeAllocation?.avgWorkHours)} ${d(deltas.timeAllocation?.avgWorkHours)}`;
+    setText("ws-mental-cur", curMental == null ? "—" : curMental.toFixed(2));
+    setText("ws-mental-prev", prevMental == null ? "—" : prevMental.toFixed(2));
+    setHTML("ws-mental-delta", d(deltaMental));
 
-    document.getElementById("ws-personal").innerHTML =
-      `${safe(current.timeAllocation?.avgPersonalHours)} ${d(deltas.timeAllocation?.avgPersonalHours)}`;
+    setText("ws-physical-cur", curPhysical == null ? "—" : curPhysical.toFixed(2));
+    setText("ws-physical-prev", prevPhysical == null ? "—" : prevPhysical.toFixed(2));
+    setHTML("ws-physical-delta", d(deltaPhysical));
 
-    document.getElementById("ws-work-goal").textContent =
-      safe(current.timeAllocation?.workGoalDays);
+    // ---- Sleep (display labels; use hours for delta)
+    const curBedLabel = pick(current?.sleep, ["avgTimeInBedLabel", "timeInBedLabel", "timeInBed"]);
+    const prevBedLabel = pick(previous?.sleep, ["avgTimeInBedLabel", "timeInBedLabel", "timeInBed"]);
+    const deltaBedHours = pick(deltas?.sleep, ["avgTimeInBedHours", "timeInBedHours", "timeInBed"]);
 
-    document.getElementById("ws-personal-goal").textContent =
-      safe(current.timeAllocation?.personalGoalDays);
+    const curUpLabel = pick(current?.sleep, ["avgTimeUpLabel", "timeUpLabel", "timeUp"]);
+    const prevUpLabel = pick(previous?.sleep, ["avgTimeUpLabel", "timeUpLabel", "timeUp"]);
+    const deltaUpHours = pick(deltas?.sleep, ["avgTimeUpHours", "timeUpHours", "timeUp"]);
 
-    const habitsEl = document.getElementById("ws-habits");
-    habitsEl.innerHTML = "";
+    setText("ws-bed-cur", safe(curBedLabel));
+    setText("ws-bed-prev", safe(prevBedLabel));
+    setHTML("ws-bed-delta", d(deltaBedHours));
 
-    Object.entries(current.habits || {}).forEach(([k, v]) => {
-      habitsEl.innerHTML += `<li>${k}: ${safe(v)} days ${d(deltas.habits?.[k])}</li>`;
-    });
+    setText("ws-up-cur", safe(curUpLabel));
+    setText("ws-up-prev", safe(prevUpLabel));
+    setHTML("ws-up-delta", d(deltaUpHours));
+
+    // ---- Time Allocation
+    const curWork = pick(current?.timeAllocation, ["avgWorkHoursPerDay", "avgWorkHours"]);
+    const prevWork = pick(previous?.timeAllocation, ["avgWorkHoursPerDay", "avgWorkHours"]);
+    const deltaWork = pick(deltas?.timeAllocation, ["avgWorkHoursPerDay", "avgWorkHours"]);
+
+    const curPersonal = pick(current?.timeAllocation, ["avgPersonalHoursPerDay", "avgPersonalHours"]);
+    const prevPersonal = pick(previous?.timeAllocation, ["avgPersonalHoursPerDay", "avgPersonalHours"]);
+    const deltaPersonal = pick(deltas?.timeAllocation, ["avgPersonalHoursPerDay", "avgPersonalHours"]);
+
+    const curWorkGoal = pick(current?.timeAllocation, ["daysMeetingWorkGoal", "workGoalDays"]);
+    const prevWorkGoal = pick(previous?.timeAllocation, ["daysMeetingWorkGoal", "workGoalDays"]);
+    const deltaWorkGoal = pick(deltas?.timeAllocation, ["daysMeetingWorkGoal", "workGoalDays"]);
+
+    const curPersonalGoal = pick(current?.timeAllocation, ["daysMeetingPersonalGoal", "personalGoalDays"]);
+    const prevPersonalGoal = pick(previous?.timeAllocation, ["daysMeetingPersonalGoal", "personalGoalDays"]);
+    const deltaPersonalGoal = pick(deltas?.timeAllocation, ["daysMeetingPersonalGoal", "personalGoalDays"]);
+
+    setText("ws-work-cur", curWork == null ? "—" : curWork.toFixed(2));
+    setText("ws-work-prev", prevWork == null ? "—" : prevWork.toFixed(2));
+    setHTML("ws-work-delta", d(deltaWork));
+
+    setText("ws-personal-cur", curPersonal == null ? "—" : curPersonal.toFixed(2));
+    setText("ws-personal-prev", prevPersonal == null ? "—" : prevPersonal.toFixed(2));
+    setHTML("ws-personal-delta", d(deltaPersonal));
+
+    setText("ws-work-goal-cur", safe(curWorkGoal));
+    setText("ws-work-goal-prev", safe(prevWorkGoal));
+    setHTML("ws-work-goal-delta", d(deltaWorkGoal));
+
+    setText("ws-personal-goal-cur", safe(curPersonalGoal));
+    setText("ws-personal-goal-prev", safe(prevPersonalGoal));
+    setHTML("ws-personal-goal-delta", d(deltaPersonalGoal));
+
+    // ---- Habits (compact table style)
+    const habitsRows = document.getElementById("ws-habits-rows");
+    if (habitsRows) {
+      habitsRows.innerHTML = "";
+
+      const curHabits = current?.habits || {};
+      const prevHabits = previous?.habits || {};
+      const deltaHabits = deltas?.habits || {};
+
+      const order = ["workouts", "journaling", "reading", "drinking", "lowMedia", "piano", "office", "hitGoal"];
+      const keys = [...order.filter(k => k in curHabits), ...Object.keys(curHabits).filter(k => !order.includes(k))];
+
+      const labelMap = {
+        workouts: "Workouts",
+        journaling: "Journaling",
+        reading: "Reading",
+        drinking: "Drinking",
+        lowMedia: "Low Media",
+        piano: "Piano",
+        office: "Office",
+        hitGoal: "Hit Goal",
+      };
+
+      keys.forEach((k) => {
+        const row = document.createElement("div");
+        row.className = "ws-row";
+
+        const curV = curHabits[k];
+        const prevV = prevHabits[k];
+        const delV = deltaHabits[k];
+
+        row.innerHTML = `
+          <div class="ws-name">${labelMap[k] || k}</div>
+          <div class="ws-cur">${safe(curV)}</div>
+          <div class="ws-prev">${safe(prevV)}</div>
+          <div class="ws-delta">${d(delV)}</div>
+        `;
+        habitsRows.appendChild(row);
+      });
+    }
   }
 
   waitForWeeklySummary();
 </script>
 
-<!-- Time Allocation Button Wiring -->
-<script>
-  document.addEventListener("click", (e) => {
-    const btn = e.target.closest(".control-btn");
-    if (!btn || !window.HOURS_CHART_CONFIG) return;
-
-    const key = btn.dataset.toggle;
-    const value = btn.dataset.value === "true";
-    if (key in window.HOURS_CHART_CONFIG) {
-      window.HOURS_CHART_CONFIG[key] = value;
-    }
-
-    btn.parentElement.querySelectorAll(".control-btn")
-      .forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-
-    if (window.buildCharts && window.getFilteredData) {
-      buildCharts(getFilteredData());
-    }
-  });
-</script>
-
 </body>
 </html>
-

@@ -10,6 +10,10 @@ let sleepChart = null;
 let habitChart = null;
 let hoursChart = null;
 
+const IS_DASHBOARD =
+  document.getElementById("ratingsChart") !== null;
+
+
 // -------------------------
 // Time Allocation config (logic only)
 // -------------------------
@@ -229,6 +233,9 @@ function setupFilters() {
   const startEl = document.getElementById("startMonth");
   const endEl = document.getElementById("endMonth");
 
+  // ✅ NEW GUARD
+  if (!startEl || !endEl) return;
+
   startEl.value = localStorage.getItem("filterStart") || "";
   endEl.value = localStorage.getItem("filterEnd") || "";
 
@@ -246,6 +253,7 @@ function setupFilters() {
     buildCharts(allData);
   });
 }
+
 
 function getFilteredData() {
   const start = document.getElementById("startMonth").value;
@@ -403,7 +411,15 @@ function buildCharts(data) {
   habitChart = new Chart(document.getElementById("habitChart"), {
     type: "bar",
     data: {
-      labels: keys.map(k => new Date(k + "-01").toLocaleDateString("en-US", { month: "short", year: "numeric" })),
+      // IMPORTANT: Avoid `new Date('YYYY-MM-DD')` here.
+      // That string format is commonly parsed as UTC, which can shift into the previous local day/month
+      // in negative offsets (e.g., America/Indiana/Indianapolis). Instead, construct the Date from
+      // numeric parts so month labels match the actual data dates.
+      labels: keys.map(k => {
+        const [yy, mm] = k.split("-");
+        const dt = new Date(Number(yy), Number(mm) - 1, 1); // local time
+        return dt.toLocaleDateString("en-US", { month: "short", year: "numeric" });
+      }),
       datasets: [
         { label: "Workout", data: keys.map(k => pct(monthGroups[k].workout, monthGroups[k].total)), backgroundColor: "#10b981" },
         { label: "Journal", data: keys.map(k => pct(monthGroups[k].journal, monthGroups[k].total)), backgroundColor: "#3b82f6" },
@@ -605,9 +621,11 @@ window.addEventListener("load", async () => {
   if (error) return console.error(error);
 
   allData = data.map(mapRow);
+  window.allData = allData;
+  if (IS_DASHBOARD) {
   setupFilters();
   buildCharts(allData);
-
+}
   // Weekly Summary is computed after data loads. No UI yet.
   window.weeklySummary = computeWeeklySummary(allData);
   console.log("📊 weeklySummary", window.weeklySummary);
