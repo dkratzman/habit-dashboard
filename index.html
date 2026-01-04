@@ -255,7 +255,6 @@
 <script>
   function safe(v) { return v == null || v === "" ? "—" : v; }
 
-  // Same delta styling logic as habits tile: arrow + color class
   function renderDelta(d) {
     if (d == null || d === 0) return `<span class="delta neutral">–</span>`;
     const cls = d > 0 ? "up" : "down";
@@ -271,7 +270,6 @@
     if (el) el.innerHTML = html;
   }
 
-  // Defensive getter: supports either "new keys" or older keys if they ever appear
   function pick(obj, keys) {
     for (const k of keys) {
       const v = obj?.[k];
@@ -286,7 +284,6 @@
       return;
     }
 
-    // 1) Safe console log once
     if (!window.__WS_LOGGED__) {
       console.log("Weekly Summary (render):", window.weeklySummary);
       window.__WS_LOGGED__ = true;
@@ -294,12 +291,10 @@
 
     const { current, previous, deltas } = window.weeklySummary;
 
-    // daysIncluded is nested under current.window.daysIncluded per your object
     const daysIncluded = current?.daysIncluded ?? current?.window?.daysIncluded ?? 0;
     const incomplete = typeof daysIncluded === "number" && daysIncluded < 7;
     const d = (x) => incomplete ? "" : renderDelta(x);
 
-    // ---- Overall Snapshot (uses *Avg keys)
     const curOverall = pick(current?.ratings, ["overallAvg", "overall"]);
     const prevOverall = pick(previous?.ratings, ["overallAvg", "overall"]);
     const deltaOverall = pick(deltas?.ratings, ["overallAvg", "overall"]);
@@ -332,7 +327,6 @@
     setText("ws-physical-prev", prevPhysical == null ? "—" : prevPhysical.toFixed(2));
     setHTML("ws-physical-delta", d(deltaPhysical));
 
-    // ---- Sleep (display labels; use hours for delta)
     const curBedLabel = pick(current?.sleep, ["avgTimeInBedLabel", "timeInBedLabel", "timeInBed"]);
     const prevBedLabel = pick(previous?.sleep, ["avgTimeInBedLabel", "timeInBedLabel", "timeInBed"]);
     const deltaBedHours = pick(deltas?.sleep, ["avgTimeInBedHours", "timeInBedHours", "timeInBed"]);
@@ -349,7 +343,6 @@
     setText("ws-up-prev", safe(prevUpLabel));
     setHTML("ws-up-delta", d(deltaUpHours));
 
-    // ---- Time Allocation
     const curWork = pick(current?.timeAllocation, ["avgWorkHoursPerDay", "avgWorkHours"]);
     const prevWork = pick(previous?.timeAllocation, ["avgWorkHoursPerDay", "avgWorkHours"]);
     const deltaWork = pick(deltas?.timeAllocation, ["avgWorkHoursPerDay", "avgWorkHours"]);
@@ -382,7 +375,6 @@
     setText("ws-personal-goal-prev", safe(prevPersonalGoal));
     setHTML("ws-personal-goal-delta", d(deltaPersonalGoal));
 
-    // ---- Habits (compact table style)
     const habitsRows = document.getElementById("ws-habits-rows");
     if (habitsRows) {
       habitsRows.innerHTML = "";
@@ -426,6 +418,85 @@
 
   waitForWeeklySummary();
 </script>
+
+<!-- =========================
+     Daily Notes Renderer (UI ONLY)
+========================= -->
+<script>
+  // 1) Confirm renderer exists + is called (log once)
+  function renderDailyNotesOnceReady() {
+    const tbody = document.getElementById("dailyTableBody");
+    if (!tbody) {
+      console.warn("Daily Notes: tbody #dailyTableBody not found.");
+      return;
+    }
+
+    const maxWaitMs = 8000;
+    const start = Date.now();
+
+    function pick(obj, keys) {
+      for (const k of keys) {
+        const v = obj?.[k];
+        if (v !== undefined && v !== null) return v;
+      }
+      return "";
+    }
+
+    function safe(v) {
+      return v == null ? "" : String(v);
+    }
+
+    function tryRender() {
+      // 2) Confirm data source exists
+      const data = window.allData;
+
+      if (!Array.isArray(data)) {
+        if (Date.now() - start > maxWaitMs) {
+          console.warn("Daily Notes: window.allData not available after waiting.");
+          return;
+        }
+        setTimeout(tryRender, 150);
+        return;
+      }
+
+      // 3) Log shape safely once (debug)
+      if (!window.__DN_LOGGED__) {
+        console.log("Daily Notes: window.allData length =", data.length);
+        console.log("Daily Notes: sample row =", data[0]);
+        window.__DN_LOGGED__ = true;
+      }
+
+      // 4) Fix ONE row rendering first (if data exists)
+      tbody.innerHTML = "";
+      if (data.length === 0) return;
+
+      // 5) Render all rows (descending by date)
+      const sorted = [...data].sort((a, b) => String(b.date).localeCompare(String(a.date)));
+
+      sorted.forEach(d => {
+        const date = pick(d, ["date"]);
+        const keyword = pick(d, ["dailyKeyword", "keyword"]);
+        const summary = pick(d, ["dailySummary", "summary"]);
+        const overall = pick(d, ["overallFeeling", "overall", "overallScore"]);
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${safe(date)}</td>
+          <td>${safe(keyword)}</td>
+          <td>${safe(summary)}</td>
+          <td>${safe(overall)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    tryRender();
+  }
+
+  // Run after page load (script.js may fill window.allData after async fetch)
+  window.addEventListener("load", renderDailyNotesOnceReady);
+</script>
+
 <!-- =========================
      Mobile Bottom Navigation
 ========================= -->
@@ -435,6 +506,6 @@
   <a href="data.html">Data</a>
 </nav>
 
-
 </body>
 </html>
+
