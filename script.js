@@ -13,6 +13,90 @@ let hoursChart = null;
 const IS_DASHBOARD =
   document.getElementById("ratingsChart") !== null;
 
+// -------------------------
+// Session / Persistent Login
+// -------------------------
+// V1: store a minimal Supabase session snapshot in localStorage.
+// No passwords stored. No backend changes.
+const SESSION_STORAGE_KEY = "habitdash_session_v1";
+
+function _sessionToStorable(session) {
+  if (!session) return null;
+  return {
+    access_token: session.access_token,
+    refresh_token: session.refresh_token,
+    expires_at: session.expires_at,
+    user: session.user ? { id: session.user.id, email: session.user.email } : null,
+  };
+}
+
+function saveSessionToLocalStorage(session) {
+  try {
+    const payload = _sessionToStorable(session);
+    if (!payload) return;
+    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(payload));
+  } catch (e) {
+    console.warn("⚠️ Could not save session to localStorage", e);
+  }
+}
+
+function loadSessionFromLocalStorage() {
+  try {
+    const raw = localStorage.getItem(SESSION_STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (e) {
+    console.warn("⚠️ Could not read session from localStorage", e);
+    return null;
+  }
+}
+
+function clearSessionFromLocalStorage() {
+  try {
+    localStorage.removeItem(SESSION_STORAGE_KEY);
+  } catch (e) {
+    console.warn("⚠️ Could not clear session from localStorage", e);
+  }
+}
+
+// Try to ensure Supabase has an active session.
+// 1) If Supabase already has one, keep localStorage in sync.
+// 2) Else if localStorage has one, restore via setSession().
+async function ensureSession() {
+  // First: see if Supabase already has a session
+  const { data: existing } = await supabaseClient.auth.getSession();
+  if (existing?.session) {
+    saveSessionToLocalStorage(existing.session);
+    return existing.session;
+  }
+
+  // Second: try to restore from our localStorage snapshot
+  const saved = loadSessionFromLocalStorage();
+  if (saved?.access_token && saved?.refresh_token) {
+    const { data: restored, error } = await supabaseClient.auth.setSession({
+      access_token: saved.access_token,
+      refresh_token: saved.refresh_token,
+    });
+
+    if (!error && restored?.session) {
+      saveSessionToLocalStorage(restored.session);
+      return restored.session;
+    }
+  }
+
+  return null;
+}
+
+// Keep localStorage synced as Supabase refreshes tokens / signs out
+try {
+  supabaseClient.auth.onAuthStateChange((_event, session) => {
+    if (session) saveSessionToLocalStorage(session);
+    else clearSessionFromLocalStorage();
+  });
+} catch (e) {
+  // If auth listeners aren’t available for some reason, fail silently.
+  console.warn("⚠️ auth.onAuthStateChange unavailable", e);
+}
 
 // -------------------------
 // Time Allocation config (logic only)
@@ -73,16 +157,17 @@ const averageLabelPlugin = {
 // Auth guard
 // -------------------------
 async function requireDashboardAuth() {
-  const { data } = await supabaseClient.auth.getSession();
+  // ✅ NEW: attempt to restore / ensure session before redirecting
+  const session = await ensureSession();
 
-  if (!data.session) {
+  if (!session) {
     window.location.href = "login.html";
     return false;
   }
 
   const userEmailEl = document.getElementById("userEmail");
   if (userEmailEl) {
-    userEmailEl.textContent = `Logged in as ${data.session.user.email}`;
+    userEmailEl.textContent = `Logged in as ${session.user.email}`;
   }
 
   return true;
@@ -253,7 +338,6 @@ function setupFilters() {
     buildCharts(allData);
   });
 }
-
 
 function getFilteredData() {
   const start = document.getElementById("startMonth").value;
@@ -622,14 +706,17 @@ window.addEventListener("load", async () => {
 
   allData = data.map(mapRow);
   window.allData = allData;
+
   if (IS_DASHBOARD) {
-  setupFilters();
-  buildCharts(allData);
-}
+    setupFilters();
+    buildCharts(allData);
+  }
+
   // Weekly Summary is computed after data loads. No UI yet.
   window.weeklySummary = computeWeeklySummary(allData);
   console.log("📊 weeklySummary", window.weeklySummary);
 });
+
 // -------------------------
 // Weekly Summary UI Compatibility Layer
 // (prevents renderWeeklySummary crashes)
@@ -666,6 +753,9 @@ if (window.weeklySummary?.current) {
 // -------------------------
 document.getElementById("logoutBtn")?.addEventListener("click", async () => {
   await supabaseClient.auth.signOut();
+  // ✅ NEW: clear persistent session snapshot
+  clearSessionFromLocalStorage();
   window.location.href = "login.html";
 });
+
 
