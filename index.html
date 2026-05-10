@@ -27,6 +27,34 @@
   <a href="data.html" class="btn-secondary">View Raw Data</a>
 </div>
 
+<div class="walkthrough-overlay" id="firstLoginWalkthrough" hidden>
+  <div class="walkthrough-modal" role="dialog" aria-modal="true" aria-labelledby="walkthroughTitle">
+    <h2 id="walkthroughTitle">Welcome to Habit Dashboard</h2>
+    <div class="walkthrough-steps">
+      <div class="walkthrough-step">
+        <strong>Log once per day.</strong>
+        <p>Add one daily entry with your ratings, habits, time, and notes.</p>
+      </div>
+      <div class="walkthrough-step">
+        <strong>Give it a week.</strong>
+        <p>The dashboard becomes more useful after about 7 days of entries.</p>
+      </div>
+      <div class="walkthrough-step">
+        <strong>Compare your weeks.</strong>
+        <p>Weekly Summary shows your last 7 days against the prior 7 days.</p>
+      </div>
+      <div class="walkthrough-step">
+        <strong>Review the patterns.</strong>
+        <p>Charts show longer trends, Daily Notes add context, and Raw Data shows the entries underneath.</p>
+      </div>
+    </div>
+    <div class="walkthrough-actions">
+      <button type="button" class="btn-secondary" id="walkthroughSkip">Skip for now</button>
+      <button type="button" id="walkthroughStart">Get started</button>
+    </div>
+  </div>
+</div>
+
 
 <div class="filter-bar">
   <div>
@@ -255,9 +283,11 @@
 <script>
   function safe(v) { return v == null || v === "" ? "—" : v; }
 
-  function renderDelta(d) {
+  function renderDelta(d, options = {}) {
     if (d == null || d === 0) return `<span class="delta neutral">–</span>`;
-    const cls = d > 0 ? "up" : "down";
+    const isPositiveChange = d > 0;
+    const isGoodChange = options.lowerIsBetter ? !isPositiveChange : isPositiveChange;
+    const cls = isGoodChange ? "up" : "down";
     return `<span class="delta ${cls}">${d > 0 ? "↑" : "↓"} ${Math.abs(d).toFixed(1)}</span>`;
   }
 
@@ -293,7 +323,8 @@
 
     const daysIncluded = current?.daysIncluded ?? current?.window?.daysIncluded ?? 0;
     const incomplete = typeof daysIncluded === "number" && daysIncluded < 7;
-    const d = (x) => incomplete ? "" : renderDelta(x);
+    const d = (x, options) => incomplete ? "" : renderDelta(x, options);
+    const lowerIsBetter = { lowerIsBetter: true };
 
     const curOverall = pick(current?.ratings, ["overallAvg", "overall"]);
     const prevOverall = pick(previous?.ratings, ["overallAvg", "overall"]);
@@ -337,11 +368,11 @@
 
     setText("ws-bed-cur", safe(curBedLabel));
     setText("ws-bed-prev", safe(prevBedLabel));
-    setHTML("ws-bed-delta", d(deltaBedHours));
+    setHTML("ws-bed-delta", d(deltaBedHours, lowerIsBetter));
 
     setText("ws-up-cur", safe(curUpLabel));
     setText("ws-up-prev", safe(prevUpLabel));
-    setHTML("ws-up-delta", d(deltaUpHours));
+    setHTML("ws-up-delta", d(deltaUpHours, lowerIsBetter));
 
     const curWork = pick(current?.timeAllocation, ["avgWorkHoursPerDay", "avgWorkHours"]);
     const prevWork = pick(previous?.timeAllocation, ["avgWorkHoursPerDay", "avgWorkHours"]);
@@ -409,7 +440,7 @@
           <div class="ws-name">${labelMap[k] || k}</div>
           <div class="ws-cur">${safe(curV)}</div>
           <div class="ws-prev">${safe(prevV)}</div>
-          <div class="ws-delta">${d(delV)}</div>
+          <div class="ws-delta">${d(delV, k === "drinking" ? lowerIsBetter : undefined)}</div>
         `;
         habitsRows.appendChild(row);
       });
@@ -417,6 +448,37 @@
   }
 
   waitForWeeklySummary();
+</script>
+
+<!-- First Login Walkthrough -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const storageKey = "habitdash_walkthrough_seen_v1";
+    const walkthrough = document.getElementById("firstLoginWalkthrough");
+    const skipBtn = document.getElementById("walkthroughSkip");
+    const startBtn = document.getElementById("walkthroughStart");
+
+    if (!walkthrough) return;
+
+    const closeWalkthrough = () => {
+      localStorage.setItem(storageKey, "true");
+      walkthrough.hidden = true;
+    };
+
+    const showWalkthrough = () => {
+      if (localStorage.getItem(storageKey) === "true") return;
+      walkthrough.hidden = false;
+    };
+
+    window.addEventListener("habitdash:dashboard-ready", showWalkthrough, { once: true });
+    skipBtn?.addEventListener("click", closeWalkthrough);
+    startBtn?.addEventListener("click", closeWalkthrough);
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !walkthrough.hidden) {
+        closeWalkthrough();
+      }
+    });
+  });
 </script>
 
 <!-- =========================
