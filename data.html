@@ -98,7 +98,7 @@
 
     data.forEach(d => {
       const habitCells = habitDefs
-        .map(habit => `<td>${d[habit.dataKey] ? "Yes" : ""}</td>`)
+        .map(habit => `<td>${d[habit.dataKey] == null ? "N/A" : (d[habit.dataKey] ? "Yes" : "")}</td>`)
         .join("");
 
       const tr = document.createElement("tr");

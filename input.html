@@ -23,6 +23,37 @@
   </div>
 </header>
 
+<div class="walkthrough-overlay" id="firstEntryGuide" hidden>
+  <div class="walkthrough-modal" role="dialog" aria-modal="true" aria-labelledby="firstEntryTitle">
+    <h2 id="firstEntryTitle">Let's Add Your First Entry</h2>
+    <p class="setup-copy">
+      Start with yesterday's information if you can. A completed day is easier to rate than one that is still happening.
+    </p>
+    <ul class="first-entry-list">
+      <li>Pick yesterday's date.</li>
+      <li>Only the habits you chose to track are shown here.</li>
+      <li>Add a short note so the dashboard has context.</li>
+    </ul>
+    <div class="walkthrough-actions">
+      <button type="button" class="btn-secondary" id="firstEntryBack">Back</button>
+      <button type="button" id="firstEntryContinue">Start entry</button>
+    </div>
+  </div>
+</div>
+
+<div class="walkthrough-overlay" id="overwriteEntryModal" hidden>
+  <div class="walkthrough-modal" role="dialog" aria-modal="true" aria-labelledby="overwriteEntryTitle">
+    <h2 id="overwriteEntryTitle">Entry Already Exists</h2>
+    <p class="setup-copy" id="overwriteEntryMessage">
+      Data has already been entered for this date. Do you want to overwrite it?
+    </p>
+    <div class="walkthrough-actions">
+      <button type="button" class="btn-secondary" id="overwriteCancel">Go back</button>
+      <button type="button" id="overwriteConfirm">Overwrite entry</button>
+    </div>
+  </div>
+</div>
+
 
   <div class="page-actions">
   <a href="index.html" class="btn-secondary">
@@ -297,15 +328,15 @@
       <tbody>
         <tr>
           <td>Date</td>
-          <td>—</td>
+          <td id="lastSubmissionDate">—</td>
         </tr>
         <tr>
           <td>Overall Feeling</td>
-          <td>—</td>
+          <td id="lastSubmissionOverall">—</td>
         </tr>
         <tr>
           <td>Keyword</td>
-          <td>—</td>
+          <td id="lastSubmissionKeyword">—</td>
         </tr>
       </tbody>
     </table>

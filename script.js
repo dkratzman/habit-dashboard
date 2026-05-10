@@ -257,6 +257,8 @@ function aggregateWeeklyHours(data) {
 // Map DB row → internal format
 // -------------------------
 function mapRow(row) {
+  const boolOrNull = (value) => value == null ? null : !!value;
+
   return {
     date: normalizeDateOnlyISO(row.timestamp),
 
@@ -265,14 +267,14 @@ function mapRow(row) {
     mentalFeeling: row.mental_feeling != null ? Number(row.mental_feeling) : null,
     energyFeeling: row.energy != null ? Number(row.energy) : null,
 
-    workoutYes: !!row.worked_out,
-    journalYes: !!row.journaled,
-    readYes: !!row.read_books,
-    drinkYes: !!row.drank,
-    mediaYes: !!row.low_media,
-    pianoYes: !!row.piano,
-    officeYes: !!row.office,
-    goalYes: !!row.hit_goal,
+    workoutYes: boolOrNull(row.worked_out),
+    journalYes: boolOrNull(row.journaled),
+    readYes: boolOrNull(row.read_books),
+    drinkYes: boolOrNull(row.drank),
+    mediaYes: boolOrNull(row.low_media),
+    pianoYes: boolOrNull(row.piano),
+    officeYes: boolOrNull(row.office),
+    goalYes: boolOrNull(row.hit_goal),
 
     timeUpHours: parseTimeToHours(row.time_up),
     timeInBedHours: parseTimeToHours(row.time_in_bed),
@@ -488,12 +490,16 @@ function buildCharts(data) {
     const key = `${y}-${m}`;
     if (!monthGroups[key]) {
       monthGroups[key] = { total: 0 };
-      habitDefs.forEach(habit => { monthGroups[key][habit.chartKey] = 0; });
+      habitDefs.forEach(habit => {
+        monthGroups[key][habit.chartKey] = { yes: 0, tracked: 0 };
+      });
     }
     const g = monthGroups[key];
     g.total++;
     habitDefs.forEach(habit => {
-      if (d[habit.dataKey]) g[habit.chartKey]++;
+      if (d[habit.dataKey] == null) return;
+      g[habit.chartKey].tracked++;
+      if (d[habit.dataKey]) g[habit.chartKey].yes++;
     });
   });
 
@@ -514,7 +520,10 @@ function buildCharts(data) {
       }),
       datasets: habitDefs.map(habit => ({
         label: habit.label,
-        data: keys.map(k => pct(monthGroups[k][habit.chartKey], monthGroups[k].total)),
+        data: keys.map(k => {
+          const habitMonth = monthGroups[k][habit.chartKey];
+          return pct(habitMonth.yes, habitMonth.tracked);
+        }),
         backgroundColor: habit.color,
       })),
     },

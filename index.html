@@ -38,6 +38,7 @@
     <div class="habit-choice-grid" id="habitPreferencesForm"></div>
     <div class="walkthrough-actions">
       <span class="setup-status" id="habitSetupStatus"></span>
+      <button type="button" class="btn-secondary" id="habitSetupBack" hidden>Back</button>
       <button type="button" id="saveHabitSetup">Save habits</button>
     </div>
   </div>
@@ -118,7 +119,34 @@
     </div>
     <div class="walkthrough-actions">
       <button type="button" class="btn-secondary" id="exampleSkip">Skip for now</button>
+      <button type="button" class="btn-secondary" id="exampleBack">Back</button>
       <button type="button" id="exampleContinue">Choose habits</button>
+    </div>
+  </div>
+</div>
+
+<div class="walkthrough-overlay" id="firstEntryDashboardGuide" hidden>
+  <div class="walkthrough-modal" role="dialog" aria-modal="true" aria-labelledby="firstEntryDashboardTitle">
+    <h2 id="firstEntryDashboardTitle">Your First Entry Is In</h2>
+    <p class="setup-copy">
+      With one entry, the dashboard will still look quiet. That is normal. It becomes more useful as you add more days.
+    </p>
+    <div class="walkthrough-steps">
+      <div class="walkthrough-step">
+        <strong>Daily Notes</strong>
+        <p>Your keyword and summary show up near the bottom of the dashboard.</p>
+      </div>
+      <div class="walkthrough-step">
+        <strong>Charts</strong>
+        <p>Your first ratings, sleep, time, and habit values start the trend lines and bars.</p>
+      </div>
+      <div class="walkthrough-step">
+        <strong>Weekly Summary</strong>
+        <p>This section fills in after several completed days and compares weeks once there is enough data.</p>
+      </div>
+    </div>
+    <div class="walkthrough-actions">
+      <button type="button" id="firstEntryDashboardDone">View dashboard</button>
     </div>
   </div>
 </div>
@@ -525,13 +553,18 @@
 <script>
   const ONBOARDING_FLOW_KEY = "habitdash_new_user_onboarding_v1";
   const ONBOARDING_ENTRY_REDIRECT_KEY = "habitdash_onboarding_entry_redirect_v1";
+  const WALKTHROUGH_REVIEW_KEY = "habitdash_walkthrough_review_v1";
 
   document.addEventListener("DOMContentLoaded", () => {
     const modal = document.getElementById("habitSetupModal");
     const openBtn = document.getElementById("openHabitSetup");
+    const backBtn = document.getElementById("habitSetupBack");
     if (!modal || typeof setupHabitPreferencesForm !== "function") return;
 
-    const openSetup = () => { modal.hidden = false; };
+    const openSetup = (fromOnboarding = false) => {
+      if (backBtn) backBtn.hidden = !fromOnboarding;
+      modal.hidden = false;
+    };
     const closeSetup = () => { modal.hidden = true; };
 
     setupHabitPreferencesForm({
@@ -550,17 +583,33 @@
         window.dispatchEvent(new CustomEvent("habitdash:habit-setup-complete"));
         if (shouldSendToInput) {
           localStorage.removeItem(ONBOARDING_FLOW_KEY);
+          localStorage.removeItem(WALKTHROUGH_REVIEW_KEY);
           window.location.href = "input.html?fromOnboarding=1";
+        } else {
+          localStorage.removeItem(WALKTHROUGH_REVIEW_KEY);
         }
       },
     });
 
-    openBtn?.addEventListener("click", openSetup);
+    openBtn?.addEventListener("click", () => openSetup(false));
+    backBtn?.addEventListener("click", () => {
+      closeSetup();
+      const exampleModal = document.getElementById("exampleDashboardModal");
+      if (exampleModal) exampleModal.hidden = false;
+    });
+
     window.addEventListener("habitdash:dashboard-ready", () => {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("onboardingHabitSetup") === "1") {
+        localStorage.setItem(ONBOARDING_ENTRY_REDIRECT_KEY, "true");
+        openSetup(true);
+        history.replaceState(null, "", "index.html");
+        return;
+      }
       if (localStorage.getItem(ONBOARDING_FLOW_KEY) === "true") return;
       if (localStorage.getItem("habitdash_walkthrough_seen_v1") !== "true") return;
       if (typeof hasHabitPreferences === "function" && !hasHabitPreferences()) {
-        openSetup();
+        openSetup(false);
       }
     }, { once: true });
 
@@ -581,6 +630,7 @@
     const skipBtn = document.getElementById("walkthroughSkip");
     const startBtn = document.getElementById("walkthroughStart");
     const exampleSkipBtn = document.getElementById("exampleSkip");
+    const exampleBackBtn = document.getElementById("exampleBack");
     const exampleContinueBtn = document.getElementById("exampleContinue");
     const openBtn = document.getElementById("openWalkthrough");
 
@@ -594,13 +644,20 @@
     const endOnboardingFlow = () => {
       localStorage.removeItem(ONBOARDING_FLOW_KEY);
       localStorage.removeItem(ONBOARDING_ENTRY_REDIRECT_KEY);
+      localStorage.removeItem(WALKTHROUGH_REVIEW_KEY);
     };
 
     const openHabitSetupForOnboarding = () => {
       if (exampleModal) exampleModal.hidden = true;
       const habitSetup = document.getElementById("habitSetupModal");
       if (habitSetup) {
-        localStorage.setItem(ONBOARDING_ENTRY_REDIRECT_KEY, "true");
+        if (localStorage.getItem(ONBOARDING_FLOW_KEY) === "true") {
+          localStorage.setItem(ONBOARDING_ENTRY_REDIRECT_KEY, "true");
+        } else {
+          localStorage.removeItem(ONBOARDING_ENTRY_REDIRECT_KEY);
+        }
+        const habitSetupBack = document.getElementById("habitSetupBack");
+        if (habitSetupBack) habitSetupBack.hidden = false;
         habitSetup.hidden = false;
       }
     };
@@ -616,6 +673,8 @@
       const habitSetup = document.getElementById("habitSetupModal");
       if (habitSetup) habitSetup.hidden = true;
       if (exampleModal) exampleModal.hidden = true;
+      localStorage.setItem(WALKTHROUGH_REVIEW_KEY, "true");
+      localStorage.removeItem(ONBOARDING_ENTRY_REDIRECT_KEY);
       walkthrough.hidden = false;
     };
 
@@ -636,7 +695,13 @@
     });
     startBtn?.addEventListener("click", () => {
       closeWalkthrough();
-      if (localStorage.getItem(ONBOARDING_FLOW_KEY) === "true" && exampleModal) {
+      if (
+        exampleModal &&
+        (
+          localStorage.getItem(ONBOARDING_FLOW_KEY) === "true" ||
+          localStorage.getItem(WALKTHROUGH_REVIEW_KEY) === "true"
+        )
+      ) {
         exampleModal.hidden = false;
       }
     });
@@ -644,12 +709,42 @@
       if (exampleModal) exampleModal.hidden = true;
       endOnboardingFlow();
     });
+    exampleBackBtn?.addEventListener("click", () => {
+      if (exampleModal) exampleModal.hidden = true;
+      walkthrough.hidden = false;
+    });
     exampleContinueBtn?.addEventListener("click", openHabitSetupForOnboarding);
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape" && !walkthrough.hidden) {
         closeWalkthrough();
         endOnboardingFlow();
       }
+    });
+  });
+</script>
+
+<!-- First Entry Dashboard Guide -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("fromFirstEntry") !== "1") return;
+
+    const guide = document.getElementById("firstEntryDashboardGuide");
+    const doneBtn = document.getElementById("firstEntryDashboardDone");
+    if (!guide) return;
+
+    const closeGuide = () => {
+      guide.hidden = true;
+      history.replaceState(null, "", "index.html");
+    };
+
+    window.addEventListener("habitdash:dashboard-ready", () => {
+      guide.hidden = false;
+    }, { once: true });
+
+    doneBtn?.addEventListener("click", closeGuide);
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !guide.hidden) closeGuide();
     });
   });
 </script>

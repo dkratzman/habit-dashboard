@@ -40,6 +40,10 @@ section {
   max-width: 800px;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 /* =========================
    Charts
 ========================= */
@@ -212,10 +216,10 @@ body.dark .control-btn {
 
 .habit-choice {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
-  min-height: 44px;
-  padding: 9px 10px;
+  min-height: 58px;
+  padding: 10px 12px;
   border: 1px solid var(--border-color);
   border-radius: 8px;
   background: var(--bg-color);
@@ -225,6 +229,22 @@ body.dark .control-btn {
 .habit-choice input {
   width: 18px;
   height: 18px;
+  margin-top: 2px;
+  flex: 0 0 auto;
+}
+
+.habit-choice span {
+  display: grid;
+  gap: 3px;
+}
+
+.habit-choice strong {
+  font-size: 0.95rem;
+}
+
+.habit-choice small {
+  line-height: 1.35;
+  opacity: 0.72;
 }
 
 .setup-status {
@@ -239,6 +259,7 @@ body.dark .control-btn {
   justify-content: flex-end;
   gap: 10px;
   margin-top: 18px;
+  padding-top: 8px;
 }
 
 .walkthrough-actions button {
@@ -292,6 +313,13 @@ body.dark .control-btn {
   min-width: 18px;
   border-radius: 6px 6px 0 0;
   background: #3b82f6;
+}
+
+.first-entry-list {
+  margin: 12px 0 0;
+  padding-left: 20px;
+  line-height: 1.5;
+  opacity: 0.86;
 }
 
 /* =========================
@@ -701,6 +729,26 @@ body.dark .header-right button:hover {
 ========================= */
 
 @media (max-width: 768px) {
+  .walkthrough-overlay {
+    align-items: flex-start;
+    padding: 14px 14px calc(84px + env(safe-area-inset-bottom, 0px));
+    overflow-y: auto;
+  }
+
+  .walkthrough-modal {
+    max-height: calc(100dvh - 112px);
+    padding-bottom: 0;
+  }
+
+  .walkthrough-actions {
+    position: sticky;
+    bottom: 0;
+    margin: 18px -22px 0;
+    padding: 12px 22px calc(12px + env(safe-area-inset-bottom, 0px));
+    background: var(--card-bg);
+    border-top: 1px solid var(--border-color);
+  }
+
   section {
     margin: 20px auto;
   }

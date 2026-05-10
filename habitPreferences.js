@@ -7,6 +7,7 @@ const HABIT_DEFINITIONS = [
   {
     id: "workout",
     label: "Workout",
+    description: "Any intentional exercise, training, or workout session.",
     inputId: "workout",
     dataKey: "workoutYes",
     summaryKey: "workouts",
@@ -16,6 +17,7 @@ const HABIT_DEFINITIONS = [
   {
     id: "journal",
     label: "Journal",
+    description: "A written journal entry, vlog, or intentional reflection.",
     inputId: "journal",
     dataKey: "journalYes",
     summaryKey: "journaling",
@@ -25,6 +27,7 @@ const HABIT_DEFINITIONS = [
   {
     id: "read",
     label: "Read / Audiobook",
+    description: "Reading or listening to an audiobook for personal growth or enjoyment.",
     inputId: "read",
     dataKey: "readYes",
     summaryKey: "reading",
@@ -34,6 +37,7 @@ const HABIT_DEFINITIONS = [
   {
     id: "drink",
     label: "Alcohol / Drinking",
+    description: "Whether you drank alcohol that day. Fewer drinking days are treated as positive.",
     inputId: "drink",
     dataKey: "drinkYes",
     summaryKey: "drinking",
@@ -44,6 +48,7 @@ const HABIT_DEFINITIONS = [
   {
     id: "media",
     label: "Low Media",
+    description: "Whether you spent less than 2 hours on social media that day.",
     inputId: "media",
     dataKey: "mediaYes",
     summaryKey: "lowMedia",
@@ -53,6 +58,7 @@ const HABIT_DEFINITIONS = [
   {
     id: "piano",
     label: "Music Practice",
+    description: "Practicing music, such as piano, guitar, voice, or another instrument.",
     inputId: "piano",
     dataKey: "pianoYes",
     summaryKey: "piano",
@@ -62,6 +68,7 @@ const HABIT_DEFINITIONS = [
   {
     id: "office",
     label: "Office / Work Location",
+    description: "Whether you went into the office to work instead of working from home.",
     inputId: "office",
     dataKey: "officeYes",
     summaryKey: "office",
@@ -71,6 +78,7 @@ const HABIT_DEFINITIONS = [
   {
     id: "hitGoal",
     label: "Hit Work Goal",
+    description: "Whether you met the main work goal you set for that day.",
     inputId: "hitGoal",
     dataKey: "goalYes",
     summaryKey: "hitGoal",
@@ -141,7 +149,10 @@ function setupHabitPreferencesForm({ formId, saveButtonId, statusId, onSave } = 
     form.innerHTML = HABIT_DEFINITIONS.map(habit => `
       <label class="habit-choice">
         <input type="checkbox" value="${habit.id}" ${enabled.has(habit.id) ? "checked" : ""}>
-        <span>${habit.label}</span>
+        <span>
+          <strong>${habit.label}</strong>
+          <small>${habit.description}</small>
+        </span>
       </label>
     `).join("");
   }
