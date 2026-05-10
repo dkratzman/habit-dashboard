@@ -32,7 +32,7 @@
 
 
   <section>
-    <h2>Enter Today&apos;s Data</h2>
+    <h2>Enter Data</h2>
     <form id="dailyForm">
       <!-- Date -->
       <div class="form-row">
@@ -94,8 +94,8 @@
       <fieldset class="form-group">
         <legend>Habits (Yes/No)</legend>
 
-        <div class="form-row inline">
-          <label>Workout today?</label>
+        <div class="form-row inline" data-habit-id="workout">
+          <label>Workout?</label>
           <div class="button-group" data-input-id="workout">
             <button type="button" class="btn-option" data-value="Yes">Yes</button>
             <button type="button" class="btn-option selected" data-value="No">No</button>
@@ -103,8 +103,8 @@
           <input type="hidden" id="workout" value="No">
         </div>
 
-        <div class="form-row inline">
-          <label>Journal or vlog today?</label>
+        <div class="form-row inline" data-habit-id="journal">
+          <label>Journal?</label>
           <div class="button-group" data-input-id="journal">
             <button type="button" class="btn-option" data-value="Yes">Yes</button>
             <button type="button" class="btn-option selected" data-value="No">No</button>
@@ -112,8 +112,8 @@
           <input type="hidden" id="journal" value="No">
         </div>
 
-        <div class="form-row inline">
-          <label>Read / Audiobook today?</label>
+        <div class="form-row inline" data-habit-id="read">
+          <label>Read / Audiobook?</label>
           <div class="button-group" data-input-id="read">
             <button type="button" class="btn-option" data-value="Yes">Yes</button>
             <button type="button" class="btn-option selected" data-value="No">No</button>
@@ -121,8 +121,8 @@
           <input type="hidden" id="read" value="No">
         </div>
 
-        <div class="form-row inline">
-          <label>Drink today?</label>
+        <div class="form-row inline" data-habit-id="drink">
+          <label>Drink?</label>
           <div class="button-group" data-input-id="drink">
             <button type="button" class="btn-option" data-value="Yes">Yes</button>
             <button type="button" class="btn-option selected" data-value="No">No</button>
@@ -130,7 +130,7 @@
           <input type="hidden" id="drink" value="No">
         </div>
 
-        <div class="form-row inline">
+        <div class="form-row inline" data-habit-id="media">
           <label>Less than 2 hours of media?</label>
           <div class="button-group" data-input-id="media">
             <button type="button" class="btn-option" data-value="Yes">Yes</button>
@@ -139,8 +139,8 @@
           <input type="hidden" id="media" value="No">
         </div>
 
-        <div class="form-row inline">
-          <label>Practice piano today?</label>
+        <div class="form-row inline" data-habit-id="piano">
+          <label>Practice music?</label>
           <div class="button-group" data-input-id="piano">
             <button type="button" class="btn-option" data-value="Yes">Yes</button>
             <button type="button" class="btn-option selected" data-value="No">No</button>
@@ -148,8 +148,8 @@
           <input type="hidden" id="piano" value="No">
         </div>
 
-        <div class="form-row inline">
-          <label>Go into office today?</label>
+        <div class="form-row inline" data-habit-id="office">
+          <label>Go into office?</label>
           <div class="button-group" data-input-id="office">
             <button type="button" class="btn-option" data-value="Yes">Yes</button>
             <button type="button" class="btn-option selected" data-value="No">No</button>
@@ -157,8 +157,8 @@
           <input type="hidden" id="office" value="No">
         </div>
 
-        <div class="form-row inline">
-          <label>Hit work goal today?</label>
+        <div class="form-row inline" data-habit-id="hitGoal">
+          <label>Hit work goal?</label>
           <div class="button-group" data-input-id="hitGoal">
             <button type="button" class="btn-option" data-value="Yes">Yes</button>
             <button type="button" class="btn-option selected" data-value="No">No</button>
@@ -169,7 +169,7 @@
 
       <!-- Hours worked / personal: buttons 0–14 -->
       <div class="form-row">
-        <label>Hours worked today</label>
+        <label>Hours worked?</label>
         <div class="button-group wrap" data-input-id="hoursWorked">
           <!-- 0 through 14 -->
           <button type="button" class="btn-option selected" data-value="0">0</button>
@@ -192,7 +192,7 @@
       </div>
 
       <div class="form-row">
-        <label>Hours on personal work / learning / development</label>
+        <label>Hours on personal work / learning / development?</label>
         <div class="button-group wrap" data-input-id="hoursPersonal">
           <!-- 0 through 14 -->
           <button type="button" class="btn-option selected" data-value="0">0</button>
@@ -337,6 +337,7 @@
 
 <!-- Theme -->
 <script src="theme.js"></script>
+<script src="habitPreferences.js"></script>
 
 <!-- Input page logic -->
 <script src="input.js"></script>

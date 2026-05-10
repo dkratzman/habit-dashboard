@@ -15,11 +15,14 @@
 
   <div class="header-right">
     <span id="userEmail"></span>
-    <button id="darkModeToggle">🌙 Dark Mode</button>
+    <button id="darkModeToggle">Dark Mode</button>
     <button id="logoutBtn">Log out</button>
   </div>
 </header>
 
+<div class="page-actions">
+  <a href="index.html" class="btn-secondary">Back to Dashboard</a>
+</div>
 
 <section>
   <h2>Raw Habit Data</h2>
@@ -30,28 +33,16 @@
   <div class="daily-list-container" style="max-height: 70vh;">
     <table class="daily-table" id="rawDataTable">
       <thead>
-        <tr>
+        <tr id="rawDataHeaderRow">
           <th>Date</th>
           <th>Overall</th>
           <th>Energy</th>
           <th>Mental</th>
           <th>Physical</th>
-
           <th>Time Up</th>
           <th>Time In Bed</th>
-
           <th>Work (hrs)</th>
           <th>Personal (hrs)</th>
-
-          <th>Workout</th>
-          <th>Journal</th>
-          <th>Read</th>
-          <th>Drink</th>
-          <th>Low Media</th>
-          <th>Piano</th>
-          <th>Office</th>
-          <th>Hit Goal</th>
-
           <th>Keyword</th>
           <th>Summary</th>
         </tr>
@@ -61,12 +52,10 @@
   </div>
 </section>
 
-<!-- =========================
-     SCRIPTS (same order)
-========================= -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabaseClient.js"></script>
 <script src="theme.js"></script>
+<script src="habitPreferences.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="script.js"></script>
 
@@ -76,42 +65,54 @@
   }
 
   function renderRawTable() {
-    // 🔁 CHANGE THIS if your global array name differs
     const data = window.allData;
+    const habitDefs = typeof getEnabledHabitDefinitions === "function"
+      ? getEnabledHabitDefinitions()
+      : [];
 
     if (!Array.isArray(data)) {
       console.warn("Raw data not found (window.allData)");
       return;
     }
 
+    const headerRow = document.getElementById("rawDataHeaderRow");
+    if (headerRow) {
+      headerRow.innerHTML = `
+        <th>Date</th>
+        <th>Overall</th>
+        <th>Energy</th>
+        <th>Mental</th>
+        <th>Physical</th>
+        <th>Time Up</th>
+        <th>Time In Bed</th>
+        <th>Work (hrs)</th>
+        <th>Personal (hrs)</th>
+        ${habitDefs.map(habit => `<th>${habit.label}</th>`).join("")}
+        <th>Keyword</th>
+        <th>Summary</th>
+      `;
+    }
+
     const tbody = document.getElementById("rawDataBody");
     tbody.innerHTML = "";
 
     data.forEach(d => {
+      const habitCells = habitDefs
+        .map(habit => `<td>${d[habit.dataKey] ? "Yes" : ""}</td>`)
+        .join("");
+
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${safe(d.date)}</td>
-
         <td>${safe(d.overallFeeling)}</td>
         <td>${safe(d.energyFeeling)}</td>
         <td>${safe(d.mentalFeeling)}</td>
         <td>${safe(d.physicalFeeling)}</td>
-
         <td>${safe(d.timeUpHours)}</td>
         <td>${safe(d.timeInBedHours)}</td>
-
-        <td>${safe(d.workHours)}</td>
-        <td>${safe(d.personalHours)}</td>
-
-        <td>${d.workoutYes ? "✓" : ""}</td>
-        <td>${d.journalYes ? "✓" : ""}</td>
-        <td>${d.readYes ? "✓" : ""}</td>
-        <td>${d.drinkYes ? "✓" : ""}</td>
-        <td>${d.mediaYes ? "✓" : ""}</td>
-        <td>${d.pianoYes ? "✓" : ""}</td>
-        <td>${d.officeYes ? "✓" : ""}</td>
-        <td>${d.goalYes ? "✓" : ""}</td>
-
+        <td>${safe(d.hoursWorked)}</td>
+        <td>${safe(d.hoursPersonal)}</td>
+        ${habitCells}
         <td>${safe(d.dailyKeyword)}</td>
         <td>${safe(d.dailySummary)}</td>
       `;
@@ -120,26 +121,21 @@
   }
 
   function waitForRawData() {
-  if (!Array.isArray(window.allData)) {
-    setTimeout(waitForRawData, 100);
-    return;
+    if (!Array.isArray(window.allData)) {
+      setTimeout(waitForRawData, 100);
+      return;
+    }
+    renderRawTable();
   }
-  renderRawTable();
-}
 
-waitForRawData();
-
+  waitForRawData();
 </script>
-<!-- =========================
-     Mobile Bottom Navigation
-========================= -->
+
 <nav class="bottom-nav">
   <a href="index.html">Dashboard</a>
   <a href="input.html">Input</a>
   <a href="data.html" class="active">Data</a>
 </nav>
 
-
 </body>
 </html>
-

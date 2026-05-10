@@ -1,5 +1,7 @@
 console.log("input.js loaded");
 
+const ONBOARDING_ENTRY_REDIRECT_KEY = "habitdash_onboarding_entry_redirect_v1";
+
 // --------------------------------------
 // Auth Helpers
 // --------------------------------------
@@ -24,6 +26,7 @@ requireInputAuth();
 // --------------------------------------
 document.addEventListener("DOMContentLoaded", () => {
   setupLogout();
+  if (typeof applyHabitVisibility === "function") applyHabitVisibility();
   setupAllButtonGroups();
   setupFormSubmit();
 });
@@ -109,6 +112,16 @@ function setupFormSubmit() {
       document
         .querySelectorAll(".btn-option.selected")
         .forEach(btn => btn.classList.remove("selected"));
+
+      if (
+        localStorage.getItem(ONBOARDING_ENTRY_REDIRECT_KEY) === "true" ||
+        new URLSearchParams(window.location.search).get("fromOnboarding") === "1"
+      ) {
+        localStorage.removeItem(ONBOARDING_ENTRY_REDIRECT_KEY);
+        setTimeout(() => {
+          window.location.href = "index.html";
+        }, 900);
+      }
 
     } catch (err) {
       console.error("Unexpected submit error:", err);
