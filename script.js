@@ -170,7 +170,7 @@ async function requireDashboardAuth() {
     userEmailEl.textContent = `Logged in as ${session.user.email}`;
   }
 
-  return true;
+  return session;
 }
 
 // -------------------------
@@ -695,11 +695,15 @@ function computeWeeklySummary(data) {
 // Load data
 // -------------------------
 window.addEventListener("load", async () => {
-  if (!(await requireDashboardAuth())) return;
+  const session = await requireDashboardAuth();
+  if (!session) return;
+
+  window.dispatchEvent(new CustomEvent("habitdash:dashboard-ready"));
 
   const { data, error } = await supabaseClient
     .from("daily_entries")
     .select("*")
+    .eq("user_id", session.user.id)
     .order("timestamp", { ascending: true });
 
   if (error) return console.error(error);
