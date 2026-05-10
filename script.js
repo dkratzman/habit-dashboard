@@ -470,23 +470,31 @@ function buildCharts(data) {
   });
 
   /* HABITS */
+  const habitDefs = typeof getEnabledHabitDefinitions === "function"
+    ? getEnabledHabitDefinitions()
+    : [
+        { label: "Workout", dataKey: "workoutYes", chartKey: "workout", color: "#10b981" },
+        { label: "Journal", dataKey: "journalYes", chartKey: "journal", color: "#3b82f6" },
+        { label: "Read", dataKey: "readYes", chartKey: "read", color: "#6366f1" },
+        { label: "Drink", dataKey: "drinkYes", chartKey: "drink", color: "#ef4444" },
+        { label: "< 2 hrs Media", dataKey: "mediaYes", chartKey: "media", color: "#f59e0b" },
+        { label: "Piano", dataKey: "pianoYes", chartKey: "piano", color: "#a855f7" },
+        { label: "Office", dataKey: "officeYes", chartKey: "office", color: "#0ea5e9" },
+        { label: "Hit Goal", dataKey: "goalYes", chartKey: "goal", color: "#22c55e" },
+      ];
   const monthGroups = {};
   sorted.forEach(d => {
     const [y, m] = d.date.split("-");
     const key = `${y}-${m}`;
     if (!monthGroups[key]) {
-      monthGroups[key] = { total: 0, workout: 0, journal: 0, read: 0, drink: 0, media: 0, piano: 0, office: 0, goal: 0 };
+      monthGroups[key] = { total: 0 };
+      habitDefs.forEach(habit => { monthGroups[key][habit.chartKey] = 0; });
     }
     const g = monthGroups[key];
     g.total++;
-    if (d.workoutYes) g.workout++;
-    if (d.journalYes) g.journal++;
-    if (d.readYes) g.read++;
-    if (d.drinkYes) g.drink++;
-    if (d.mediaYes) g.media++;
-    if (d.pianoYes) g.piano++;
-    if (d.officeYes) g.office++;
-    if (d.goalYes) g.goal++;
+    habitDefs.forEach(habit => {
+      if (d[habit.dataKey]) g[habit.chartKey]++;
+    });
   });
 
   const keys = Object.keys(monthGroups).sort();
@@ -504,16 +512,11 @@ function buildCharts(data) {
         const dt = new Date(Number(yy), Number(mm) - 1, 1); // local time
         return dt.toLocaleDateString("en-US", { month: "short", year: "numeric" });
       }),
-      datasets: [
-        { label: "Workout", data: keys.map(k => pct(monthGroups[k].workout, monthGroups[k].total)), backgroundColor: "#10b981" },
-        { label: "Journal", data: keys.map(k => pct(monthGroups[k].journal, monthGroups[k].total)), backgroundColor: "#3b82f6" },
-        { label: "Read", data: keys.map(k => pct(monthGroups[k].read, monthGroups[k].total)), backgroundColor: "#6366f1" },
-        { label: "Drink", data: keys.map(k => pct(monthGroups[k].drink, monthGroups[k].total)), backgroundColor: "#ef4444" },
-        { label: "< 2 hrs Media", data: keys.map(k => pct(monthGroups[k].media, monthGroups[k].total)), backgroundColor: "#f59e0b" },
-        { label: "Piano", data: keys.map(k => pct(monthGroups[k].piano, monthGroups[k].total)), backgroundColor: "#a855f7" },
-        { label: "Office", data: keys.map(k => pct(monthGroups[k].office, monthGroups[k].total)), backgroundColor: "#0ea5e9" },
-        { label: "Hit Goal", data: keys.map(k => pct(monthGroups[k].goal, monthGroups[k].total)), backgroundColor: "#22c55e" },
-      ],
+      datasets: habitDefs.map(habit => ({
+        label: habit.label,
+        data: keys.map(k => pct(monthGroups[k][habit.chartKey], monthGroups[k].total)),
+        backgroundColor: habit.color,
+      })),
     },
     options: {
       responsive: true,

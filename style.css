@@ -197,6 +197,43 @@ body.dark .control-btn {
   opacity: 0.8;
 }
 
+.setup-copy {
+  margin: 0 0 16px;
+  line-height: 1.45;
+  opacity: 0.82;
+}
+
+.habit-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.habit-choice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 9px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-color);
+  cursor: pointer;
+}
+
+.habit-choice input {
+  width: 18px;
+  height: 18px;
+}
+
+.setup-status {
+  margin-right: auto;
+  align-self: center;
+  font-size: 0.9rem;
+  color: #16a34a;
+}
+
 .walkthrough-actions {
   display: flex;
   justify-content: flex-end;
@@ -207,6 +244,54 @@ body.dark .control-btn {
 .walkthrough-actions button {
   min-height: 42px;
   padding: 8px 14px;
+}
+
+.example-dashboard-modal {
+  width: min(100%, 620px);
+}
+
+.example-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.example-summary-item {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-color);
+}
+
+.example-summary-item span,
+.example-summary-item em {
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
+
+.example-summary-item strong {
+  font-size: 1.15rem;
+}
+
+.example-chart-preview {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  height: 150px;
+  padding: 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--muted-bg);
+}
+
+.example-chart-preview span {
+  flex: 1;
+  min-width: 18px;
+  border-radius: 6px 6px 0 0;
+  background: #3b82f6;
 }
 
 /* =========================
@@ -432,6 +517,7 @@ body.dark .btn-secondary {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
   max-width: 1100px;
   margin: 0 auto 24px;
   padding: 12px 18px;
@@ -453,6 +539,8 @@ body.dark .btn-secondary {
 .header-right {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 12px;
   font-size: 0.9rem;
 }
@@ -473,6 +561,10 @@ body.dark .btn-secondary {
 
 .header-right button:hover {
   background: #e5e7eb;
+}
+
+#openWalkthrough {
+  opacity: 0.82;
 }
 
 body.dark .header-right button {
@@ -524,6 +616,7 @@ body.dark .header-right button:hover {
 }
 
 .auth-card {
+  width: min(100%, 420px);
   max-width: 420px;
   padding: 28px 32px 32px;
   border-radius: 16px;
@@ -531,6 +624,53 @@ body.dark .header-right button:hover {
   border: 1px solid var(--border-color);
   box-shadow: 0 10px 25px rgba(0,0,0,0.08);
   text-align: center;
+}
+
+.auth-card form {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 14px;
+  margin-top: 22px;
+}
+
+.auth-card .form-row {
+  width: 100%;
+  max-width: 340px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.auth-card .form-row input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.auth-submit {
+  width: 100%;
+  max-width: 340px;
+  justify-content: center;
+  margin: 8px auto 0;
+}
+
+.auth-helper {
+  margin-top: 22px;
+}
+
+.auth-helper-row {
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.auth-toggle-button {
+  padding: 7px 14px;
+}
+
+.auth-status {
+  min-height: 22px;
+  margin-top: 14px;
 }
 
 .auth-toggle {

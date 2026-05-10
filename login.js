@@ -3,6 +3,7 @@
 // --------------------------------------
 document.addEventListener("DOMContentLoaded", () => {
   const SESSION_STORAGE_KEY = "habitdash_session_v1";
+  const NEW_USER_ONBOARDING_KEY = "habitdash_new_user_onboarding_v1";
 
   function _sessionToStorable(session) {
     if (!session) return null;
@@ -73,12 +74,12 @@ document.addEventListener("DOMContentLoaded", () => {
     status.textContent = "";
 
     if (mode === "signup") {
-      signupOnlyEls.forEach(el => el.style.display = "block");
+      signupOnlyEls.forEach(el => el.style.display = el.classList.contains("auth-helper-row") ? "flex" : "block");
       signinOnlyEls.forEach(el => el.style.display = "none");
       form.querySelector(".auth-submit").textContent = "Create Account";
     } else {
       signupOnlyEls.forEach(el => el.style.display = "none");
-      signinOnlyEls.forEach(el => el.style.display = "inline");
+      signinOnlyEls.forEach(el => el.style.display = el.classList.contains("auth-helper-row") ? "flex" : "inline");
       form.querySelector(".auth-submit").textContent = "Sign In";
     }
   }
@@ -133,6 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // If a session is returned immediately, persist it
         if (data?.session) saveSessionToLocalStorage(data.session);
+        localStorage.setItem(NEW_USER_ONBOARDING_KEY, "true");
 
         status.textContent = "Account created! Redirecting...";
         setTimeout(() => {

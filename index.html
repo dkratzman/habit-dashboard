@@ -16,7 +16,8 @@
 
   <div class="header-right">
     <span id="userEmail"></span>
-    <button id="darkModeToggle">🌙 Dark Mode</button>
+    <button type="button" id="openWalkthrough">How this works</button>
+    <button id="darkModeToggle">Dark Mode</button>
     <button id="logoutBtn">Log out</button>
   </div>
 </header>
@@ -25,32 +26,99 @@
 <div class="page-actions">
   <a href="input.html" class="btn-secondary">+ Add Entry</a>
   <a href="data.html" class="btn-secondary">View Raw Data</a>
+  <button type="button" class="btn-secondary" id="openHabitSetup">Choose Habits</button>
+</div>
+
+<div class="walkthrough-overlay" id="habitSetupModal" hidden>
+  <div class="walkthrough-modal" role="dialog" aria-modal="true" aria-labelledby="habitSetupTitle">
+    <h2 id="habitSetupTitle">Choose Your Habits</h2>
+    <p class="setup-copy">
+      Pick the habits you want to log and display. You can change this anytime.
+    </p>
+    <div class="habit-choice-grid" id="habitPreferencesForm"></div>
+    <div class="walkthrough-actions">
+      <span class="setup-status" id="habitSetupStatus"></span>
+      <button type="button" id="saveHabitSetup">Save habits</button>
+    </div>
+  </div>
 </div>
 
 <div class="walkthrough-overlay" id="firstLoginWalkthrough" hidden>
   <div class="walkthrough-modal" role="dialog" aria-modal="true" aria-labelledby="walkthroughTitle">
-    <h2 id="walkthroughTitle">Welcome to Habit Dashboard</h2>
+    <h2 id="walkthroughTitle">How Habit Dashboard Works</h2>
     <div class="walkthrough-steps">
       <div class="walkthrough-step">
-        <strong>Log once per day.</strong>
-        <p>Add one daily entry with your ratings, habits, time, and notes.</p>
+        <strong>Track one day at a time.</strong>
+        <p>Submit one entry per day with your habits, ratings, sleep, time use, and notes.</p>
       </div>
       <div class="walkthrough-step">
-        <strong>Give it a week.</strong>
-        <p>The dashboard becomes more useful after about 7 days of entries.</p>
+        <strong>Look for weekly patterns.</strong>
+        <p>The dashboard becomes more useful after several days of data, especially after about 7 days. Charts show longer-term patterns over time.</p>
       </div>
       <div class="walkthrough-step">
-        <strong>Compare your weeks.</strong>
-        <p>Weekly Summary shows your last 7 days against the prior 7 days.</p>
+        <strong>Compare completed weeks.</strong>
+        <p>Weekly Summary compares the last 7 completed days against the previous 7 completed days.</p>
       </div>
       <div class="walkthrough-step">
-        <strong>Review the patterns.</strong>
-        <p>Charts show longer trends, Daily Notes add context, and Raw Data shows the entries underneath.</p>
+        <strong>Use context with the numbers.</strong>
+        <p>Daily Notes explain what was happening behind the numbers, while Raw Data lets you inspect the entries underneath.</p>
+      </div>
+      <div class="walkthrough-step">
+        <strong>Choose what you track.</strong>
+        <p>Habit choices control what is visible and available in the app. They can be edited later and do not change the database structure.</p>
+      </div>
+      <div class="walkthrough-step">
+        <strong>About Overall Score.</strong>
+        <p>Overall Score is entered by you. It is not calculated from Physical, Mental, and Energy scores.</p>
       </div>
     </div>
     <div class="walkthrough-actions">
       <button type="button" class="btn-secondary" id="walkthroughSkip">Skip for now</button>
       <button type="button" id="walkthroughStart">Get started</button>
+    </div>
+  </div>
+</div>
+
+<div class="walkthrough-overlay" id="exampleDashboardModal" hidden>
+  <div class="walkthrough-modal example-dashboard-modal" role="dialog" aria-modal="true" aria-labelledby="exampleDashboardTitle">
+    <h2 id="exampleDashboardTitle">After 2 Weeks of Data</h2>
+    <p class="setup-copy">
+      Once you have about 14 entries, the dashboard starts to show clearer comparisons between your recent week and the week before it.
+    </p>
+    <div class="example-summary-grid">
+      <div class="example-summary-item">
+        <span>Overall</span>
+        <strong>4.1</strong>
+        <em class="delta up">↑ 0.6</em>
+      </div>
+      <div class="example-summary-item">
+        <span>Sleep Time</span>
+        <strong>10:15pm</strong>
+        <em class="delta up">↓ 45m</em>
+      </div>
+      <div class="example-summary-item">
+        <span>Workouts</span>
+        <strong>5 days</strong>
+        <em class="delta up">↑ 2</em>
+      </div>
+      <div class="example-summary-item">
+        <span>Daily Notes</span>
+        <strong>Context</strong>
+        <em>why it changed</em>
+      </div>
+    </div>
+    <div class="example-chart-preview" aria-hidden="true">
+      <span style="height: 42%"></span>
+      <span style="height: 55%"></span>
+      <span style="height: 48%"></span>
+      <span style="height: 70%"></span>
+      <span style="height: 62%"></span>
+      <span style="height: 82%"></span>
+      <span style="height: 76%"></span>
+    </div>
+    <div class="walkthrough-actions">
+      <button type="button" class="btn-secondary" id="exampleSkip">Skip for now</button>
+      <button type="button" id="exampleContinue">Choose habits</button>
     </div>
   </div>
 </div>
@@ -269,6 +337,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabaseClient.js"></script>
 <script src="theme.js"></script>
+<script src="habitPreferences.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="script.js"></script>
 
@@ -414,21 +483,23 @@
       const prevHabits = previous?.habits || {};
       const deltaHabits = deltas?.habits || {};
 
-      const order = ["workouts", "journaling", "reading", "drinking", "lowMedia", "piano", "office", "hitGoal"];
-      const keys = [...order.filter(k => k in curHabits), ...Object.keys(curHabits).filter(k => !order.includes(k))];
+      const habitDefs = typeof getEnabledHabitDefinitions === "function"
+        ? getEnabledHabitDefinitions()
+        : [
+            { summaryKey: "workouts", label: "Workouts" },
+            { summaryKey: "journaling", label: "Journaling" },
+            { summaryKey: "reading", label: "Reading" },
+            { summaryKey: "drinking", label: "Drinking", lowerIsBetter: true },
+            { summaryKey: "lowMedia", label: "Low Media" },
+            { summaryKey: "piano", label: "Piano" },
+            { summaryKey: "office", label: "Office" },
+            { summaryKey: "hitGoal", label: "Hit Goal" },
+          ];
 
-      const labelMap = {
-        workouts: "Workouts",
-        journaling: "Journaling",
-        reading: "Reading",
-        drinking: "Drinking",
-        lowMedia: "Low Media",
-        piano: "Piano",
-        office: "Office",
-        hitGoal: "Hit Goal",
-      };
+      habitDefs.forEach((habit) => {
+        const k = habit.summaryKey;
+        if (!(k in curHabits)) return;
 
-      keys.forEach((k) => {
         const row = document.createElement("div");
         row.className = "ws-row";
 
@@ -437,10 +508,10 @@
         const delV = deltaHabits[k];
 
         row.innerHTML = `
-          <div class="ws-name">${labelMap[k] || k}</div>
+          <div class="ws-name">${habit.label || k}</div>
           <div class="ws-cur">${safe(curV)}</div>
           <div class="ws-prev">${safe(prevV)}</div>
-          <div class="ws-delta">${d(delV, k === "drinking" ? lowerIsBetter : undefined)}</div>
+          <div class="ws-delta">${d(delV, habit.lowerIsBetter ? lowerIsBetter : undefined)}</div>
         `;
         habitsRows.appendChild(row);
       });
@@ -450,13 +521,68 @@
   waitForWeeklySummary();
 </script>
 
+<!-- Habit Setup -->
+<script>
+  const ONBOARDING_FLOW_KEY = "habitdash_new_user_onboarding_v1";
+  const ONBOARDING_ENTRY_REDIRECT_KEY = "habitdash_onboarding_entry_redirect_v1";
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const modal = document.getElementById("habitSetupModal");
+    const openBtn = document.getElementById("openHabitSetup");
+    if (!modal || typeof setupHabitPreferencesForm !== "function") return;
+
+    const openSetup = () => { modal.hidden = false; };
+    const closeSetup = () => { modal.hidden = true; };
+
+    setupHabitPreferencesForm({
+      formId: "habitPreferencesForm",
+      saveButtonId: "saveHabitSetup",
+      statusId: "habitSetupStatus",
+      onSave: () => {
+        const shouldSendToInput = localStorage.getItem(ONBOARDING_ENTRY_REDIRECT_KEY) === "true";
+        closeSetup();
+        if (typeof buildCharts === "function" && Array.isArray(window.allData)) {
+          buildCharts(typeof getFilteredData === "function" ? getFilteredData() : window.allData);
+        }
+        if (typeof waitForWeeklySummary === "function") {
+          waitForWeeklySummary();
+        }
+        window.dispatchEvent(new CustomEvent("habitdash:habit-setup-complete"));
+        if (shouldSendToInput) {
+          localStorage.removeItem(ONBOARDING_FLOW_KEY);
+          window.location.href = "input.html?fromOnboarding=1";
+        }
+      },
+    });
+
+    openBtn?.addEventListener("click", openSetup);
+    window.addEventListener("habitdash:dashboard-ready", () => {
+      if (localStorage.getItem(ONBOARDING_FLOW_KEY) === "true") return;
+      if (localStorage.getItem("habitdash_walkthrough_seen_v1") !== "true") return;
+      if (typeof hasHabitPreferences === "function" && !hasHabitPreferences()) {
+        openSetup();
+      }
+    }, { once: true });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !modal.hidden && typeof hasHabitPreferences === "function" && hasHabitPreferences()) {
+        closeSetup();
+      }
+    });
+  });
+</script>
+
 <!-- First Login Walkthrough -->
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     const storageKey = "habitdash_walkthrough_seen_v1";
     const walkthrough = document.getElementById("firstLoginWalkthrough");
+    const exampleModal = document.getElementById("exampleDashboardModal");
     const skipBtn = document.getElementById("walkthroughSkip");
     const startBtn = document.getElementById("walkthroughStart");
+    const exampleSkipBtn = document.getElementById("exampleSkip");
+    const exampleContinueBtn = document.getElementById("exampleContinue");
+    const openBtn = document.getElementById("openWalkthrough");
 
     if (!walkthrough) return;
 
@@ -465,17 +591,64 @@
       walkthrough.hidden = true;
     };
 
+    const endOnboardingFlow = () => {
+      localStorage.removeItem(ONBOARDING_FLOW_KEY);
+      localStorage.removeItem(ONBOARDING_ENTRY_REDIRECT_KEY);
+    };
+
+    const openHabitSetupForOnboarding = () => {
+      if (exampleModal) exampleModal.hidden = true;
+      const habitSetup = document.getElementById("habitSetupModal");
+      if (habitSetup) {
+        localStorage.setItem(ONBOARDING_ENTRY_REDIRECT_KEY, "true");
+        habitSetup.hidden = false;
+      }
+    };
+
     const showWalkthrough = () => {
       if (localStorage.getItem(storageKey) === "true") return;
+      const habitSetup = document.getElementById("habitSetupModal");
+      if (habitSetup && !habitSetup.hidden) return;
       walkthrough.hidden = false;
     };
 
-    window.addEventListener("habitdash:dashboard-ready", showWalkthrough, { once: true });
-    skipBtn?.addEventListener("click", closeWalkthrough);
-    startBtn?.addEventListener("click", closeWalkthrough);
+    const openWalkthroughManually = () => {
+      const habitSetup = document.getElementById("habitSetupModal");
+      if (habitSetup) habitSetup.hidden = true;
+      if (exampleModal) exampleModal.hidden = true;
+      walkthrough.hidden = false;
+    };
+
+    const startNewUserFlow = () => {
+      if (localStorage.getItem(ONBOARDING_FLOW_KEY) === "true") {
+        walkthrough.hidden = false;
+        return;
+      }
+      showWalkthrough();
+    };
+
+    window.addEventListener("habitdash:dashboard-ready", startNewUserFlow, { once: true });
+    window.addEventListener("habitdash:habit-setup-complete", showWalkthrough, { once: true });
+    openBtn?.addEventListener("click", openWalkthroughManually);
+    skipBtn?.addEventListener("click", () => {
+      closeWalkthrough();
+      endOnboardingFlow();
+    });
+    startBtn?.addEventListener("click", () => {
+      closeWalkthrough();
+      if (localStorage.getItem(ONBOARDING_FLOW_KEY) === "true" && exampleModal) {
+        exampleModal.hidden = false;
+      }
+    });
+    exampleSkipBtn?.addEventListener("click", () => {
+      if (exampleModal) exampleModal.hidden = true;
+      endOnboardingFlow();
+    });
+    exampleContinueBtn?.addEventListener("click", openHabitSetupForOnboarding);
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape" && !walkthrough.hidden) {
         closeWalkthrough();
+        endOnboardingFlow();
       }
     });
   });
