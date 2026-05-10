@@ -26,7 +26,7 @@
 <div class="page-actions">
   <a href="input.html" class="btn-secondary">+ Add Entry</a>
   <a href="data.html" class="btn-secondary">View Raw Data</a>
-  <button type="button" class="btn-secondary" id="openHabitSetup">Choose Habits</button>
+  <button type="button" class="btn-secondary" id="openHabitSetup" data-open-habit-setup>Choose Habits</button>
 </div>
 
 <div class="walkthrough-overlay" id="habitSetupModal" hidden>
@@ -557,7 +557,7 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     const modal = document.getElementById("habitSetupModal");
-    const openBtn = document.getElementById("openHabitSetup");
+    const openButtons = document.querySelectorAll("[data-open-habit-setup]");
     const backBtn = document.getElementById("habitSetupBack");
     if (!modal || typeof setupHabitPreferencesForm !== "function") return;
 
@@ -591,7 +591,9 @@
       },
     });
 
-    openBtn?.addEventListener("click", () => openSetup(false));
+    openButtons.forEach(button => {
+      button.addEventListener("click", () => openSetup(false));
+    });
     backBtn?.addEventListener("click", () => {
       closeSetup();
       const exampleModal = document.getElementById("exampleDashboardModal");
@@ -834,6 +836,7 @@
   <a href="index.html" class="active">Dashboard</a>
   <a href="input.html">Input</a>
   <a href="data.html">Data</a>
+  <button type="button" data-open-habit-setup>Habits</button>
 </nav>
 
 </body>

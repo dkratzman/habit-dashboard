@@ -916,7 +916,8 @@ body.dark .ws-row:nth-child(even):not(.ws-head) {
     z-index: 1000;
   }
 
-  .bottom-nav a {
+  .bottom-nav a,
+  .bottom-nav button {
     flex: 1;
     text-align: center;
     text-decoration: none;
@@ -924,6 +925,14 @@ body.dark .ws-row:nth-child(even):not(.ws-head) {
     font-weight: 600;
     color: var(--text-color);
     opacity: 0.7;
+    border: 0;
+    background: transparent;
+    height: 100%;
+    font-family: inherit;
+  }
+
+  .bottom-nav button {
+    cursor: pointer;
   }
 
 .bottom-nav a.active {
