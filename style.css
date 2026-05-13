@@ -603,6 +603,16 @@ body.dark .header-right button:hover {
   background: #334155;
 }
 
+.header-link-button {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  border: 1px solid var(--border-color);
+  background: var(--muted-bg);
+  color: var(--text-color);
+  text-decoration: none;
+}
+
 /* =========================
    Primary Navigation Links
 ========================= */
@@ -641,11 +651,20 @@ body.dark .header-right button:hover {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.auth-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 .auth-card {
   width: min(100%, 420px);
   max-width: 420px;
+  margin: 0 auto;
   padding: 28px 32px 32px;
   border-radius: 16px;
   background: var(--card-bg);
@@ -725,28 +744,81 @@ body.dark .header-right button:hover {
 }
 
 /* =========================
+   Settings
+========================= */
+
+.settings-section {
+  max-width: 640px;
+}
+
+.settings-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.settings-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  width: 100%;
+  min-height: 58px;
+  padding: 12px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--card-bg);
+  color: var(--text-color);
+  text-align: left;
+  cursor: pointer;
+}
+
+.settings-action span {
+  opacity: 0.7;
+}
+
+.settings-action strong {
+  font-size: 1rem;
+}
+
+.settings-action.danger strong {
+  color: #dc2626;
+}
+
+@media (max-width: 520px) {
+  .auth-page {
+    padding: 16px;
+  }
+
+  .auth-card {
+    padding: 24px 20px 28px;
+  }
+}
+
+/* =========================
    Mobile Adjustments
 ========================= */
 
 @media (max-width: 768px) {
   .walkthrough-overlay {
     align-items: flex-start;
-    padding: 14px 14px calc(84px + env(safe-area-inset-bottom, 0px));
+    padding: 14px 14px calc(112px + env(safe-area-inset-bottom, 0px));
     overflow-y: auto;
   }
 
   .walkthrough-modal {
-    max-height: calc(100dvh - 112px);
-    padding-bottom: 0;
+    max-height: calc(100dvh - 158px - env(safe-area-inset-bottom, 0px));
+    padding-bottom: 22px;
   }
 
   .walkthrough-actions {
-    position: sticky;
-    bottom: 0;
-    margin: 18px -22px 0;
-    padding: 12px 22px calc(12px + env(safe-area-inset-bottom, 0px));
-    background: var(--card-bg);
-    border-top: 1px solid var(--border-color);
+    margin-top: 18px;
+    padding-top: 8px;
+    margin-bottom: 0;
+  }
+
+  .walkthrough-actions::after {
+    content: none;
   }
 
   section {
@@ -904,39 +976,64 @@ body.dark .ws-row:nth-child(even):not(.ws-head) {
     display: flex;
     justify-content: space-around;
     align-items: center;
+    gap: 6px;
 
     position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    bottom: 10px;
+    left: 12px;
+    right: 12px;
 
-    height: 56px;
+    height: 66px;
+    padding: 7px;
     background: var(--card-bg);
-    border-top: 1px solid var(--border-color);
+    border: 1px solid var(--border-color);
+    border-radius: 22px;
+    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.18);
     z-index: 1000;
   }
 
   .bottom-nav a {
     flex: 1;
-    text-align: center;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
     text-decoration: none;
-    font-size: 0.85rem;
+    font-size: 0.72rem;
     font-weight: 600;
     color: var(--text-color);
     opacity: 0.7;
+    border-radius: 16px;
+  }
+
+  .bottom-nav svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .bottom-nav a:first-child svg {
+    fill: currentColor;
+    stroke: none;
   }
 
 .bottom-nav a.active {
   opacity: 1;
   color: #3b82f6;
   font-weight: 600;
-  background-color: rgba(59, 130, 246, 0.08);
+  background-color: rgba(59, 130, 246, 0.12);
 }
 
 
   /* Prevent content from hiding behind bottom nav */
   body {
-    padding-bottom: 70px;
+    padding-bottom: 92px;
   }
 }
 @media (max-width: 768px) {

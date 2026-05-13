@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Settings · Habit Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<header class="app-header">
+  <div class="header-left">
+    <a href="index.html">Habit Dashboard</a>
+  </div>
+  <div class="header-right">
+    <span id="userEmail"></span>
+  </div>
+</header>
+
+<section class="settings-section">
+  <h2>Settings</h2>
+  <div class="settings-list">
+    <button type="button" class="settings-action" id="darkModeToggle">
+      <span>Appearance</span>
+      <strong>Dark Mode</strong>
+    </button>
+    <button type="button" class="settings-action" id="openWalkthrough">
+      <span>Guide</span>
+      <strong>How this works</strong>
+    </button>
+    <button type="button" class="settings-action" data-open-habit-setup>
+      <span>Tracking</span>
+      <strong>Choose habits</strong>
+    </button>
+    <button type="button" class="settings-action danger" id="logoutBtn">
+      <span>Account</span>
+      <strong>Log out</strong>
+    </button>
+  </div>
+</section>
+
+<div class="walkthrough-overlay" id="habitSetupModal" hidden>
+  <div class="walkthrough-modal" role="dialog" aria-modal="true" aria-labelledby="habitSetupTitle">
+    <h2 id="habitSetupTitle">Choose Your Habits</h2>
+    <p class="setup-copy">
+      Pick the habits you want to log and display. You can change this anytime.
+    </p>
+    <div class="habit-choice-grid" id="habitPreferencesForm"></div>
+    <div class="walkthrough-actions">
+      <span class="setup-status" id="habitSetupStatus"></span>
+      <button type="button" id="saveHabitSetup">Save habits</button>
+    </div>
+  </div>
+</div>
+
+<div class="walkthrough-overlay" id="firstLoginWalkthrough" hidden>
+  <div class="walkthrough-modal" role="dialog" aria-modal="true" aria-labelledby="walkthroughTitle">
+    <h2 id="walkthroughTitle">How Habit Dashboard Works</h2>
+    <div class="walkthrough-steps">
+      <div class="walkthrough-step">
+        <strong>Track one day at a time.</strong>
+        <p>Submit one entry per day with your habits, ratings, sleep, time use, and notes.</p>
+      </div>
+      <div class="walkthrough-step">
+        <strong>Look for weekly patterns.</strong>
+        <p>The dashboard becomes more useful after several days of data, especially after about 7 days. Charts show longer-term patterns over time.</p>
+      </div>
+      <div class="walkthrough-step">
+        <strong>Compare completed weeks.</strong>
+        <p>Weekly Summary compares the last 7 completed days against the previous 7 completed days.</p>
+      </div>
+      <div class="walkthrough-step">
+        <strong>Use context with the numbers.</strong>
+        <p>Daily Notes explain what was happening behind the numbers, while Raw Data lets you inspect the entries underneath.</p>
+      </div>
+      <div class="walkthrough-step">
+        <strong>Choose what you track.</strong>
+        <p>Habit choices control what is visible and available in the app. They can be edited later and do not change the database structure.</p>
+      </div>
+      <div class="walkthrough-step">
+        <strong>About Overall Score.</strong>
+        <p>Overall Score is entered by you. It is not calculated from Physical, Mental, and Energy scores.</p>
+      </div>
+    </div>
+    <div class="walkthrough-actions">
+      <button type="button" id="walkthroughStart">Done</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabaseClient.js"></script>
+<script src="theme.js"></script>
+<script src="habitPreferences.js"></script>
+<script src="script.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", async () => {
+    const { data } = await supabaseClient.auth.getSession();
+    if (!data.session) {
+      window.location.href = "login.html";
+      return;
+    }
+
+    const userEmailEl = document.getElementById("userEmail");
+    if (userEmailEl) {
+      userEmailEl.textContent = `Logged in as ${data.session.user.email}`;
+    }
+
+    const habitSetup = document.getElementById("habitSetupModal");
+    if (typeof setupHabitPreferencesForm === "function") {
+      setupHabitPreferencesForm({
+        formId: "habitPreferencesForm",
+        saveButtonId: "saveHabitSetup",
+        statusId: "habitSetupStatus",
+        onSave: () => { habitSetup.hidden = true; },
+      });
+    }
+
+    document.querySelectorAll("[data-open-habit-setup]").forEach(button => {
+      button.addEventListener("click", () => { habitSetup.hidden = false; });
+    });
+
+    const walkthrough = document.getElementById("firstLoginWalkthrough");
+    document.getElementById("openWalkthrough")?.addEventListener("click", () => {
+      walkthrough.hidden = false;
+    });
+    document.getElementById("walkthroughStart")?.addEventListener("click", () => {
+      walkthrough.hidden = true;
+    });
+  });
+</script>
+
+<nav class="bottom-nav">
+  <a href="index.html" aria-label="Dashboard">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3V10.5Z"/></svg>
+    <span>Home</span>
+  </a>
+  <a href="input.html" aria-label="Input">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+    <span>Input</span>
+  </a>
+  <a href="data.html" aria-label="Data">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V5M5 19h14M9 16V9M13 16V7M17 16v-5"/></svg>
+    <span>Data</span>
+  </a>
+  <a href="settings.html" class="active" aria-label="Settings">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2 3.4-.2-.1a1.7 1.7 0 0 0-2 .4l-.2.2a1.7 1.7 0 0 0-.5 1.2v.2H9.1v-.2a1.7 1.7 0 0 0-.5-1.2l-.2-.2a1.7 1.7 0 0 0-2-.4l-.2.1-2-3.4.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1.1H3v-3.8h.1a1.7 1.7 0 0 0 1.6-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1 2-3.4.2.1a1.7 1.7 0 0 0 2-.4l.2-.2a1.7 1.7 0 0 0 .5-1.2V1.7h5.8v.2a1.7 1.7 0 0 0 .5 1.2l.2.2a1.7 1.7 0 0 0 2 .4l.2-.1 2 3.4-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1.1h.1v3.8h-.1a1.7 1.7 0 0 0-1.6 1.1Z"/></svg>
+    <span>Settings</span>
+  </a>
+</nav>
+
+</body>
+</html>
