@@ -48,6 +48,8 @@
     <div class="habit-choice-grid" id="habitPreferencesForm"></div>
     <div class="walkthrough-actions">
       <span class="setup-status" id="habitSetupStatus"></span>
+      <button type="button" class="btn-secondary" id="habitSetupBack" hidden>Back</button>
+      <button type="button" class="btn-secondary" id="habitSetupCancel">Cancel</button>
       <button type="button" id="saveHabitSetup">Save habits</button>
     </div>
   </div>
@@ -83,7 +85,53 @@
       </div>
     </div>
     <div class="walkthrough-actions">
-      <button type="button" id="walkthroughStart">Done</button>
+      <button type="button" class="btn-secondary" id="walkthroughCancel">Cancel</button>
+      <button type="button" id="walkthroughStart">Next</button>
+    </div>
+  </div>
+</div>
+
+<div class="walkthrough-overlay" id="exampleDashboardModal" hidden>
+  <div class="walkthrough-modal example-dashboard-modal" role="dialog" aria-modal="true" aria-labelledby="exampleDashboardTitle">
+    <h2 id="exampleDashboardTitle">After 2 Weeks of Data</h2>
+    <p class="setup-copy">
+      Once you have about 14 entries, the dashboard starts to show clearer comparisons between your recent week and the week before it.
+    </p>
+    <div class="example-summary-grid">
+      <div class="example-summary-item">
+        <span>Overall</span>
+        <strong>4.1</strong>
+        <em class="delta up">↑ 0.6</em>
+      </div>
+      <div class="example-summary-item">
+        <span>Sleep Time</span>
+        <strong>10:15pm</strong>
+        <em class="delta up">↓ 45m</em>
+      </div>
+      <div class="example-summary-item">
+        <span>Workouts</span>
+        <strong>5 days</strong>
+        <em class="delta up">↑ 2</em>
+      </div>
+      <div class="example-summary-item">
+        <span>Daily Notes</span>
+        <strong>Context</strong>
+        <em>why it changed</em>
+      </div>
+    </div>
+    <div class="example-chart-preview" aria-hidden="true">
+      <span style="height: 42%"></span>
+      <span style="height: 55%"></span>
+      <span style="height: 48%"></span>
+      <span style="height: 70%"></span>
+      <span style="height: 62%"></span>
+      <span style="height: 82%"></span>
+      <span style="height: 76%"></span>
+    </div>
+    <div class="walkthrough-actions">
+      <button type="button" class="btn-secondary" id="exampleCancel">Cancel</button>
+      <button type="button" class="btn-secondary" id="exampleBack">Back</button>
+      <button type="button" id="exampleContinue">Choose habits</button>
     </div>
   </div>
 </div>
@@ -103,7 +151,7 @@
 
     const userEmailEl = document.getElementById("userEmail");
     if (userEmailEl) {
-      userEmailEl.textContent = `Logged in as ${data.session.user.email}`;
+      userEmailEl.textContent = data.session.user.email;
     }
 
     const habitSetup = document.getElementById("habitSetupModal");
@@ -116,16 +164,51 @@
       });
     }
 
+    const habitSetupBack = document.getElementById("habitSetupBack");
     document.querySelectorAll("[data-open-habit-setup]").forEach(button => {
-      button.addEventListener("click", () => { habitSetup.hidden = false; });
+      button.addEventListener("click", () => {
+        if (habitSetupBack) habitSetupBack.hidden = true;
+        habitSetup.hidden = false;
+      });
     });
 
     const walkthrough = document.getElementById("firstLoginWalkthrough");
+    const exampleModal = document.getElementById("exampleDashboardModal");
+    const closeAllWalkthroughs = () => {
+      if (walkthrough) walkthrough.hidden = true;
+      if (exampleModal) exampleModal.hidden = true;
+      if (habitSetup) habitSetup.hidden = true;
+    };
+
     document.getElementById("openWalkthrough")?.addEventListener("click", () => {
+      closeAllWalkthroughs();
       walkthrough.hidden = false;
     });
+
+    document.getElementById("walkthroughCancel")?.addEventListener("click", closeAllWalkthroughs);
     document.getElementById("walkthroughStart")?.addEventListener("click", () => {
-      walkthrough.hidden = true;
+      if (walkthrough) walkthrough.hidden = true;
+      if (exampleModal) exampleModal.hidden = false;
+    });
+
+    document.getElementById("exampleCancel")?.addEventListener("click", closeAllWalkthroughs);
+    document.getElementById("exampleBack")?.addEventListener("click", () => {
+      if (exampleModal) exampleModal.hidden = true;
+      if (walkthrough) walkthrough.hidden = false;
+    });
+    document.getElementById("exampleContinue")?.addEventListener("click", () => {
+      if (exampleModal) exampleModal.hidden = true;
+      if (habitSetupBack) habitSetupBack.hidden = false;
+      if (habitSetup) habitSetup.hidden = false;
+    });
+    document.getElementById("habitSetupBack")?.addEventListener("click", () => {
+      if (habitSetup) habitSetup.hidden = true;
+      if (exampleModal) exampleModal.hidden = false;
+    });
+    document.getElementById("habitSetupCancel")?.addEventListener("click", closeAllWalkthroughs);
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeAllWalkthroughs();
     });
   });
 </script>

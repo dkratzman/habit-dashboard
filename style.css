@@ -319,6 +319,25 @@ body.dark .control-btn {
 .walkthrough-actions button {
   min-height: 42px;
   padding: 8px 14px;
+  border: 1px solid #2563eb;
+  border-radius: 8px;
+  background: #2563eb;
+  color: #ffffff;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.walkthrough-actions button.btn-secondary {
+  border-color: var(--border-color);
+  background: var(--muted-bg);
+  color: var(--text-color);
+}
+
+.walkthrough-actions button:hover {
+  filter: brightness(0.96);
 }
 
 .example-dashboard-modal {
@@ -630,6 +649,9 @@ body.dark .btn-secondary {
 #userEmail {
   opacity: 0.85;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: min(42vw, 320px);
 }
 
 .header-right button {
@@ -1043,9 +1065,20 @@ body.dark .ws-row:nth-child(even):not(.ws-head) {
     display: none;
   }
 
-  /* Reduce header clutter */
+  .app-header {
+    align-items: flex-start;
+  }
+
+  .header-right {
+    min-width: 0;
+    padding-top: 3px;
+  }
+
   #userEmail {
-    display: none;
+    display: block;
+    max-width: 44vw;
+    font-size: 0.78rem;
+    opacity: 0.72;
   }
 
   /* Bottom nav container */

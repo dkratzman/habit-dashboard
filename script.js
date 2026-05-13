@@ -167,7 +167,7 @@ async function requireDashboardAuth() {
 
   const userEmailEl = document.getElementById("userEmail");
   if (userEmailEl) {
-    userEmailEl.textContent = `Logged in as ${session.user.email}`;
+    userEmailEl.textContent = session.user.email;
   }
 
   return session;

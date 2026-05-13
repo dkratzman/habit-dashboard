@@ -18,8 +18,6 @@
 
   <div class="header-right">
     <span id="userEmail"></span>
-    <button id="darkModeToggle">🌙 Dark Mode</button>
-    <button id="logoutBtn">Log out</button>
   </div>
 </header>
 
@@ -63,7 +61,6 @@
 
 
   <section>
-    <h2>Enter Data</h2>
     <form id="dailyForm">
       <!-- Date -->
       <div class="form-row">
@@ -361,7 +358,7 @@
 
     const userEmailEl = document.getElementById("userEmail");
     if (userEmailEl) {
-      userEmailEl.textContent = `Logged in as ${data.session.user.email}`;
+      userEmailEl.textContent = data.session.user.email;
     }
   });
 </script>
