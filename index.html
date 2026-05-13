@@ -16,7 +16,6 @@
 
   <div class="header-right">
     <span id="userEmail"></span>
-    <a class="header-link-button" href="settings.html">Settings</a>
   </div>
 </header>
 
@@ -25,6 +24,12 @@
   <a href="input.html" class="btn-secondary">+ Add Entry</a>
   <a href="data.html" class="btn-secondary">View Raw Data</a>
 </div>
+
+<nav class="dashboard-page-nav" aria-label="Dashboard sections">
+  <button type="button" class="active" data-dashboard-page-target="trends">Trends</button>
+  <button type="button" data-dashboard-page-target="week">Week</button>
+  <button type="button" data-dashboard-page-target="sleep-time">Sleep / Time</button>
+</nav>
 
 <div class="walkthrough-overlay" id="habitSetupModal" hidden>
   <div class="walkthrough-modal" role="dialog" aria-modal="true" aria-labelledby="habitSetupTitle">
@@ -149,25 +154,21 @@
 </div>
 
 
-<div class="filter-bar">
-  <div>
-    <label for="startMonth">Start month:</label>
-    <input type="month" id="startMonth" />
-  </div>
-  <div>
-    <label for="endMonth">End month:</label>
-    <input type="month" id="endMonth" />
-  </div>
+<div class="filter-bar" aria-label="Dashboard date range">
   <div class="filter-buttons">
-    <button id="applyFilter">Apply</button>
-    <button id="resetFilter">Reset</button>
+    <button type="button" data-range-preset="1w">1W</button>
+    <button type="button" data-range-preset="1m">1M</button>
+    <button type="button" data-range-preset="3m">3M</button>
+    <button type="button" data-range-preset="ytd">YTD</button>
+    <button type="button" data-range-preset="1y">1Y</button>
+    <button type="button" data-range-preset="all">ALL</button>
   </div>
 </div>
 
 <!-- =========================
      WEEKLY SUMMARY
 ========================= -->
-<section class="weekly-summary">
+<section class="weekly-summary" data-dashboard-page="week" hidden>
   <div class="weekly-summary-header">
     <h2>Weekly Summary</h2>
     <div class="weekly-summary-legend">
@@ -311,35 +312,35 @@
      CHARTS
 ========================= -->
 
-<section>
+<section data-dashboard-page="trends">
   <h2>Ratings Over Time</h2>
   <div class="chart-container">
     <canvas id="ratingsChart"></canvas>
   </div>
 </section>
 
-<section>
+<section data-dashboard-page="sleep-time" hidden>
   <h2>Sleep Chart</h2>
   <div class="chart-container">
     <canvas id="sleepChart"></canvas>
   </div>
 </section>
 
-<section>
+<section data-dashboard-page="sleep-time" hidden>
   <h2>Time Allocation</h2>
   <div class="chart-container">
     <canvas id="hoursChart"></canvas>
   </div>
 </section>
 
-<section>
+<section data-dashboard-page="trends">
   <h2>Habit Chart</h2>
   <div class="chart-container">
     <canvas id="habitChart"></canvas>
   </div>
 </section>
 
-<section>
+<section data-dashboard-page="week" hidden>
   <h2>Daily Notes</h2>
   <div class="daily-list-container">
     <table class="daily-table">
@@ -371,6 +372,47 @@
   if (window.HOURS_CHART_CONFIG) {
     window.HOURS_CHART_CONFIG.stacked = true;
   }
+</script>
+
+<!-- Dashboard Section Navigation -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const navButtons = document.querySelectorAll("[data-dashboard-page-target]");
+    const sections = document.querySelectorAll("[data-dashboard-page]");
+    const filterBar = document.querySelector(".filter-bar");
+    if (!navButtons.length || !sections.length) return;
+
+    const resizeVisibleCharts = () => {
+      if (!window.Chart) return;
+      ["ratingsChart", "habitChart", "sleepChart", "hoursChart"].forEach((id) => {
+        const canvas = document.getElementById(id);
+        if (!canvas) return;
+        const chart = Chart.getChart(canvas);
+        if (chart) chart.resize();
+      });
+    };
+
+    const showPage = (page) => {
+      sections.forEach((section) => {
+        section.hidden = section.dataset.dashboardPage !== page;
+      });
+      navButtons.forEach((button) => {
+        const isActive = button.dataset.dashboardPageTarget === page;
+        button.classList.toggle("active", isActive);
+        button.setAttribute("aria-current", isActive ? "page" : "false");
+      });
+      if (filterBar) filterBar.hidden = page === "week";
+      requestAnimationFrame(resizeVisibleCharts);
+    };
+
+    navButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        showPage(button.dataset.dashboardPageTarget);
+      });
+    });
+
+    showPage("trends");
+  });
 </script>
 
 <!-- Weekly Summary Renderer (UI ONLY) -->
@@ -415,9 +457,7 @@
 
     const { current, previous, deltas } = window.weeklySummary;
 
-    const daysIncluded = current?.daysIncluded ?? current?.window?.daysIncluded ?? 0;
-    const incomplete = typeof daysIncluded === "number" && daysIncluded < 7;
-    const d = (x, options) => incomplete ? "" : renderDelta(x, options);
+    const d = (x, options) => renderDelta(x, options);
     const lowerIsBetter = { lowerIsBetter: true };
 
     const curOverall = pick(current?.ratings, ["overallAvg", "overall"]);
@@ -543,6 +583,7 @@
     }
   }
 
+  window.addEventListener("habitdash:weekly-summary-ready", waitForWeeklySummary);
   waitForWeeklySummary();
 </script>
 

@@ -185,7 +185,9 @@ function normalizeDateOnlyISO(dateLike) {
     return `${y}-${m}-${d}`;
   }
   const s = String(dateLike);
-  return s.includes("T") ? s.split("T")[0] : s;
+  const dateMatch = s.match(/\d{4}-\d{2}-\d{2}/);
+  const dateOnly = dateMatch ? dateMatch[0] : (s.includes("T") ? s.split("T")[0] : s);
+  return dateOnly.trim();
 }
 
 function isoDateToLocalDate(isoDateOnly) {
@@ -220,6 +222,7 @@ function aggregateWeeklyHours(data) {
   const weeks = {};
 
   data.forEach(d => {
+    if (d.isPlaceholder || (d.hoursWorked == null && d.hoursPersonal == null)) return;
     const date = isoDateToLocalDate(d.date);
     if (!date) return;
 
@@ -261,6 +264,7 @@ function mapRow(row) {
 
   return {
     date: normalizeDateOnlyISO(row.timestamp),
+    rawTimestamp: row.timestamp,
 
     overallFeeling: Number(row.overall_feeling),
     physicalFeeling: row.physical_feeling != null ? Number(row.physical_feeling) : null,
@@ -316,7 +320,7 @@ function parseTimeToHours(str) {
 // -------------------------
 // Filters + persistence
 // -------------------------
-function setupFilters() {
+function setupFiltersLegacy() {
   const startEl = document.getElementById("startMonth");
   const endEl = document.getElementById("endMonth");
 
@@ -341,19 +345,120 @@ function setupFilters() {
   });
 }
 
-function getFilteredData() {
-  const start = document.getElementById("startMonth").value;
-  const end = document.getElementById("endMonth").value;
+function setupFilters() {
+  const presetButtons = document.querySelectorAll("[data-range-preset]");
+  if (!presetButtons.length) return;
 
-  let startDate = start ? new Date(`${start}-01T00:00:00`) : null;
-  let endDate = end ? new Date(`${end}-31T23:59:59`) : null;
+  const setPreset = (preset, shouldBuild = true) => {
+    localStorage.setItem("filterPreset", preset);
+    localStorage.removeItem("filterStart");
+    localStorage.removeItem("filterEnd");
+    presetButtons.forEach((button) => {
+      const isActive = button.dataset.rangePreset === preset;
+      button.classList.toggle("active", isActive);
+      button.setAttribute("aria-pressed", isActive ? "true" : "false");
+    });
+    if (shouldBuild) buildCharts(getFilteredData());
+  };
+
+  presetButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      setPreset(button.dataset.rangePreset || "1m");
+    });
+  });
+
+  setPreset(localStorage.getItem("filterPreset") || "1m", false);
+}
+
+function getPresetDateRange() {
+  const preset = localStorage.getItem("filterPreset") || "1m";
+  const endDate = new Date();
+  endDate.setHours(23, 59, 59, 999);
+  let startDate = null;
+
+  if (preset === "1w") {
+    startDate = new Date(endDate);
+    startDate.setDate(startDate.getDate() - 6);
+  } else if (preset === "1m") {
+    startDate = new Date(endDate);
+    startDate.setDate(startDate.getDate() - 30);
+  } else if (preset === "3m") {
+    startDate = new Date(endDate);
+    startDate.setDate(startDate.getDate() - 89);
+  } else if (preset === "ytd") {
+    startDate = new Date(endDate.getFullYear(), 0, 1);
+  } else if (preset === "1y") {
+    startDate = new Date(endDate);
+    startDate.setDate(startDate.getDate() - 364);
+  }
+
+  if (startDate) startDate.setHours(0, 0, 0, 0);
+  return { preset, startDate, endDate };
+}
+
+function getFilteredData() {
+  const { preset, startDate, endDate } = getPresetDateRange();
+  if (preset === "all") return allData;
 
   return allData.filter(d => {
     const dDate = isoDateToLocalDate(d.date);
+    if (!dDate) return false;
     if (startDate && dDate < startDate) return false;
     if (endDate && dDate > endDate) return false;
     return true;
   });
+}
+
+function buildDisplayTimeline(data, range = getPresetDateRange()) {
+  const sorted = [...data].sort((a, b) => a.date.localeCompare(b.date));
+  if (!range.startDate) return sorted;
+
+  const byDate = new Map();
+  sorted.forEach((entry) => {
+    const existing = byDate.get(entry.date);
+    byDate.set(entry.date, existing ? { ...existing, ...entry } : entry);
+  });
+  const display = [];
+  const cursor = new Date(range.startDate);
+  cursor.setHours(0, 0, 0, 0);
+  const end = new Date(range.endDate);
+  end.setHours(0, 0, 0, 0);
+
+  while (cursor <= end) {
+    const date = normalizeDateOnlyISO(cursor);
+    display.push(byDate.get(date) || {
+      date,
+      isPlaceholder: true,
+      overallFeeling: null,
+      physicalFeeling: null,
+      mentalFeeling: null,
+      energyFeeling: null,
+      timeUpHours: null,
+      timeInBedHours: null,
+      hoursWorked: null,
+      hoursPersonal: null,
+    });
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  return display;
+}
+
+function getMonthKeysForRange(data, range = getPresetDateRange()) {
+  if (!range.startDate) {
+    return [...new Set(data.map((entry) => entry.date.slice(0, 7)))].sort();
+  }
+
+  const keys = [];
+  const cursor = new Date(range.startDate.getFullYear(), range.startDate.getMonth(), 1);
+  const end = new Date(range.endDate.getFullYear(), range.endDate.getMonth(), 1);
+
+  while (cursor <= end) {
+    keys.push(`${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, "0")}`);
+    cursor.setMonth(cursor.getMonth() + 1);
+  }
+
+  return keys;
 }
 
 // -------------------------
@@ -373,7 +478,23 @@ function buildCharts(data) {
   destroyCharts();
   const theme = getChartTheme();
 
-  const sorted = [...data].sort((a, b) => a.date.localeCompare(b.date));
+  const actualSorted = [...data].sort((a, b) => a.date.localeCompare(b.date));
+  const sorted = buildDisplayTimeline(actualSorted);
+  console.log("Chart range render:", {
+    preset: localStorage.getItem("filterPreset") || "1m",
+    entries: actualSorted.length,
+    firstEntry: actualSorted[0]?.date || null,
+    lastEntry: actualSorted[actualSorted.length - 1]?.date || null,
+    axisStart: sorted[0]?.date || null,
+    axisEnd: sorted[sorted.length - 1]?.date || null,
+  });
+  window.habitDashboardDebug = {
+    allDates: allData.map((entry) => entry.date),
+    allRawTimestamps: allData.map((entry) => entry.rawTimestamp),
+    filteredDates: actualSorted.map((entry) => entry.date),
+    filteredRows: actualSorted,
+    axisDates: sorted.map((entry) => entry.date),
+  };
   const labels = sorted.map(d => formatDate(d.date));
   const n = labels.length;
 
@@ -383,13 +504,13 @@ function buildCharts(data) {
     return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null;
   };
 
-  const avgOverall = avg(sorted.map(d => d.overallFeeling));
-  const avgPhysical = avg(sorted.map(d => d.physicalFeeling));
-  const avgMental = avg(sorted.map(d => d.mentalFeeling));
-  const avgEnergy = avg(sorted.map(d => d.energyFeeling));
+  const avgOverall = avg(actualSorted.map(d => d.overallFeeling));
+  const avgPhysical = avg(actualSorted.map(d => d.physicalFeeling));
+  const avgMental = avg(actualSorted.map(d => d.mentalFeeling));
+  const avgEnergy = avg(actualSorted.map(d => d.energyFeeling));
 
-  const avgTimeUp = avg(sorted.map(d => d.timeUpHours));
-  const avgTimeBed = avg(sorted.map(d => d.timeInBedHours));
+  const avgTimeUp = avg(actualSorted.map(d => d.timeUpHours));
+  const avgTimeBed = avg(actualSorted.map(d => d.timeInBedHours));
 
   const markerData = (value) => {
     if (!n) return [];
@@ -410,10 +531,10 @@ function buildCharts(data) {
     data: {
       labels,
       datasets: [
-        { label: "Overall", data: sorted.map(d => d.overallFeeling), borderColor: "#3b82f6", tension: 0.3 },
-        { label: "Physical", data: sorted.map(d => d.physicalFeeling), borderColor: "#f97316", tension: 0.3 },
-        { label: "Mental", data: sorted.map(d => d.mentalFeeling), borderColor: "#22c55e", tension: 0.3 },
-        { label: "Energy", data: sorted.map(d => d.energyFeeling), borderColor: "#a855f7", tension: 0.3 },
+        { label: "Overall", data: sorted.map(d => d.overallFeeling), borderColor: "#3b82f6", tension: 0.3, spanGaps: true, pointRadius: 3 },
+        { label: "Physical", data: sorted.map(d => d.physicalFeeling), borderColor: "#f97316", tension: 0.3, spanGaps: true, pointRadius: 3 },
+        { label: "Mental", data: sorted.map(d => d.mentalFeeling), borderColor: "#22c55e", tension: 0.3, spanGaps: true, pointRadius: 3 },
+        { label: "Energy", data: sorted.map(d => d.energyFeeling), borderColor: "#a855f7", tension: 0.3, spanGaps: true, pointRadius: 3 },
 
         { label: "Avg", data: markerData(avgOverall), borderColor: "#93c5fd", pointRadius: 4, showLine: false, _isAverageMarker: true, _labelText: avgOverall != null ? avgOverall.toFixed(1) : "" },
         { label: "Avg", data: markerData(avgPhysical), borderColor: "#fdba74", pointRadius: 4, showLine: false, _isAverageMarker: true, _labelText: avgPhysical != null ? avgPhysical.toFixed(1) : "" },
@@ -442,8 +563,8 @@ function buildCharts(data) {
     data: {
       labels,
       datasets: [
-        { label: "Time Up", data: sorted.map(d => d.timeUpHours), borderColor: "#0ea5e9", tension: 0.3 },
-        { label: "Time in Bed", data: sorted.map(d => d.timeInBedHours), borderColor: "#ef4444", tension: 0.3 },
+        { label: "Time Up", data: sorted.map(d => d.timeUpHours), borderColor: "#0ea5e9", tension: 0.3, spanGaps: true, pointRadius: 3 },
+        { label: "Time in Bed", data: sorted.map(d => d.timeInBedHours), borderColor: "#ef4444", tension: 0.3, spanGaps: true, pointRadius: 3 },
 
         { label: "Avg", data: markerData(avgTimeUp), borderColor: "#7dd3fc", pointRadius: 4, showLine: false, _isAverageMarker: true, _labelText: formatTimeFromHours(avgTimeUp) },
         { label: "Avg", data: markerData(avgTimeBed), borderColor: "#fca5a5", pointRadius: 4, showLine: false, _isAverageMarker: true, _labelText: formatTimeFromHours(avgTimeBed) },
@@ -485,15 +606,17 @@ function buildCharts(data) {
         { label: "Hit Goal", dataKey: "goalYes", chartKey: "goal", color: "#22c55e" },
       ];
   const monthGroups = {};
-  sorted.forEach(d => {
-    const [y, m] = d.date.split("-");
-    const key = `${y}-${m}`;
-    if (!monthGroups[key]) {
-      monthGroups[key] = { total: 0 };
-      habitDefs.forEach(habit => {
-        monthGroups[key][habit.chartKey] = { yes: 0, tracked: 0 };
-      });
-    }
+  const keys = getMonthKeysForRange(actualSorted);
+  keys.forEach((key) => {
+    monthGroups[key] = { total: 0 };
+    habitDefs.forEach(habit => {
+      monthGroups[key][habit.chartKey] = { yes: 0, tracked: 0 };
+    });
+  });
+
+  actualSorted.forEach(d => {
+    const key = d.date.slice(0, 7);
+    if (!monthGroups[key]) return;
     const g = monthGroups[key];
     g.total++;
     habitDefs.forEach(habit => {
@@ -503,8 +626,7 @@ function buildCharts(data) {
     });
   });
 
-  const keys = Object.keys(monthGroups).sort();
-  const pct = (v, t) => (t ? (v / t) * 100 : 0);
+  const pct = (v, t) => (t ? (v / t) * 100 : null);
 
   habitChart = new Chart(document.getElementById("habitChart"), {
     type: "bar",
@@ -725,11 +847,12 @@ window.addEventListener("load", async () => {
 
   if (IS_DASHBOARD) {
     setupFilters();
-    buildCharts(allData);
+    buildCharts(getFilteredData());
   }
 
   // Weekly Summary is computed after data loads. No UI yet.
   window.weeklySummary = computeWeeklySummary(allData);
+  window.dispatchEvent(new CustomEvent("habitdash:weekly-summary-ready"));
   console.log("📊 weeklySummary", window.weeklySummary);
 });
 
