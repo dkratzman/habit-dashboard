@@ -317,6 +317,21 @@ function parseTimeToHours(str) {
   return value;
 }
 
+function getActiveDashboardTimeGoals() {
+  const goals = typeof getTimeGoals === "function"
+    ? getTimeGoals()
+    : { timeBed: "10:30p", timeUp: "7:00a", hoursWorked: 8, hoursPersonal: 2 };
+
+  HOURS_CHART_CONFIG.workGoal = Number(goals.hoursWorked) || 8;
+  HOURS_CHART_CONFIG.personalGoal = Number(goals.hoursPersonal) || 2;
+
+  return {
+    ...goals,
+    timeBedHours: parseTimeToHours(goals.timeBed),
+    timeUpHours: parseTimeToHours(goals.timeUp),
+  };
+}
+
 // -------------------------
 // Filters + persistence
 // -------------------------
@@ -477,6 +492,7 @@ function destroyCharts() {
 function buildCharts(data) {
   destroyCharts();
   const theme = getChartTheme();
+  const timeGoals = getActiveDashboardTimeGoals();
 
   const actualSorted = [...data].sort((a, b) => a.date.localeCompare(b.date));
   const sorted = buildDisplayTimeline(actualSorted);
@@ -568,6 +584,8 @@ function buildCharts(data) {
 
         { label: "Avg", data: markerData(avgTimeUp), borderColor: "#7dd3fc", pointRadius: 4, showLine: false, _isAverageMarker: true, _labelText: formatTimeFromHours(avgTimeUp) },
         { label: "Avg", data: markerData(avgTimeBed), borderColor: "#fca5a5", pointRadius: 4, showLine: false, _isAverageMarker: true, _labelText: formatTimeFromHours(avgTimeBed) },
+        { label: "Time Up Goal", data: new Array(labels.length).fill(timeGoals.timeUpHours), borderColor: "#7dd3fc", borderDash: [5, 5], pointRadius: 0, spanGaps: true },
+        { label: "Bedtime Goal", data: new Array(labels.length).fill(timeGoals.timeBedHours), borderColor: "#fca5a5", borderDash: [5, 5], pointRadius: 0, spanGaps: true },
       ],
     },
     options: {
@@ -681,8 +699,8 @@ function buildCharts(data) {
         datasets: [
           { label: "Work Hours", data: workData, backgroundColor: "#3b82f6", stack: HOURS_CHART_CONFIG.stacked ? "time" : undefined },
           { label: "Personal Project Hours", data: personalData, backgroundColor: "#10b981", stack: HOURS_CHART_CONFIG.stacked ? "time" : undefined },
-          { label: "Work Goal", type: "line", data: new Array(hoursLabels.length).fill(HOURS_CHART_CONFIG.workGoal), borderColor: "#93c5fd", borderDash: [5, 5], pointRadius: 0 },
-          { label: "Personal Goal", type: "line", data: new Array(hoursLabels.length).fill(HOURS_CHART_CONFIG.personalGoal), borderColor: "#6ee7b7", borderDash: [5, 5], pointRadius: 0 },
+          { label: "Work Goal", type: "line", data: new Array(hoursLabels.length).fill(timeGoals.hoursWorked), borderColor: "#93c5fd", borderDash: [5, 5], pointRadius: 0 },
+          { label: "Personal Goal", type: "line", data: new Array(hoursLabels.length).fill(timeGoals.hoursPersonal), borderColor: "#6ee7b7", borderDash: [5, 5], pointRadius: 0 },
         ],
       },
       options: {
@@ -702,6 +720,7 @@ function buildCharts(data) {
 // Weekly Summary (Data Only)
 // -------------------------
 function computeWeeklySummary(data) {
+  getActiveDashboardTimeGoals();
   // "last 7 completed days" = yesterday back 6 more days (exclude today)
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -854,6 +873,12 @@ window.addEventListener("load", async () => {
   window.weeklySummary = computeWeeklySummary(allData);
   window.dispatchEvent(new CustomEvent("habitdash:weekly-summary-ready"));
   console.log("📊 weeklySummary", window.weeklySummary);
+});
+
+window.addEventListener("habitdash:time-goals-updated", () => {
+  if (IS_DASHBOARD && Array.isArray(window.allData)) {
+    buildCharts(typeof getFilteredData === "function" ? getFilteredData() : window.allData);
+  }
 });
 
 // -------------------------

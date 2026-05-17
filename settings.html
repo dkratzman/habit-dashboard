@@ -32,6 +32,10 @@
       <span>Tracking</span>
       <strong>Choose habits</strong>
     </button>
+    <button type="button" class="settings-action" data-open-time-goals>
+      <span>Goals</span>
+      <strong>Time targets</strong>
+    </button>
     <button type="button" class="settings-action danger" id="logoutBtn">
       <span>Account</span>
       <strong>Log out</strong>
@@ -51,6 +55,39 @@
       <button type="button" class="btn-secondary" id="habitSetupBack" hidden>Back</button>
       <button type="button" class="btn-secondary" id="habitSetupCancel">Cancel</button>
       <button type="button" id="saveHabitSetup">Save habits</button>
+    </div>
+  </div>
+</div>
+
+<div class="walkthrough-overlay" id="timeGoalsModal" hidden>
+  <div class="walkthrough-modal" role="dialog" aria-modal="true" aria-labelledby="timeGoalsTitle">
+    <h2 id="timeGoalsTitle">Set Time Goals</h2>
+    <p class="setup-copy">
+      These targets set your input defaults and the goal lines on your charts.
+    </p>
+    <div class="time-goals-form" id="timeGoalsForm">
+      <label>
+        <span>Time in bed</span>
+        <input type="time" data-time-goal="timeBed" step="1800" value="22:30">
+      </label>
+      <label>
+        <span>Time up</span>
+        <input type="time" data-time-goal="timeUp" min="04:00" max="11:00" step="1800" value="07:00">
+      </label>
+      <label>
+        <span>Hours worked</span>
+        <input type="number" data-time-goal="hoursWorked" min="0" max="14" step="1" value="8">
+      </label>
+      <label>
+        <span>Personal / learning hours</span>
+        <input type="number" data-time-goal="hoursPersonal" min="0" max="14" step="1" value="2">
+      </label>
+    </div>
+    <div class="walkthrough-actions">
+      <span class="setup-status" id="timeGoalsStatus"></span>
+      <button type="button" class="btn-secondary" id="timeGoalsBack" hidden>Back</button>
+      <button type="button" class="btn-secondary" id="timeGoalsCancel">Cancel</button>
+      <button type="button" id="saveTimeGoals">Save goals</button>
     </div>
   </div>
 </div>
@@ -155,6 +192,7 @@
     }
 
     const habitSetup = document.getElementById("habitSetupModal");
+    const timeGoals = document.getElementById("timeGoalsModal");
     if (typeof setupHabitPreferencesForm === "function") {
       setupHabitPreferencesForm({
         formId: "habitPreferencesForm",
@@ -163,12 +201,27 @@
         onSave: () => { habitSetup.hidden = true; },
       });
     }
+    if (typeof setupTimeGoalsForm === "function") {
+      setupTimeGoalsForm({
+        formId: "timeGoalsForm",
+        saveButtonId: "saveTimeGoals",
+        statusId: "timeGoalsStatus",
+        onSave: () => { timeGoals.hidden = true; },
+      });
+    }
 
     const habitSetupBack = document.getElementById("habitSetupBack");
+    const timeGoalsBack = document.getElementById("timeGoalsBack");
     document.querySelectorAll("[data-open-habit-setup]").forEach(button => {
       button.addEventListener("click", () => {
         if (habitSetupBack) habitSetupBack.hidden = true;
         habitSetup.hidden = false;
+      });
+    });
+    document.querySelectorAll("[data-open-time-goals]").forEach(button => {
+      button.addEventListener("click", () => {
+        if (timeGoalsBack) timeGoalsBack.hidden = true;
+        timeGoals.hidden = false;
       });
     });
 
@@ -178,6 +231,7 @@
       if (walkthrough) walkthrough.hidden = true;
       if (exampleModal) exampleModal.hidden = true;
       if (habitSetup) habitSetup.hidden = true;
+      if (timeGoals) timeGoals.hidden = true;
     };
 
     document.getElementById("openWalkthrough")?.addEventListener("click", () => {
@@ -206,6 +260,11 @@
       if (exampleModal) exampleModal.hidden = false;
     });
     document.getElementById("habitSetupCancel")?.addEventListener("click", closeAllWalkthroughs);
+    document.getElementById("timeGoalsBack")?.addEventListener("click", () => {
+      if (timeGoals) timeGoals.hidden = true;
+      if (habitSetup) habitSetup.hidden = false;
+    });
+    document.getElementById("timeGoalsCancel")?.addEventListener("click", closeAllWalkthroughs);
 
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape") closeAllWalkthroughs();

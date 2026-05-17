@@ -46,6 +46,38 @@
   </div>
 </div>
 
+<div class="walkthrough-overlay" id="timeGoalsModal" hidden>
+  <div class="walkthrough-modal" role="dialog" aria-modal="true" aria-labelledby="timeGoalsTitle">
+    <h2 id="timeGoalsTitle">Set Your Time Goals</h2>
+    <p class="setup-copy">
+      These targets set your input defaults and the goal lines on your charts. You can change them in Settings later.
+    </p>
+    <div class="time-goals-form" id="timeGoalsForm">
+      <label>
+        <span>Time in bed</span>
+        <input type="time" data-time-goal="timeBed" step="1800" value="22:30">
+      </label>
+      <label>
+        <span>Time up</span>
+        <input type="time" data-time-goal="timeUp" min="04:00" max="11:00" step="1800" value="07:00">
+      </label>
+      <label>
+        <span>Hours worked</span>
+        <input type="number" data-time-goal="hoursWorked" min="0" max="14" step="1" value="8">
+      </label>
+      <label>
+        <span>Personal / learning hours</span>
+        <input type="number" data-time-goal="hoursPersonal" min="0" max="14" step="1" value="2">
+      </label>
+    </div>
+    <div class="walkthrough-actions">
+      <span class="setup-status" id="timeGoalsStatus"></span>
+      <button type="button" class="btn-secondary" id="timeGoalsBack">Back</button>
+      <button type="button" id="saveTimeGoals">Save goals</button>
+    </div>
+  </div>
+</div>
+
 <div class="walkthrough-overlay" id="firstLoginWalkthrough" hidden>
   <div class="walkthrough-modal" role="dialog" aria-modal="true" aria-labelledby="walkthroughTitle">
     <h2 id="walkthroughTitle">How Habit Dashboard Works</h2>
@@ -595,6 +627,7 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     const modal = document.getElementById("habitSetupModal");
+    const timeGoalsModal = document.getElementById("timeGoalsModal");
     const openButtons = document.querySelectorAll("[data-open-habit-setup]");
     const backBtn = document.getElementById("habitSetupBack");
     if (!modal || typeof setupHabitPreferencesForm !== "function") return;
@@ -604,6 +637,33 @@
       modal.hidden = false;
     };
     const closeSetup = () => { modal.hidden = true; };
+    const openTimeGoals = () => {
+      if (modal) modal.hidden = true;
+      if (timeGoalsModal) timeGoalsModal.hidden = false;
+    };
+    const closeTimeGoals = () => {
+      if (timeGoalsModal) timeGoalsModal.hidden = true;
+    };
+
+    if (typeof setupTimeGoalsForm === "function") {
+      setupTimeGoalsForm({
+        formId: "timeGoalsForm",
+        saveButtonId: "saveTimeGoals",
+        statusId: "timeGoalsStatus",
+        onSave: () => {
+          const shouldSendToInput = localStorage.getItem(ONBOARDING_ENTRY_REDIRECT_KEY) === "true";
+          closeTimeGoals();
+          if (typeof buildCharts === "function" && Array.isArray(window.allData)) {
+            buildCharts(typeof getFilteredData === "function" ? getFilteredData() : window.allData);
+          }
+          if (shouldSendToInput) {
+            localStorage.removeItem(ONBOARDING_FLOW_KEY);
+            localStorage.removeItem(WALKTHROUGH_REVIEW_KEY);
+            window.location.href = "input.html?fromOnboarding=1";
+          }
+        },
+      });
+    }
 
     setupHabitPreferencesForm({
       formId: "habitPreferencesForm",
@@ -620,9 +680,7 @@
         }
         window.dispatchEvent(new CustomEvent("habitdash:habit-setup-complete"));
         if (shouldSendToInput) {
-          localStorage.removeItem(ONBOARDING_FLOW_KEY);
-          localStorage.removeItem(WALKTHROUGH_REVIEW_KEY);
-          window.location.href = "input.html?fromOnboarding=1";
+          openTimeGoals();
         } else {
           localStorage.removeItem(WALKTHROUGH_REVIEW_KEY);
         }
@@ -636,6 +694,10 @@
       closeSetup();
       const exampleModal = document.getElementById("exampleDashboardModal");
       if (exampleModal) exampleModal.hidden = false;
+    });
+    document.getElementById("timeGoalsBack")?.addEventListener("click", () => {
+      closeTimeGoals();
+      openSetup(true);
     });
 
     window.addEventListener("habitdash:dashboard-ready", () => {
@@ -656,6 +718,9 @@
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape" && !modal.hidden && typeof hasHabitPreferences === "function" && hasHabitPreferences()) {
         closeSetup();
+      }
+      if (event.key === "Escape" && timeGoalsModal && !timeGoalsModal.hidden) {
+        closeTimeGoals();
       }
     });
   });
