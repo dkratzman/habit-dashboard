@@ -54,6 +54,61 @@ section {
   position: relative;
 }
 
+.chart-section {
+  margin-top: 32px;
+}
+
+.chart-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+
+.chart-header h2 {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.chart-toggle-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+  width: 100%;
+}
+
+.chart-legend-btn {
+  --series-color: #2563eb;
+  border: 1px solid color-mix(in srgb, var(--series-color) 52%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--series-color) 18%, var(--card-bg));
+  color: var(--text-color);
+  cursor: pointer;
+  flex: 1 1 130px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.1;
+  min-height: 32px;
+  min-width: 0;
+  padding: 7px 11px;
+  touch-action: manipulation;
+}
+
+.chart-legend-btn[aria-pressed="false"] {
+  --series-color: #ef4444;
+  border-color: color-mix(in srgb, #ef4444 46%, transparent);
+  background: color-mix(in srgb, #ef4444 14%, var(--card-bg));
+  color: var(--text-color);
+  opacity: 0.78;
+}
+
+.chart-legend-btn:hover {
+  filter: brightness(0.97);
+}
+
 canvas {
   width: 100% !important;
   display: block;
@@ -1414,7 +1469,22 @@ body.dark .header-right button:hover {
   .chart-container {
     height: 320px;
   }
+  .chart-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .chart-toggle-legend {
+    gap: 6px;
+  }
+
+  .chart-legend-btn {
+    min-height: 30px;
+    padding: 6px 9px;
+  }
 }
+
 
 /* =========================
    Weekly Summary

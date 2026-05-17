@@ -344,32 +344,42 @@
      CHARTS
 ========================= -->
 
-<section data-dashboard-page="trends">
-  <h2>Ratings Over Time</h2>
+<section class="chart-section" data-dashboard-page="trends">
+  <div class="chart-header">
+    <h2>Ratings</h2>
+  </div>
   <div class="chart-container">
     <canvas id="ratingsChart"></canvas>
   </div>
+  <div id="ratingsChartLegend" class="chart-toggle-legend" aria-label="Ratings chart series"></div>
 </section>
 
-<section data-dashboard-page="sleep-time" hidden>
-  <h2>Sleep Chart</h2>
+<section class="chart-section" data-dashboard-page="sleep-time" hidden>
+  <div class="chart-header">
+    <h2>Sleep</h2>
+  </div>
   <div class="chart-container">
     <canvas id="sleepChart"></canvas>
   </div>
 </section>
 
-<section data-dashboard-page="sleep-time" hidden>
-  <h2>Time Allocation</h2>
+<section class="chart-section" data-dashboard-page="sleep-time" hidden>
+  <div class="chart-header">
+    <h2>Time Allocation</h2>
+  </div>
   <div class="chart-container">
     <canvas id="hoursChart"></canvas>
   </div>
 </section>
 
-<section data-dashboard-page="trends">
-  <h2>Habit Chart</h2>
+<section class="chart-section" data-dashboard-page="trends">
+  <div class="chart-header">
+    <h2>Habits</h2>
+  </div>
   <div class="chart-container">
     <canvas id="habitChart"></canvas>
   </div>
+  <div id="habitChartLegend" class="chart-toggle-legend" aria-label="Habit chart series"></div>
 </section>
 
 <section data-dashboard-page="week" hidden>

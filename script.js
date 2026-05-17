@@ -135,6 +135,8 @@ const averageLabelPlugin = {
       if (!ds || !ds._isAverageMarker) return;
 
       const meta = chart.getDatasetMeta(i);
+      if (!chart.isDatasetVisible(i) || meta.hidden) return;
+
       const lastPoint = meta?.data?.[meta.data.length - 1];
       if (!lastPoint) return;
 
@@ -199,6 +201,12 @@ function formatDate(dateString) {
   if (!dateString) return "";
   const [y, m, d] = normalizeDateOnlyISO(dateString).split("-");
   return `${m}/${d}/${y.slice(-2)}`;
+}
+
+function formatDateTick(dateString) {
+  const date = isoDateToLocalDate(normalizeDateOnlyISO(dateString));
+  if (!date || Number.isNaN(date.getTime())) return "";
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
 function formatTimeFromHours(v) {
@@ -511,7 +519,7 @@ function buildCharts(data) {
     filteredRows: actualSorted,
     axisDates: sorted.map((entry) => entry.date),
   };
-  const labels = sorted.map(d => formatDate(d.date));
+  const labels = sorted.map(d => normalizeDateOnlyISO(d.date));
   const n = labels.length;
 
   // averages
@@ -540,6 +548,79 @@ function buildCharts(data) {
     return !(ds && ds._isAverageMarker);
   };
 
+  const interactiveLegend = (filter) => ({
+    position: "bottom",
+    align: "start",
+    labels: {
+      color: theme.textColor,
+      filter,
+      usePointStyle: true,
+      pointStyle: "circle",
+      boxWidth: 7,
+      boxHeight: 7,
+      padding: 10,
+    },
+  });
+
+  const renderChartToggleLegend = (chart, legendId) => {
+    const legend = document.getElementById(legendId);
+    if (!legend || !chart) return;
+
+    legend.replaceChildren();
+
+    chart.data.datasets.forEach((dataset, datasetIndex) => {
+      if (dataset._isAverageMarker) return;
+
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "chart-legend-btn";
+      button.textContent = dataset.label;
+      button.style.setProperty("--series-color", dataset.borderColor || dataset.backgroundColor || "#2563eb");
+
+      const setPressedState = () => {
+        button.setAttribute("aria-pressed", String(chart.isDatasetVisible(datasetIndex)));
+      };
+
+      button.addEventListener("click", () => {
+        const nextVisible = !chart.isDatasetVisible(datasetIndex);
+        chart.setDatasetVisibility(datasetIndex, nextVisible);
+
+        chart.data.datasets.forEach((candidate, candidateIndex) => {
+          if (candidate._averageFor === dataset.label) {
+            chart.setDatasetVisibility(candidateIndex, nextVisible);
+          }
+        });
+
+        chart.update();
+        setPressedState();
+      });
+
+      setPressedState();
+      legend.appendChild(button);
+    });
+  };
+
+  const dateScale = {
+    ticks: {
+      color: theme.textColor,
+      autoSkip: true,
+      maxRotation: 0,
+      maxTicksLimit: 6,
+      callback(value) {
+        return formatDateTick(this.getLabelForValue(value));
+      },
+    },
+    grid: { color: theme.gridColor },
+  };
+
+  const dateTooltip = {
+    callbacks: {
+      title(items) {
+        return items?.[0]?.label ? formatDate(items[0].label) : "";
+      },
+    },
+  };
+
   /* RATINGS */
   ratingsChart = new Chart(document.getElementById("ratingsChart"), {
     type: "line",
@@ -552,10 +633,10 @@ function buildCharts(data) {
         { label: "Mental", data: sorted.map(d => d.mentalFeeling), borderColor: "#22c55e", tension: 0.3, spanGaps: true, pointRadius: 3 },
         { label: "Energy", data: sorted.map(d => d.energyFeeling), borderColor: "#a855f7", tension: 0.3, spanGaps: true, pointRadius: 3 },
 
-        { label: "Avg", data: markerData(avgOverall), borderColor: "#93c5fd", pointRadius: 4, showLine: false, _isAverageMarker: true, _labelText: avgOverall != null ? avgOverall.toFixed(1) : "" },
-        { label: "Avg", data: markerData(avgPhysical), borderColor: "#fdba74", pointRadius: 4, showLine: false, _isAverageMarker: true, _labelText: avgPhysical != null ? avgPhysical.toFixed(1) : "" },
-        { label: "Avg", data: markerData(avgMental), borderColor: "#86efac", pointRadius: 4, showLine: false, _isAverageMarker: true, _labelText: avgMental != null ? avgMental.toFixed(1) : "" },
-        { label: "Avg", data: markerData(avgEnergy), borderColor: "#d8b4fe", pointRadius: 4, showLine: false, _isAverageMarker: true, _labelText: avgEnergy != null ? avgEnergy.toFixed(1) : "" },
+        { label: "Avg", data: markerData(avgOverall), borderColor: "#93c5fd", pointRadius: 4, showLine: false, _isAverageMarker: true, _averageFor: "Overall", _labelText: avgOverall != null ? avgOverall.toFixed(1) : "" },
+        { label: "Avg", data: markerData(avgPhysical), borderColor: "#fdba74", pointRadius: 4, showLine: false, _isAverageMarker: true, _averageFor: "Physical", _labelText: avgPhysical != null ? avgPhysical.toFixed(1) : "" },
+        { label: "Avg", data: markerData(avgMental), borderColor: "#86efac", pointRadius: 4, showLine: false, _isAverageMarker: true, _averageFor: "Mental", _labelText: avgMental != null ? avgMental.toFixed(1) : "" },
+        { label: "Avg", data: markerData(avgEnergy), borderColor: "#d8b4fe", pointRadius: 4, showLine: false, _isAverageMarker: true, _averageFor: "Energy", _labelText: avgEnergy != null ? avgEnergy.toFixed(1) : "" },
       ],
     },
     options: {
@@ -563,14 +644,23 @@ function buildCharts(data) {
       maintainAspectRatio: false,
       layout: { padding: { right: 48 } },
       plugins: {
-        legend: { labels: { color: theme.textColor, filter: legendFilter } },
+        legend: { display: false },
+        tooltip: dateTooltip,
       },
       scales: {
-        x: { ticks: { color: theme.textColor }, grid: { color: theme.gridColor } },
-        y: { ticks: { color: theme.textColor }, grid: { color: theme.gridColor } },
+        x: dateScale,
+        y: {
+          ticks: {
+            color: theme.textColor,
+            stepSize: 1,
+            callback: v => Number(v).toFixed(0),
+          },
+          grid: { color: theme.gridColor },
+        },
       },
     },
   });
+  renderChartToggleLegend(ratingsChart, "ratingsChartLegend");
 
   /* SLEEP */
   sleepChart = new Chart(document.getElementById("sleepChart"), {
@@ -593,7 +683,8 @@ function buildCharts(data) {
       maintainAspectRatio: false,
       layout: { padding: { right: 48 } },
       plugins: {
-        legend: { labels: { color: theme.textColor, filter: legendFilter } },
+        legend: interactiveLegend(legendFilter),
+        tooltip: dateTooltip,
       },
       scales: {
         y: {
@@ -605,7 +696,7 @@ function buildCharts(data) {
           },
           grid: { color: theme.gridColor },
         },
-        x: { ticks: { color: theme.textColor }, grid: { color: theme.gridColor } },
+        x: dateScale,
       },
     },
   });
@@ -670,13 +761,14 @@ function buildCharts(data) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { labels: { color: theme.textColor } } },
+      plugins: { legend: { display: false } },
       scales: {
         y: { max: 100, ticks: { color: theme.textColor, callback: v => `${v}%` }, grid: { color: theme.gridColor } },
         x: { ticks: { color: theme.textColor }, grid: { color: theme.gridColor } },
       },
     },
   });
+  renderChartToggleLegend(habitChart, "habitChartLegend");
 
   /* TIME ALLOCATION */
   const hoursCanvas = document.getElementById("hoursChart");
@@ -706,9 +798,13 @@ function buildCharts(data) {
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { labels: { color: theme.textColor } } },
+        plugins: { legend: interactiveLegend() },
         scales: {
-          x: { stacked: HOURS_CHART_CONFIG.stacked, ticks: { color: theme.textColor }, grid: { color: theme.gridColor } },
+          x: {
+            stacked: HOURS_CHART_CONFIG.stacked,
+            ticks: HOURS_CHART_CONFIG.weekly ? { color: theme.textColor } : dateScale.ticks,
+            grid: { color: theme.gridColor },
+          },
           y: { stacked: HOURS_CHART_CONFIG.stacked, min: 0, max: 14, ticks: { color: theme.textColor }, grid: { color: theme.gridColor } },
         },
       },
