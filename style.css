@@ -655,6 +655,7 @@ body.dark .daily-table th {
   font-size: 1.25rem;
   font-weight: 800;
   line-height: 1;
+  touch-action: manipulation;
 }
 
 .stepper-btn:hover {
@@ -739,8 +740,8 @@ body.dark .stepper-btn:hover {
 }
 
 .habit-section {
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 8px;
 }
 
 .habit-section legend {
@@ -754,6 +755,23 @@ body.dark .stepper-btn:hover {
   min-height: 48px;
   border: 1px solid rgba(220, 38, 38, 0.22);
   cursor: pointer;
+}
+
+@media (max-width: 520px) {
+  .habit-section {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .habit-section .form-row.inline {
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .habit-toggle {
+    min-width: 46px;
+    padding-inline: 8px;
+  }
 }
 
 /* =========================
@@ -1075,6 +1093,15 @@ body.dark .habit-section .form-row.inline.habit-yes {
 .habit-section .form-row.inline.habit-yes:focus-visible {
   border-color: rgba(22, 163, 74, 0.52);
   background-color: rgba(22, 163, 74, 0.18);
+}
+
+.stepper-btn,
+.habit-section .form-row.inline,
+.btn-option,
+.zero-time-btn,
+.calendar-day,
+.calendar-nav-btn {
+  touch-action: manipulation;
 }
 
 /* =========================
@@ -1469,6 +1496,7 @@ body.dark .header-right button:hover {
   .chart-container {
     height: 320px;
   }
+
   .chart-header {
     align-items: flex-start;
     flex-direction: column;
@@ -1484,7 +1512,6 @@ body.dark .header-right button:hover {
     padding: 6px 9px;
   }
 }
-
 
 /* =========================
    Weekly Summary

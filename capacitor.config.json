@@ -1,0 +1,6 @@
+{
+  "appId": "com.daymark.app",
+  "appName": "DayMark",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}

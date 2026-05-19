@@ -350,6 +350,7 @@ function setupTimeSteppers() {
     syncTimeStepper(stepper, getSafeTimeOption(inputId, goals[inputId] || input.value || options[0]));
 
     stepper.querySelectorAll(".stepper-btn").forEach(button => {
+      button.addEventListener("dblclick", event => event.preventDefault());
       button.addEventListener("click", () => {
         const currentIndex = Math.max(0, options.indexOf(getSafeTimeOption(inputId, input.value)));
         const nextIndex = clampNumber(currentIndex + Number(button.dataset.step), 0, options.length - 1);
@@ -369,6 +370,7 @@ function setupTimeSteppers() {
     syncNumberStepper(stepper, goalValue);
 
     stepper.querySelectorAll(".stepper-btn").forEach(button => {
+      button.addEventListener("dblclick", event => event.preventDefault());
       button.addEventListener("click", () => {
         syncNumberStepper(stepper, Number(input.value) + Number(button.dataset.step));
       });

@@ -1,0 +1,19 @@
+{
+  "name": "daymark",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Capacitor shell for the DayMark habit dashboard.",
+  "scripts": {
+    "build:cap": "node scripts/copy-to-www.js",
+    "cap:add:ios": "npm run build:cap && npx cap add ios",
+    "cap:sync": "npm run build:cap && npx cap sync ios",
+    "cap:open:ios": "npx cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/core": "^8.0.0",
+    "@capacitor/ios": "^8.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.0.0"
+  }
+}
