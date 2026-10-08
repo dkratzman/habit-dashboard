@@ -20,6 +20,20 @@ body.dark {
   --table-alt: #1e293b;
 }
 
+body.journal {
+  --bg-color: #eee5d3;
+  --text-color: #2d2b25;
+  --card-bg: #f8f1e2;
+  --border-color: #c8b99f;
+  --muted-bg: #e9deca;
+  --table-alt: #efe4d0;
+  --journal-ink: #2d2b25;
+  --journal-sage: #64715b;
+  --journal-clay: #98644b;
+  --journal-gold: #aa854f;
+  --journal-paper: #f8f1e2;
+}
+
 /* =========================
    Base Layout & Typography
 ========================= */
@@ -1510,6 +1524,360 @@ body.dark .header-right button:hover {
   .chart-legend-btn {
     min-height: 30px;
     padding: 6px 9px;
+  }
+}
+
+/* =========================
+   Journal Theme
+   Scoped so Light and Dark remain unchanged.
+========================= */
+
+body.journal {
+  min-height: 100vh;
+  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  background-color: var(--bg-color);
+  background-image:
+    linear-gradient(to bottom, transparent 0, transparent 27px, rgba(91, 104, 91, 0.09) 28px),
+    radial-gradient(circle at 18% 13%, rgba(93, 73, 49, 0.08) 0 0.7px, transparent 0.9px),
+    radial-gradient(circle at 73% 61%, rgba(93, 73, 49, 0.055) 0 0.6px, transparent 0.8px);
+  background-size: 100% 28px, 7px 7px, 11px 11px;
+  background-attachment: fixed;
+}
+
+body.journal::before {
+  content: "";
+  position: fixed;
+  z-index: 0;
+  top: 0;
+  bottom: 0;
+  left: max(13px, calc((100vw - 940px) / 2));
+  width: 1px;
+  background: rgba(152, 100, 75, 0.27);
+  box-shadow: 4px 0 0 rgba(152, 100, 75, 0.07);
+  pointer-events: none;
+}
+
+body.journal h1,
+body.journal h2,
+body.journal h3,
+body.journal legend,
+body.journal .header-left {
+  font-family: Georgia, "Times New Roman", serif;
+  letter-spacing: 0.015em;
+}
+
+body.journal h2 {
+  text-decoration-color: rgba(100, 113, 91, 0.38);
+  text-decoration-line: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
+}
+
+body.journal a {
+  color: var(--journal-ink);
+  text-decoration-color: rgba(100, 113, 91, 0.55);
+  text-underline-offset: 3px;
+}
+
+body.journal .app-header {
+  position: relative;
+  padding: 15px 20px 13px;
+  border: 1px solid var(--border-color);
+  border-top: 4px solid var(--journal-ink);
+  border-radius: 2px 2px 7px 7px;
+  background: rgba(248, 241, 226, 0.93);
+  box-shadow: 3px 4px 0 rgba(84, 68, 48, 0.12);
+}
+
+body.journal .header-left {
+  font-size: 1.28rem;
+  font-style: italic;
+}
+
+body.journal .header-left a::after {
+  content: "  /  field notes";
+  color: var(--journal-sage);
+  font-family: "Iowan Old Style", Georgia, serif;
+  font-size: 0.72rem;
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+body.journal section:not(.weekly-summary),
+body.journal .chart-section {
+  padding: 20px;
+  border: 1px solid var(--border-color);
+  border-radius: 3px 8px 5px 3px;
+  background: rgba(248, 241, 226, 0.87);
+  box-shadow: 3px 4px 0 rgba(84, 68, 48, 0.1);
+}
+
+body.journal .dashboard-page-nav {
+  border-bottom: 1px solid rgba(45, 43, 37, 0.38);
+  background: rgba(238, 229, 211, 0.95);
+  backdrop-filter: blur(5px);
+}
+
+body.journal .dashboard-page-nav button {
+  font-family: inherit;
+  letter-spacing: 0.08em;
+}
+
+body.journal .dashboard-page-nav button.active {
+  border-bottom-color: var(--journal-clay);
+  color: var(--journal-ink);
+}
+
+body.journal .filter-bar {
+  border-radius: 3px;
+  background: rgba(248, 241, 226, 0.88);
+  box-shadow: 2px 3px 0 rgba(84, 68, 48, 0.08);
+}
+
+body.journal .filter-buttons button,
+body.journal button,
+body.journal input,
+body.journal select,
+body.journal textarea {
+  font-family: inherit;
+}
+
+body.journal .filter-buttons button.active,
+body.journal .control-btn.active,
+body.journal .btn-option.selected,
+body.journal .auth-tab.active {
+  border-color: var(--journal-sage);
+  background: var(--journal-sage);
+  color: #fffaf0;
+}
+
+body.journal .btn-primary,
+body.journal .walkthrough-actions button:not(.btn-secondary) {
+  border-color: var(--journal-ink);
+  border-radius: 3px;
+  background: var(--journal-ink);
+  color: #fffaf0;
+  box-shadow: 2px 2px 0 rgba(152, 100, 75, 0.28);
+}
+
+body.journal .btn-primary:hover,
+body.journal .walkthrough-actions button:not(.btn-secondary):hover {
+  background: #191914;
+}
+
+body.journal .btn-secondary,
+body.journal .header-link-button,
+body.journal .header-right button,
+body.journal .control-btn,
+body.journal .stepper-btn,
+body.journal .calendar-nav-btn,
+body.journal .zero-time-btn {
+  border-color: var(--border-color);
+  border-radius: 3px;
+  background: var(--muted-bg);
+  color: var(--journal-ink);
+  box-shadow: 1px 1px 0 rgba(84, 68, 48, 0.1);
+}
+
+body.journal .btn-secondary:hover,
+body.journal .header-right button:hover,
+body.journal .stepper-btn:hover,
+body.journal .calendar-nav-btn:hover {
+  border-color: var(--journal-sage);
+  background: #ded2bc;
+}
+
+body.journal .summary-card,
+body.journal .coach-card,
+body.journal .settings-action,
+body.journal .habit-choice,
+body.journal .time-stepper,
+body.journal .number-stepper,
+body.journal .entry-calendar,
+body.journal .walkthrough-modal,
+body.journal .auth-card {
+  border-color: var(--border-color);
+  border-radius: 3px 8px 4px 3px;
+  background: rgba(248, 241, 226, 0.94);
+  box-shadow: 2px 3px 0 rgba(84, 68, 48, 0.09);
+}
+
+body.journal .settings-action {
+  min-height: 62px;
+  border-left: 4px solid var(--journal-sage);
+}
+
+body.journal .settings-action:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 5px 0 rgba(84, 68, 48, 0.11);
+}
+
+body.journal .habit-coach {
+  border-color: var(--border-color);
+  border-radius: 3px 10px 5px 3px;
+  background:
+    linear-gradient(90deg, rgba(100, 113, 91, 0.1), transparent 34%),
+    rgba(248, 241, 226, 0.94);
+  box-shadow: 3px 4px 0 rgba(84, 68, 48, 0.1);
+}
+
+body.journal .habit-coach__label,
+body.journal .coach-card__eyebrow {
+  color: var(--journal-sage);
+}
+
+body.journal .habit-coach__badge {
+  border: 1px solid var(--border-color);
+  background: var(--muted-bg);
+}
+
+body.journal .coach-card--positive {
+  border-top-color: var(--journal-sage);
+}
+
+body.journal .coach-card--attention {
+  border-top-color: var(--journal-gold);
+}
+
+body.journal .coach-card--focus {
+  border-top-color: var(--journal-clay);
+}
+
+body.journal .form-row input,
+body.journal .form-row select,
+body.journal .form-row textarea,
+body.journal .time-goals-form input {
+  border-color: var(--border-color);
+  border-radius: 2px;
+  background: rgba(255, 250, 240, 0.72);
+  color: var(--journal-ink);
+  box-shadow: inset 0 -1px 0 rgba(100, 113, 91, 0.12);
+}
+
+body.journal .form-row input:focus,
+body.journal .form-row select:focus,
+body.journal .form-row textarea:focus,
+body.journal .time-goals-form input:focus {
+  outline: 2px solid rgba(100, 113, 91, 0.35);
+  outline-offset: 1px;
+}
+
+body.journal .stepper-value,
+body.journal .calendar-day,
+body.journal .form-row.inline:nth-of-type(odd),
+body.journal .ws-row:nth-child(even):not(.ws-head) {
+  background: rgba(233, 222, 202, 0.72);
+}
+
+body.journal .calendar-day {
+  border-radius: 2px;
+}
+
+body.journal .calendar-day:hover {
+  border-color: var(--journal-sage);
+  background: rgba(100, 113, 91, 0.1);
+}
+
+body.journal .calendar-day.selected {
+  border-color: var(--journal-ink);
+  box-shadow: inset 0 0 0 2px var(--journal-ink);
+}
+
+body.journal .calendar-day.today::after {
+  background: var(--journal-clay);
+}
+
+body.journal .habit-section .form-row.inline.habit-no {
+  border-color: rgba(152, 100, 75, 0.36);
+  background: rgba(152, 100, 75, 0.08);
+}
+
+body.journal .habit-section .form-row.inline.habit-yes {
+  border-color: rgba(100, 113, 91, 0.42);
+  background: rgba(100, 113, 91, 0.11);
+}
+
+body.journal .habit-toggle {
+  background: rgba(255, 250, 240, 0.55);
+  color: var(--journal-clay);
+}
+
+body.journal .habit-toggle.selected {
+  color: var(--journal-sage);
+}
+
+body.journal .daily-list-container {
+  border-radius: 2px;
+  background: rgba(248, 241, 226, 0.9);
+  box-shadow: 2px 3px 0 rgba(84, 68, 48, 0.09);
+}
+
+body.journal .daily-table thead {
+  background: #e6dac4;
+}
+
+body.journal .daily-table th {
+  color: var(--journal-ink);
+  font-family: Georgia, "Times New Roman", serif;
+  letter-spacing: 0.025em;
+}
+
+body.journal .delta.up,
+body.journal .setup-status {
+  color: var(--journal-sage);
+}
+
+body.journal .delta.down,
+body.journal .settings-action.danger strong {
+  color: var(--journal-clay);
+}
+
+body.journal .chart-legend-btn {
+  border-radius: 2px;
+  box-shadow: 1px 1px 0 rgba(84, 68, 48, 0.08);
+}
+
+body.journal .bottom-nav {
+  border-color: var(--border-color);
+  border-radius: 4px 4px 18px 18px;
+  background: rgba(248, 241, 226, 0.97);
+  box-shadow: 3px 5px 0 rgba(84, 68, 48, 0.16);
+}
+
+body.journal .bottom-nav a.active {
+  background: rgba(100, 113, 91, 0.14);
+  color: var(--journal-sage);
+}
+
+body.journal .auth-card {
+  position: relative;
+  border-top: 5px solid var(--journal-ink);
+}
+
+body.journal .auth-card::after {
+  content: "Private daily notes";
+  display: block;
+  margin-top: 20px;
+  color: var(--journal-sage);
+  font-size: 0.72rem;
+  font-style: italic;
+  letter-spacing: 0.08em;
+}
+
+@media (max-width: 768px) {
+  body.journal::before {
+    left: 9px;
+  }
+
+  body.journal .header-left a::after {
+    display: none;
+  }
+
+  body.journal section:not(.weekly-summary),
+  body.journal .chart-section {
+    padding: 14px;
   }
 }
 

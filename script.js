@@ -115,9 +115,51 @@ window.HOURS_CHART_CONFIG = HOURS_CHART_CONFIG;
 // -------------------------
 function getChartTheme() {
   const isDark = document.body.classList.contains("dark");
+  const isJournal = document.body.classList.contains("journal");
+  const palette = isJournal
+    ? {
+        overall: "#2f312d",
+        physical: "#9a6048",
+        mental: "#5f7258",
+        energy: "#ad8951",
+        overallSoft: "#77756d",
+        physicalSoft: "#c29a84",
+        mentalSoft: "#94a28d",
+        energySoft: "#c9ae7b",
+        wake: "#61746a",
+        bed: "#9a6048",
+        wakeSoft: "#89958a",
+        bedSoft: "#c29a84",
+        work: "#4d5b50",
+        personal: "#9a6b4c",
+        workGoal: "#89958a",
+        personalGoal: "#c1a681",
+        habits: ["#5f7258", "#9a6048", "#4d5b50", "#ad8951", "#77756d", "#7b6651", "#6a7871", "#8b7056"],
+      }
+    : {
+        overall: "#3b82f6",
+        physical: "#f97316",
+        mental: "#22c55e",
+        energy: "#a855f7",
+        overallSoft: "#93c5fd",
+        physicalSoft: "#fdba74",
+        mentalSoft: "#86efac",
+        energySoft: "#d8b4fe",
+        wake: "#0ea5e9",
+        bed: "#ef4444",
+        wakeSoft: "#7dd3fc",
+        bedSoft: "#fca5a5",
+        work: "#3b82f6",
+        personal: "#10b981",
+        workGoal: "#93c5fd",
+        personalGoal: "#6ee7b7",
+        habits: null,
+      };
   return {
-    textColor: isDark ? "#f9fafb" : "#374151",
-    gridColor: isDark ? "rgba(255,255,255,0.15)" : "#e5e7eb",
+    textColor: isDark ? "#f9fafb" : isJournal ? "#403d36" : "#374151",
+    gridColor: isDark ? "rgba(255,255,255,0.15)" : isJournal ? "rgba(83, 73, 58, 0.16)" : "#e5e7eb",
+    isJournal,
+    palette,
   };
 }
 
@@ -628,15 +670,15 @@ function buildCharts(data) {
     data: {
       labels,
       datasets: [
-        { label: "Overall", data: sorted.map(d => d.overallFeeling), borderColor: "#3b82f6", tension: 0.3, spanGaps: true, pointRadius: 3 },
-        { label: "Physical", data: sorted.map(d => d.physicalFeeling), borderColor: "#f97316", tension: 0.3, spanGaps: true, pointRadius: 3 },
-        { label: "Mental", data: sorted.map(d => d.mentalFeeling), borderColor: "#22c55e", tension: 0.3, spanGaps: true, pointRadius: 3 },
-        { label: "Energy", data: sorted.map(d => d.energyFeeling), borderColor: "#a855f7", tension: 0.3, spanGaps: true, pointRadius: 3 },
+        { label: "Overall", data: sorted.map(d => d.overallFeeling), borderColor: theme.palette.overall, tension: 0.3, spanGaps: true, pointRadius: 3 },
+        { label: "Physical", data: sorted.map(d => d.physicalFeeling), borderColor: theme.palette.physical, tension: 0.3, spanGaps: true, pointRadius: 3 },
+        { label: "Mental", data: sorted.map(d => d.mentalFeeling), borderColor: theme.palette.mental, tension: 0.3, spanGaps: true, pointRadius: 3 },
+        { label: "Energy", data: sorted.map(d => d.energyFeeling), borderColor: theme.palette.energy, tension: 0.3, spanGaps: true, pointRadius: 3 },
 
-        { label: "Avg", data: markerData(avgOverall), borderColor: "#93c5fd", pointRadius: 4, showLine: false, _isAverageMarker: true, _averageFor: "Overall", _labelText: avgOverall != null ? avgOverall.toFixed(1) : "" },
-        { label: "Avg", data: markerData(avgPhysical), borderColor: "#fdba74", pointRadius: 4, showLine: false, _isAverageMarker: true, _averageFor: "Physical", _labelText: avgPhysical != null ? avgPhysical.toFixed(1) : "" },
-        { label: "Avg", data: markerData(avgMental), borderColor: "#86efac", pointRadius: 4, showLine: false, _isAverageMarker: true, _averageFor: "Mental", _labelText: avgMental != null ? avgMental.toFixed(1) : "" },
-        { label: "Avg", data: markerData(avgEnergy), borderColor: "#d8b4fe", pointRadius: 4, showLine: false, _isAverageMarker: true, _averageFor: "Energy", _labelText: avgEnergy != null ? avgEnergy.toFixed(1) : "" },
+        { label: "Avg", data: markerData(avgOverall), borderColor: theme.palette.overallSoft, pointRadius: 4, showLine: false, _isAverageMarker: true, _averageFor: "Overall", _labelText: avgOverall != null ? avgOverall.toFixed(1) : "" },
+        { label: "Avg", data: markerData(avgPhysical), borderColor: theme.palette.physicalSoft, pointRadius: 4, showLine: false, _isAverageMarker: true, _averageFor: "Physical", _labelText: avgPhysical != null ? avgPhysical.toFixed(1) : "" },
+        { label: "Avg", data: markerData(avgMental), borderColor: theme.palette.mentalSoft, pointRadius: 4, showLine: false, _isAverageMarker: true, _averageFor: "Mental", _labelText: avgMental != null ? avgMental.toFixed(1) : "" },
+        { label: "Avg", data: markerData(avgEnergy), borderColor: theme.palette.energySoft, pointRadius: 4, showLine: false, _isAverageMarker: true, _averageFor: "Energy", _labelText: avgEnergy != null ? avgEnergy.toFixed(1) : "" },
       ],
     },
     options: {
@@ -669,13 +711,13 @@ function buildCharts(data) {
     data: {
       labels,
       datasets: [
-        { label: "Time Up", data: sorted.map(d => d.timeUpHours), borderColor: "#0ea5e9", tension: 0.3, spanGaps: true, pointRadius: 3 },
-        { label: "Time in Bed", data: sorted.map(d => d.timeInBedHours), borderColor: "#ef4444", tension: 0.3, spanGaps: true, pointRadius: 3 },
+        { label: "Time Up", data: sorted.map(d => d.timeUpHours), borderColor: theme.palette.wake, tension: 0.3, spanGaps: true, pointRadius: 3 },
+        { label: "Time in Bed", data: sorted.map(d => d.timeInBedHours), borderColor: theme.palette.bed, tension: 0.3, spanGaps: true, pointRadius: 3 },
 
-        { label: "Avg", data: markerData(avgTimeUp), borderColor: "#7dd3fc", pointRadius: 4, showLine: false, _isAverageMarker: true, _labelText: formatTimeFromHours(avgTimeUp) },
-        { label: "Avg", data: markerData(avgTimeBed), borderColor: "#fca5a5", pointRadius: 4, showLine: false, _isAverageMarker: true, _labelText: formatTimeFromHours(avgTimeBed) },
-        { label: "Time Up Goal", data: new Array(labels.length).fill(timeGoals.timeUpHours), borderColor: "#7dd3fc", borderDash: [5, 5], pointRadius: 0, spanGaps: true },
-        { label: "Bedtime Goal", data: new Array(labels.length).fill(timeGoals.timeBedHours), borderColor: "#fca5a5", borderDash: [5, 5], pointRadius: 0, spanGaps: true },
+        { label: "Avg", data: markerData(avgTimeUp), borderColor: theme.palette.wakeSoft, pointRadius: 4, showLine: false, _isAverageMarker: true, _labelText: formatTimeFromHours(avgTimeUp) },
+        { label: "Avg", data: markerData(avgTimeBed), borderColor: theme.palette.bedSoft, pointRadius: 4, showLine: false, _isAverageMarker: true, _labelText: formatTimeFromHours(avgTimeBed) },
+        { label: "Time Up Goal", data: new Array(labels.length).fill(timeGoals.timeUpHours), borderColor: theme.palette.wakeSoft, borderDash: [5, 5], pointRadius: 0, spanGaps: true },
+        { label: "Bedtime Goal", data: new Array(labels.length).fill(timeGoals.timeBedHours), borderColor: theme.palette.bedSoft, borderDash: [5, 5], pointRadius: 0, spanGaps: true },
       ],
     },
     options: {
@@ -749,13 +791,13 @@ function buildCharts(data) {
         const dt = new Date(Number(yy), Number(mm) - 1, 1); // local time
         return dt.toLocaleDateString("en-US", { month: "short", year: "numeric" });
       }),
-      datasets: habitDefs.map(habit => ({
+      datasets: habitDefs.map((habit, habitIndex) => ({
         label: habit.label,
         data: keys.map(k => {
           const habitMonth = monthGroups[k][habit.chartKey];
           return pct(habitMonth.yes, habitMonth.tracked);
         }),
-        backgroundColor: habit.color,
+        backgroundColor: theme.palette.habits?.[habitIndex % theme.palette.habits.length] || habit.color,
       })),
     },
     options: {
@@ -789,10 +831,10 @@ function buildCharts(data) {
       data: {
         labels: hoursLabels,
         datasets: [
-          { label: "Work Hours", data: workData, backgroundColor: "#3b82f6", stack: HOURS_CHART_CONFIG.stacked ? "time" : undefined },
-          { label: "Personal Project Hours", data: personalData, backgroundColor: "#10b981", stack: HOURS_CHART_CONFIG.stacked ? "time" : undefined },
-          { label: "Work Goal", type: "line", data: new Array(hoursLabels.length).fill(timeGoals.hoursWorked), borderColor: "#93c5fd", borderDash: [5, 5], pointRadius: 0 },
-          { label: "Personal Goal", type: "line", data: new Array(hoursLabels.length).fill(timeGoals.hoursPersonal), borderColor: "#6ee7b7", borderDash: [5, 5], pointRadius: 0 },
+          { label: "Work Hours", data: workData, backgroundColor: theme.palette.work, stack: HOURS_CHART_CONFIG.stacked ? "time" : undefined },
+          { label: "Personal Project Hours", data: personalData, backgroundColor: theme.palette.personal, stack: HOURS_CHART_CONFIG.stacked ? "time" : undefined },
+          { label: "Work Goal", type: "line", data: new Array(hoursLabels.length).fill(timeGoals.hoursWorked), borderColor: theme.palette.workGoal, borderDash: [5, 5], pointRadius: 0 },
+          { label: "Personal Goal", type: "line", data: new Array(hoursLabels.length).fill(timeGoals.hoursPersonal), borderColor: theme.palette.personalGoal, borderDash: [5, 5], pointRadius: 0 },
         ],
       },
       options: {

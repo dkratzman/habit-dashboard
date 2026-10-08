@@ -62,6 +62,7 @@ DayMark is a personal habit dashboard built as a vanilla HTML/CSS/JavaScript app
 - Habit Coach shows three local, automatic cards on the Week page and uses minimum sample sizes before reporting an association.
 - Daily Notes table renders Date, Keyword, Summary, and Overall.
 - Dark mode affects chart colors through `getChartTheme()` and `body.dark`.
+- Appearance settings now cycle through Light, Dark, and a scoped Journal theme; Journal uses paper texture, ink typography, and muted chart colors without changing the original themes.
 - Dashboard can switch between weekly summary and chart sections.
 - Mobile bottom navigation is present across main app pages.
 - Entry page supports one entry per day and asks before overwriting an existing entry.
@@ -85,6 +86,7 @@ DayMark is a personal habit dashboard built as a vanilla HTML/CSS/JavaScript app
 - Added mobile bottom navigation and responsive mobile layouts.
 - Added a local-only Habit Coach MVP with recent movement, statistically cautious habit associations, and a suggested one-week focus.
 - Added automated coach checks and a GitHub Actions validation workflow for the Capacitor web bundle.
+- Added an optional Journal appearance with warm paper texture, restrained natural colors, and matching charts across dashboard, entry, data, settings, and login pages.
 - Added a Capacitor iOS shell for bundling the web app as DayMark.
 - Added a `www` bundle output generated from root app files.
 - Added npm scripts for Capacitor build/sync/open workflows.
