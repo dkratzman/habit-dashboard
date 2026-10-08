@@ -15,6 +15,7 @@ const rootFiles = [
   "input.js",
   "login.js",
   "habitPreferences.js",
+  "habitCoach.js",
   "theme.js",
   "supabaseClient.js"
 ];

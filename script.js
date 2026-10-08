@@ -274,7 +274,7 @@ function mapRow(row) {
     date: normalizeDateOnlyISO(row.timestamp),
     rawTimestamp: row.timestamp,
 
-    overallFeeling: Number(row.overall_feeling),
+    overallFeeling: row.overall_feeling != null ? Number(row.overall_feeling) : null,
     physicalFeeling: row.physical_feeling != null ? Number(row.physical_feeling) : null,
     mentalFeeling: row.mental_feeling != null ? Number(row.mental_feeling) : null,
     energyFeeling: row.energy != null ? Number(row.energy) : null,
@@ -855,9 +855,13 @@ function computeWeeklySummary(data) {
 
   const safeCount = (arr, predicate) => arr.reduce((sum, x) => sum + (predicate(x) ? 1 : 0), 0);
 
-  const summarizePeriod = (days) => {
+  const summarizePeriod = (days, start, end) => {
+    const validOverallRatings = days
+      .map(d => d.overallFeeling)
+      .filter(value => Number.isFinite(value) && value > 0);
     const ratings = {
-      overallAvg: safeAvg(days.map(d => d.overallFeeling)),
+      overallAvg: safeAvg(validOverallRatings),
+      overallCount: validOverallRatings.length,
       physicalAvg: safeAvg(days.map(d => d.physicalFeeling)),
       mentalAvg: safeAvg(days.map(d => d.mentalFeeling)),
       energyAvg: safeAvg(days.map(d => d.energyFeeling)),
@@ -889,8 +893,8 @@ function computeWeeklySummary(data) {
 
     return {
       window: {
-        startISO: normalizeDateOnlyISO(startCurrent),
-        endISO: normalizeDateOnlyISO(endCurrent),
+        startISO: normalizeDateOnlyISO(start),
+        endISO: normalizeDateOnlyISO(end),
         daysIncluded: days.length,
       },
       ratings,
@@ -904,8 +908,8 @@ function computeWeeklySummary(data) {
     };
   };
 
-  const current = summarizePeriod(currentDays);
-  const previous = summarizePeriod(previousDays);
+  const current = summarizePeriod(currentDays, startCurrent, endCurrent);
+  const previous = summarizePeriod(previousDays, startPrevious, endPrevious);
 
   const deltas = {
     ratings: {
@@ -940,6 +944,22 @@ function computeWeeklySummary(data) {
   return weeklySummary;
 }
 
+function refreshHabitCoach() {
+  if (!IS_DASHBOARD || !window.HabitCoach || !window.weeklySummary) return;
+
+  const habitDefinitions = typeof getEnabledHabitDefinitions === "function"
+    ? getEnabledHabitDefinitions()
+    : [];
+  window.habitCoachInsights = window.HabitCoach.buildInsights(
+    Array.isArray(window.allData) ? window.allData : [],
+    window.weeklySummary,
+    habitDefinitions
+  );
+  window.HabitCoach.render("habit-coach-insights", window.habitCoachInsights);
+}
+
+window.refreshHabitCoach = refreshHabitCoach;
+
 // -------------------------
 // Load data
 // -------------------------
@@ -967,6 +987,7 @@ window.addEventListener("load", async () => {
 
   // Weekly Summary is computed after data loads. No UI yet.
   window.weeklySummary = computeWeeklySummary(allData);
+  refreshHabitCoach();
   window.dispatchEvent(new CustomEvent("habitdash:weekly-summary-ready"));
   console.log("📊 weeklySummary", window.weeklySummary);
 });
@@ -976,6 +997,8 @@ window.addEventListener("habitdash:time-goals-updated", () => {
     buildCharts(typeof getFilteredData === "function" ? getFilteredData() : window.allData);
   }
 });
+
+window.addEventListener("habitdash:habit-preferences-updated", refreshHabitCoach);
 
 // -------------------------
 // Weekly Summary UI Compatibility Layer

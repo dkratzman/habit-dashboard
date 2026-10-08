@@ -210,6 +210,24 @@
     </div>
   </div>
 
+  <div class="habit-coach" aria-labelledby="habit-coach-title">
+    <div class="habit-coach__header">
+      <div>
+        <p class="habit-coach__label">Habit Coach</p>
+        <h2 id="habit-coach-title">A cautious read on your recent patterns</h2>
+      </div>
+      <span class="habit-coach__badge">Based on your entries</span>
+    </div>
+    <div class="habit-coach__grid" id="habit-coach-insights" aria-live="polite">
+      <article class="coach-card coach-card--neutral">
+        <p class="coach-card__eyebrow">Preparing insights</p>
+        <h3>Reviewing your recent entries</h3>
+        <p class="coach-card__body">Your coach will appear after the dashboard data loads.</p>
+      </article>
+    </div>
+    <p class="habit-coach__note">Patterns are directional, not medical or causal conclusions. More consistent logging makes them more useful.</p>
+  </div>
+
   <div class="summary-grid">
 
     <!-- Overall Snapshot -->
@@ -406,6 +424,7 @@
 <script src="supabaseClient.js"></script>
 <script src="theme.js"></script>
 <script src="habitPreferences.js"></script>
+<script src="habitCoach.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="script.js"></script>
 

@@ -5,6 +5,8 @@
   "description": "Capacitor shell for the DayMark habit dashboard.",
   "scripts": {
     "build:cap": "node scripts/copy-to-www.js",
+    "test": "node scripts/check-habit-coach.js",
+    "check": "npm test && npm run build:cap && node scripts/verify-cap-bundle.js",
     "cap:add:ios": "npm run build:cap && npx cap add ios",
     "cap:sync": "npm run build:cap && npx cap sync ios",
     "cap:open:ios": "npx cap open ios"

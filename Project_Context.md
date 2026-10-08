@@ -1,6 +1,6 @@
 # DayMark Habit Dashboard - Project Context
 
-Last updated: May 19, 2026
+Last updated: October 7, 2026
 
 DayMark is a personal habit dashboard built as a vanilla HTML/CSS/JavaScript app with Supabase auth/database persistence and Chart.js visualizations. The browser app still lives at the repository root, and the current branch also includes a Capacitor iOS shell so the same local web files can be bundled into a mobile app.
 
@@ -14,28 +14,18 @@ DayMark is a personal habit dashboard built as a vanilla HTML/CSS/JavaScript app
 
 ## Repository And GitHub State
 
-- Current local branch: `capacitor-app-shell`.
+- Current local branch: `main`.
 - GitHub remote: `https://github.com/dkratzman/habit-dashboard.git`.
-- Recent local work includes uncommitted changes and untracked Capacitor/mobile files.
+- The working tree was clean at commit `3be9fdedfea0d70ba53f0da6f91a353f5ddb71f4` before the Habit Coach upgrade began.
+- Local checkpoint branch `codex/pre-habit-coach-20261007` preserves that pre-upgrade commit.
+- The Habit Coach and validation workflow changes from the current upgrade are intentionally left uncommitted for review.
 - Nothing is automatically updated on GitHub unless changes are committed and pushed with Git.
-- As of this update, these local files were modified or added and may still need commit/push:
-  - `input.html`
-  - `input.js`
-  - `style.css`
-  - `.gitignore`
-  - `CAPACITOR.md`
-  - `capacitor.config.json`
-  - `package.json`
-  - `package-lock.json`
-  - `scripts/`
-  - `www/`
-  - `ios/`
-  - `Project_Context.md`
 
 ## Core Files
 
 - `index.html`: main dashboard, dashboard section tabs, onboarding/walkthrough modals, weekly summary markup, chart canvases, Daily Notes table, mobile bottom nav.
 - `script.js`: dashboard data loading, data mapping, date filters, chart building, weekly summary computation, onboarding behavior, Daily Notes rendering.
+- `habitCoach.js`: local-only Habit Coach analysis and safe UI rendering for movement, habit associations, and a suggested focus.
 - `input.html`: daily entry page with date calendar, habit toggles, time/number steppers, ratings, daily keyword/summary, overwrite modal, recent entry table, mobile bottom nav.
 - `input.js`: entry calendar behavior, habit toggle behavior, time and number steppers, goal comparison coloring, duplicate-date overwrite flow, Supabase insert/update, form reset and submission summary.
 - `settings.html`: habit choice setup, time-goal setup, walkthrough/example modals, settings actions, mobile bottom nav.
@@ -46,6 +36,9 @@ DayMark is a personal habit dashboard built as a vanilla HTML/CSS/JavaScript app
 - `login.html` and `login.js`: auth UI and login/signup flow.
 - `CAPACITOR.md`: mobile shell setup notes and commands.
 - `scripts/copy-to-www.js`: copies root web app files into `www` for Capacitor.
+- `scripts/check-habit-coach.js`: deterministic checks for coach thresholds, cautious wording, and sparse-data fallbacks.
+- `scripts/verify-cap-bundle.js`: confirms required web files are present and current in the generated Capacitor bundle.
+- `.github/workflows/validate.yml`: installs dependencies and runs `npm run check` for pushes and pull requests.
 - `capacitor.config.json`: Capacitor app config for DayMark.
 
 ## Important Implementation Rules
@@ -66,6 +59,7 @@ DayMark is a personal habit dashboard built as a vanilla HTML/CSS/JavaScript app
 - Date filters use `startMonth` and `endMonth`.
 - `buildCharts(getFilteredData())` is the main dashboard rebuild trigger.
 - Weekly summary compares recent 7 days against previous 7 days.
+- Habit Coach shows three local, automatic cards on the Week page and uses minimum sample sizes before reporting an association.
 - Daily Notes table renders Date, Keyword, Summary, and Overall.
 - Dark mode affects chart colors through `getChartTheme()` and `body.dark`.
 - Dashboard can switch between weekly summary and chart sections.
@@ -89,6 +83,8 @@ DayMark is a personal habit dashboard built as a vanilla HTML/CSS/JavaScript app
 - Added Daily Notes rendering on the dashboard.
 - Added dark-mode-friendly chart and table styling.
 - Added mobile bottom navigation and responsive mobile layouts.
+- Added a local-only Habit Coach MVP with recent movement, statistically cautious habit associations, and a suggested one-week focus.
+- Added automated coach checks and a GitHub Actions validation workflow for the Capacitor web bundle.
 - Added a Capacitor iOS shell for bundling the web app as DayMark.
 - Added a `www` bundle output generated from root app files.
 - Added npm scripts for Capacitor build/sync/open workflows.
@@ -142,5 +138,6 @@ I am working on DayMark, a vanilla HTML/CSS/JavaScript personal habit dashboard 
 - Push branch `capacitor-app-shell` to GitHub when ready.
 - Verify the browser app after UI changes.
 - Run `npm run build:cap` before syncing iOS.
+- Run `npm run check` before proposing or committing app changes.
 - Decide whether `www/` should stay committed or be treated as generated output.
 - Decide whether the Capacitor branch should be merged into the main GitHub branch.

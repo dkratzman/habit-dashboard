@@ -1532,6 +1532,96 @@ body.dark .header-right button:hover {
   display: none; /* optional; keeping minimal noise */
 }
 
+.habit-coach {
+  margin-top: 16px;
+  padding: 18px;
+  border: 1px solid color-mix(in srgb, var(--border-color) 72%, #3b82f6 28%);
+  border-radius: 16px;
+  background: linear-gradient(145deg, color-mix(in srgb, var(--card-bg) 92%, #dbeafe 8%), var(--card-bg));
+}
+
+.habit-coach__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.habit-coach__header h2 {
+  margin: 2px 0 0;
+  font-size: 1.15rem;
+}
+
+.habit-coach__label,
+.coach-card__eyebrow {
+  margin: 0;
+  color: #2563eb;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.habit-coach__badge {
+  flex: 0 0 auto;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--muted-bg) 75%, #dbeafe 25%);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.habit-coach__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.coach-card {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--border-color);
+  border-top: 3px solid #94a3b8;
+  border-radius: 12px;
+  background: var(--card-bg);
+}
+
+.coach-card--positive {
+  border-top-color: #16a34a;
+}
+
+.coach-card--attention {
+  border-top-color: #f59e0b;
+}
+
+.coach-card--focus {
+  border-top-color: #6366f1;
+}
+
+.coach-card h3 {
+  margin: 7px 0 6px;
+  font-size: 0.98rem;
+  line-height: 1.35;
+}
+
+.coach-card__body,
+.habit-coach__note {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  opacity: 0.78;
+}
+
+.habit-coach__note {
+  margin-top: 12px;
+  font-size: 0.76rem;
+}
+
+body.dark .habit-coach {
+  background: linear-gradient(145deg, rgba(37, 99, 235, 0.09), var(--card-bg));
+}
+
 .summary-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -1624,6 +1714,19 @@ body.dark .ws-row:nth-child(even):not(.ws-head) {
 
 /* Mobile: keep readable */
 @media (max-width: 520px) {
+  .habit-coach {
+    padding: 14px;
+  }
+
+  .habit-coach__header {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .habit-coach__grid {
+    grid-template-columns: 1fr;
+  }
+
   .ws-row {
     grid-template-columns: 1.2fr 0.8fr 0.8fr 0.6fr;
     gap: 8px;
