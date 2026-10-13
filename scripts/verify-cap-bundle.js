@@ -9,6 +9,9 @@ const requiredFiles = [
   "script.js",
   "habitPreferences.js",
   "habitCoach.js",
+  "input.html",
+  "input.js",
+  "entryEditor.js",
 ];
 
 requiredFiles.forEach(relativePath => {
@@ -24,5 +27,8 @@ requiredFiles.forEach(relativePath => {
 
 const bundledIndex = fs.readFileSync(path.join(rootDir, "www", "index.html"), "utf8");
 assert.match(bundledIndex, /<script src="habitCoach\.js"><\/script>/);
+
+const bundledInput = fs.readFileSync(path.join(rootDir, "www", "input.html"), "utf8");
+assert.match(bundledInput, /<script src="entryEditor\.js"><\/script>/);
 
 console.log("Capacitor web bundle checks passed.");

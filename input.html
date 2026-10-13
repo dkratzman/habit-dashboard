@@ -129,6 +129,15 @@
         </div>
       </div>
 
+      <div class="entry-edit-banner" id="entryEditBanner" role="status" aria-live="polite" hidden>
+        <div>
+          <span id="entryEditEyebrow">Editing entry</span>
+          <strong id="entryEditDate">Selected date</strong>
+          <small id="entryEditHelp">Your saved values are loaded below. Saving will update this entry.</small>
+        </div>
+        <button type="button" class="btn-secondary" id="cancelEntryEdit">Cancel editing</button>
+      </div>
+
       <!-- Time Up: buttons 4:00a–11:00a every 30 mins -->
       <div class="form-row time-entry-row time-section-start">
         <div class="sleep-panel">
@@ -361,6 +370,7 @@
 <!-- Theme -->
 <script src="theme.js"></script>
 <script src="habitPreferences.js"></script>
+<script src="entryEditor.js"></script>
 
 <!-- Input page logic -->
 <script src="input.js"></script>

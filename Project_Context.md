@@ -1,6 +1,6 @@
 # DayMark Habit Dashboard - Project Context
 
-Last updated: October 7, 2026
+Last updated: October 12, 2026
 
 DayMark is a personal habit dashboard built as a vanilla HTML/CSS/JavaScript app with Supabase auth/database persistence and Chart.js visualizations. The browser app still lives at the repository root, and the current branch also includes a Capacitor iOS shell so the same local web files can be bundled into a mobile app.
 
@@ -14,11 +14,10 @@ DayMark is a personal habit dashboard built as a vanilla HTML/CSS/JavaScript app
 
 ## Repository And GitHub State
 
-- Current local branch: `main`.
+- Current local branch: `codex/past-entry-editing`.
 - GitHub remote: `https://github.com/dkratzman/habit-dashboard.git`.
-- The working tree was clean at commit `3be9fdedfea0d70ba53f0da6f91a353f5ddb71f4` before the Habit Coach upgrade began.
-- Local checkpoint branch `codex/pre-habit-coach-20261007` preserves that pre-upgrade commit.
-- The Habit Coach and validation workflow changes from the current upgrade are intentionally left uncommitted for review.
+- The branch started from production commit `375ef0f` (`Add journal appearance theme`).
+- Past-entry editing changes are intentionally left uncommitted for local review.
 - Nothing is automatically updated on GitHub unless changes are committed and pushed with Git.
 
 ## Core Files
@@ -28,6 +27,7 @@ DayMark is a personal habit dashboard built as a vanilla HTML/CSS/JavaScript app
 - `habitCoach.js`: local-only Habit Coach analysis and safe UI rendering for movement, habit associations, and a suggested focus.
 - `input.html`: daily entry page with date calendar, habit toggles, time/number steppers, ratings, daily keyword/summary, overwrite modal, recent entry table, mobile bottom nav.
 - `input.js`: entry calendar behavior, habit toggle behavior, time and number steppers, goal comparison coloring, duplicate-date overwrite flow, Supabase insert/update, form reset and submission summary.
+- `entryEditor.js`: conversion and data-preservation helpers for loading and updating completed daily entries.
 - `settings.html`: habit choice setup, time-goal setup, walkthrough/example modals, settings actions, mobile bottom nav.
 - `habitPreferences.js`: fixed habit catalog, enabled habit preferences, local time-goal defaults, setup rendering, and app-wide preference update events.
 - `style.css`: shared responsive styling, dark/light theme variables, dashboard tabs, weekly summary, entry calendar, input controls, onboarding/settings modals, mobile bottom navigation.
@@ -37,6 +37,7 @@ DayMark is a personal habit dashboard built as a vanilla HTML/CSS/JavaScript app
 - `CAPACITOR.md`: mobile shell setup notes and commands.
 - `scripts/copy-to-www.js`: copies root web app files into `www` for Capacitor.
 - `scripts/check-habit-coach.js`: deterministic checks for coach thresholds, cautious wording, and sparse-data fallbacks.
+- `scripts/check-entry-editor.js`: deterministic checks for entry prefilling, date/time formatting, and disabled-habit preservation.
 - `scripts/verify-cap-bundle.js`: confirms required web files are present and current in the generated Capacitor bundle.
 - `.github/workflows/validate.yml`: installs dependencies and runs `npm run check` for pushes and pull requests.
 - `capacitor.config.json`: Capacitor app config for DayMark.
@@ -66,6 +67,7 @@ DayMark is a personal habit dashboard built as a vanilla HTML/CSS/JavaScript app
 - Dashboard can switch between weekly summary and chart sections.
 - Mobile bottom navigation is present across main app pages.
 - Entry page supports one entry per day and asks before overwriting an existing entry.
+- Completed calendar dates can be opened for explicit editing, with saved values prefilled and disabled-habit data preserved.
 
 ## Major Updates Made
 
@@ -76,6 +78,7 @@ DayMark is a personal habit dashboard built as a vanilla HTML/CSS/JavaScript app
 - Added goal-aware input steppers that visually indicate whether a value meets or misses its goal.
 - Added an entry calendar with entered/waiting/upcoming day states.
 - Added duplicate-date detection and overwrite confirmation for daily entries.
+- Added explicit past-entry editing from completed calendar dates with a visible editing state and cancel action.
 - Added daily keyword and daily summary fields.
 - Added recent submission summary feedback after saving an entry.
 - Added dashboard section navigation so weekly summary and charts are separated.

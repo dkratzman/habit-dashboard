@@ -6,6 +6,10 @@ const calendarState = {
   selectedDate: "",
   entryDates: new Set()
 };
+const entryEditState = {
+  entry: null,
+  requestId: 0
+};
 const TIME_OPTIONS = {
   timeBed: [
     "8:00p", "8:30p", "9:00p", "9:30p", "10:00p", "10:30p", "11:00p", "11:30p",
@@ -58,6 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (typeof applyHabitVisibility === "function") applyHabitVisibility();
   setupQuickEntryOrder();
   setupEntryCalendar();
+  setupEntryEditing();
   setupFirstEntryGuide();
   setupRequiredTimeGoalsPrompt();
   setupHabitToggles();
@@ -73,6 +78,7 @@ function setupQuickEntryOrder() {
 
   [
     document.querySelector(".date-picker-row"),
+    document.getElementById("entryEditBanner"),
     document.querySelector(".habit-section"),
     document.querySelector(".rating-section"),
     ...document.querySelectorAll(".time-entry-row"),
@@ -216,7 +222,7 @@ function renderEntryCalendar() {
       <span class="calendar-day-number">${day}</span>
       <span class="calendar-status-dot" aria-hidden="true"></span>
     `;
-    button.addEventListener("click", () => selectCalendarDate(dateKey));
+    button.addEventListener("click", () => handleCalendarDateSelection(dateKey, hasEntry));
     grid.appendChild(button);
   }
 }
@@ -261,6 +267,151 @@ function getCalendarStatusLabel(status) {
   if (status === "has-entry") return "entry complete";
   if (status === "needs-entry") return "waiting on data";
   return "upcoming";
+}
+
+// --------------------------------------
+// Past Entry Editing
+// --------------------------------------
+function setupEntryEditing() {
+  document.getElementById("cancelEntryEdit")?.addEventListener("click", () => {
+    clearEntryEditMode({ dateKey: calendarState.selectedDate, reset: true });
+    showSaveStatus("Editing canceled. Start a fresh entry for this date if needed.");
+  });
+}
+
+async function handleCalendarDateSelection(dateKey, hasEntry) {
+  selectCalendarDate(dateKey);
+
+  if (!hasEntry) {
+    clearEntryEditMode({ dateKey, reset: true });
+    return;
+  }
+
+  await loadExistingEntryForEditing(dateKey);
+}
+
+async function loadExistingEntryForEditing(dateKey) {
+  const requestId = ++entryEditState.requestId;
+  entryEditState.entry = null;
+  resetDailyFormToDefaults(dateKey);
+  setEntryEditBanner("loading", dateKey);
+  setSubmitButtonLabel("Loading...", true);
+
+  try {
+    const userId = await getCurrentUserId();
+    if (!userId || requestId !== entryEditState.requestId) return;
+
+    const { data, error } = await supabaseClient
+      .from("daily_entries")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("timestamp", dateKey)
+      .limit(1);
+
+    if (requestId !== entryEditState.requestId) return;
+    if (error) throw error;
+
+    const storedEntry = data?.[0];
+    if (!storedEntry) {
+      calendarState.entryDates.delete(dateKey);
+      clearEntryEditMode({ dateKey, reset: true });
+      renderEntryCalendar();
+      showSaveStatus("That entry could not be found. You can create a new one instead.", true);
+      return;
+    }
+
+    entryEditState.entry = storedEntry;
+    populateEntryForm(EntryEditor.mapDatabaseEntryToForm(storedEntry));
+    setEntryEditBanner("editing", dateKey);
+    setSubmitButtonLabel("Save Changes");
+  } catch (error) {
+    if (requestId !== entryEditState.requestId) return;
+    console.error("Entry load failed:", error);
+    entryEditState.entry = null;
+    setEntryEditBanner("error", dateKey);
+    setSubmitButtonLabel("Save Entry");
+  }
+}
+
+function populateEntryForm(entry) {
+  if (!entry) return;
+
+  selectCalendarDate(entry.date || calendarState.selectedDate);
+
+  Object.entries(entry.habits || {}).forEach(([habitId, isOn]) => {
+    const toggle = document.querySelector(`.habit-toggle[data-input-id="${habitId}"]`);
+    if (toggle) syncHabitToggle(toggle, isOn);
+  });
+
+  Object.entries(entry.ratings || {}).forEach(([ratingId, value]) => {
+    resetButtonGroupToValue(ratingId, String(value));
+  });
+
+  const goals = getActiveTimeGoals();
+  resetTimeStepperToValue("timeBed", entry.timeBed || goals.timeBed);
+  resetTimeStepperToValue("timeUp", entry.timeUp || goals.timeUp);
+  resetNumberStepperToValue("hoursWorked", entry.hoursWorked);
+  resetNumberStepperToValue("hoursPersonal", entry.hoursPersonal);
+
+  const keyword = document.getElementById("keyword");
+  const summary = document.getElementById("summary");
+  if (keyword) keyword.value = entry.keyword;
+  if (summary) summary.value = entry.summary;
+}
+
+function clearEntryEditMode(options = {}) {
+  const { dateKey = calendarState.selectedDate, reset = false } = options;
+  entryEditState.requestId += 1;
+  entryEditState.entry = null;
+
+  const banner = document.getElementById("entryEditBanner");
+  if (banner) {
+    banner.hidden = true;
+    banner.classList.remove("is-loading", "is-error");
+    banner.removeAttribute("aria-busy");
+  }
+
+  setSubmitButtonLabel("Save Entry");
+  if (reset && dateKey) resetDailyFormToDefaults(dateKey);
+}
+
+function setEntryEditBanner(state, dateKey) {
+  const banner = document.getElementById("entryEditBanner");
+  const eyebrow = document.getElementById("entryEditEyebrow");
+  const date = document.getElementById("entryEditDate");
+  const help = document.getElementById("entryEditHelp");
+  const cancelButton = document.getElementById("cancelEntryEdit");
+  if (!banner) return;
+
+  const label = EntryEditor.formatEditDateLabel(dateKey);
+  banner.hidden = false;
+  banner.classList.toggle("is-loading", state === "loading");
+  banner.classList.toggle("is-error", state === "error");
+  if (state === "loading") banner.setAttribute("aria-busy", "true");
+  else banner.removeAttribute("aria-busy");
+
+  if (eyebrow) eyebrow.textContent = state === "error" ? "Could not load entry" : state === "loading" ? "Loading entry" : "Editing entry";
+  if (date) date.textContent = label;
+  if (help) {
+    help.textContent = state === "error"
+      ? "Try selecting this date again. Your saved entry was not changed."
+      : state === "loading"
+        ? "Getting your saved values..."
+        : "Your saved values are loaded below. Saving will update this entry.";
+  }
+  if (cancelButton) {
+    cancelButton.disabled = false;
+    cancelButton.hidden = false;
+    cancelButton.textContent = state === "error" ? "Dismiss" : "Cancel editing";
+  }
+}
+
+function setSubmitButtonLabel(label, disabled = false) {
+  const submitButton = document.querySelector('#dailyForm button[type="submit"]');
+  if (submitButton) {
+    submitButton.textContent = label;
+    submitButton.disabled = disabled;
+  }
 }
 
 // --------------------------------------
@@ -491,14 +642,27 @@ function setupFormSubmit() {
       const entry = buildEntryFromForm(userId);
       console.log("Submitting entry:", entry);
 
-      const existingEntry = await findExistingEntryForDate(userId, entry.timestamp);
+      const explicitEntry = entryEditState.entry &&
+        formatSubmissionDate(entryEditState.entry.timestamp) === formatSubmissionDate(entry.timestamp)
+        ? entryEditState.entry
+        : null;
+      const existingEntry = explicitEntry || await findExistingEntryForDate(userId, entry.timestamp);
       let saveResult;
 
       if (existingEntry) {
-        const shouldOverwrite = await confirmOverwrite(entry.timestamp);
-        if (!shouldOverwrite) {
-          showSaveStatus("Save canceled. Existing entry was not changed.");
-          return;
+        if (!explicitEntry) {
+          const shouldOverwrite = await confirmOverwrite(entry.timestamp);
+          if (!shouldOverwrite) {
+            showSaveStatus("Save canceled. Existing entry was not changed.");
+            return;
+          }
+        }
+
+        if (window.EntryEditor) {
+          const enabledHabitIds = typeof getEnabledHabitIds === "function"
+            ? getEnabledHabitIds()
+            : Object.keys(EntryEditor.HABIT_FIELD_MAP);
+          EntryEditor.preserveDisabledHabitValues(entry, existingEntry, enabledHabitIds);
         }
 
         saveResult = await updateExistingEntry(existingEntry, entry, userId);
@@ -524,6 +688,7 @@ function setupFormSubmit() {
       showSaveStatus(existingEntry ? "Entry updated successfully!" : "Entry saved successfully!");
       renderLastSubmissionSummary(entry);
       calendarState.entryDates.add(entry.timestamp);
+      clearEntryEditMode({ reset: false });
       resetDailyFormToDefaults(entry.timestamp);
 
       if (
@@ -568,7 +733,7 @@ async function findExistingEntryForDate(userId, date) {
 
   const { data, error } = await supabaseClient
     .from("daily_entries")
-    .select("id, timestamp")
+    .select("*")
     .eq("user_id", userId)
     .eq("timestamp", date)
     .limit(1);

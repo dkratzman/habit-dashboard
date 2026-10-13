@@ -13,6 +13,7 @@ const rootFiles = [
   "style.css",
   "script.js",
   "input.js",
+  "entryEditor.js",
   "login.js",
   "habitPreferences.js",
   "habitCoach.js",
