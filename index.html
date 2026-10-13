@@ -26,7 +26,8 @@
 </div>
 
 <nav class="dashboard-page-nav" aria-label="Dashboard sections">
-  <button type="button" class="active" data-dashboard-page-target="trends">Trends</button>
+  <button type="button" class="active" data-dashboard-page-target="home">Home</button>
+  <button type="button" data-dashboard-page-target="trends">Trends</button>
   <button type="button" data-dashboard-page-target="week">Week</button>
   <button type="button" data-dashboard-page-target="sleep-time">Sleep / Time</button>
 </nav>
@@ -186,7 +187,7 @@
 </div>
 
 
-<div class="filter-bar" aria-label="Dashboard date range">
+<div class="filter-bar" aria-label="Dashboard date range" hidden>
   <div class="filter-buttons">
     <button type="button" data-range-preset="1w">1W</button>
     <button type="button" data-range-preset="1m">1M</button>
@@ -196,6 +197,53 @@
     <button type="button" data-range-preset="all">ALL</button>
   </div>
 </div>
+
+<!-- =========================
+     MOMENTUM & STREAKS
+========================= -->
+<section class="momentum-panel" id="momentum-panel" data-dashboard-page="home" aria-labelledby="momentum-title">
+  <div class="momentum-header">
+    <div>
+      <p class="momentum-label">Momentum</p>
+      <h2 id="momentum-title">Your consistency at a glance</h2>
+    </div>
+    <span class="momentum-badge" id="momentum-entry-count">Loading entries...</span>
+  </div>
+
+  <div class="momentum-metrics" aria-live="polite">
+    <article class="momentum-metric momentum-metric--current">
+      <span>Current check-in streak</span>
+      <strong><b id="momentum-current">—</b> <small id="momentum-current-unit">days</small></strong>
+      <p id="momentum-current-note">Reviewing your recent entries</p>
+    </article>
+    <article class="momentum-metric">
+      <span>Best check-in streak</span>
+      <strong><b id="momentum-best">—</b> <small id="momentum-best-unit">days</small></strong>
+      <p>Your longest run of consecutive entries</p>
+    </article>
+    <article class="momentum-metric">
+      <span>Recent logging</span>
+      <strong><b id="momentum-recent">—/7</b></strong>
+      <p>Entries saved across the last 7 calendar days</p>
+    </article>
+  </div>
+
+  <div class="momentum-body">
+    <div class="momentum-week-wrap">
+      <h3>Last 7 days</h3>
+      <div class="momentum-week" id="momentum-week"></div>
+    </div>
+    <div class="momentum-habits-wrap">
+      <div class="momentum-subhead">
+        <h3>Habit streaks</h3>
+        <span>Current · best · recent</span>
+      </div>
+      <div class="momentum-habits" id="momentum-habits">
+        <p class="momentum-empty">Calculating your habit streaks...</p>
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- =========================
      WEEKLY SUMMARY
@@ -425,6 +473,7 @@
 <script src="theme.js"></script>
 <script src="habitPreferences.js"></script>
 <script src="habitCoach.js"></script>
+<script src="momentum.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="script.js"></script>
 
@@ -462,7 +511,7 @@
         button.classList.toggle("active", isActive);
         button.setAttribute("aria-current", isActive ? "page" : "false");
       });
-      if (filterBar) filterBar.hidden = page === "week";
+      if (filterBar) filterBar.hidden = page === "home" || page === "week";
       requestAnimationFrame(resizeVisibleCharts);
     };
 
@@ -472,7 +521,7 @@
       });
     });
 
-    showPage("trends");
+    showPage("home");
   });
 </script>
 

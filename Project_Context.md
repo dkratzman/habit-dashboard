@@ -14,10 +14,9 @@ DayMark is a personal habit dashboard built as a vanilla HTML/CSS/JavaScript app
 
 ## Repository And GitHub State
 
-- Current local branch: `codex/past-entry-editing`.
+- Current local branch: `main`.
 - GitHub remote: `https://github.com/dkratzman/habit-dashboard.git`.
-- The branch started from production commit `375ef0f` (`Add journal appearance theme`).
-- Past-entry editing changes are intentionally left uncommitted for local review.
+- Production `main` includes past-entry editing and the Momentum Home page.
 - Nothing is automatically updated on GitHub unless changes are committed and pushed with Git.
 
 ## Core Files
@@ -25,6 +24,7 @@ DayMark is a personal habit dashboard built as a vanilla HTML/CSS/JavaScript app
 - `index.html`: main dashboard, dashboard section tabs, onboarding/walkthrough modals, weekly summary markup, chart canvases, Daily Notes table, mobile bottom nav.
 - `script.js`: dashboard data loading, data mapping, date filters, chart building, weekly summary computation, onboarding behavior, Daily Notes rendering.
 - `habitCoach.js`: local-only Habit Coach analysis and safe UI rendering for movement, habit associations, and a suggested focus.
+- `momentum.js`: local streak calculations and safe rendering for check-in consistency, recent logging, and enabled habits.
 - `input.html`: daily entry page with date calendar, habit toggles, time/number steppers, ratings, daily keyword/summary, overwrite modal, recent entry table, mobile bottom nav.
 - `input.js`: entry calendar behavior, habit toggle behavior, time and number steppers, goal comparison coloring, duplicate-date overwrite flow, Supabase insert/update, form reset and submission summary.
 - `entryEditor.js`: conversion and data-preservation helpers for loading and updating completed daily entries.
@@ -38,6 +38,7 @@ DayMark is a personal habit dashboard built as a vanilla HTML/CSS/JavaScript app
 - `scripts/copy-to-www.js`: copies root web app files into `www` for Capacitor.
 - `scripts/check-habit-coach.js`: deterministic checks for coach thresholds, cautious wording, and sparse-data fallbacks.
 - `scripts/check-entry-editor.js`: deterministic checks for entry prefilling, date/time formatting, and disabled-habit preservation.
+- `scripts/check-momentum.js`: deterministic checks for current/longest streaks, seven-day logging, and lower-is-better habits.
 - `scripts/verify-cap-bundle.js`: confirms required web files are present and current in the generated Capacitor bundle.
 - `.github/workflows/validate.yml`: installs dependencies and runs `npm run check` for pushes and pull requests.
 - `capacitor.config.json`: Capacitor app config for DayMark.
@@ -65,6 +66,7 @@ DayMark is a personal habit dashboard built as a vanilla HTML/CSS/JavaScript app
 - Dark mode affects chart colors through `getChartTheme()` and `body.dark`.
 - Appearance settings now cycle through Light, Dark, and a scoped Journal theme; Journal uses paper texture, ink typography, and muted chart colors without changing the original themes.
 - Dashboard can switch between weekly summary and chart sections.
+- Home opens with a dedicated momentum panel showing current/best check-in streaks, recent logging, and enabled-habit progress bars measured against each personal best; Trends remains a separate charts page.
 - Mobile bottom navigation is present across main app pages.
 - Entry page supports one entry per day and asks before overwriting an existing entry.
 - Completed calendar dates can be opened for explicit editing, with saved values prefilled and disabled-habit data preserved.
@@ -79,6 +81,7 @@ DayMark is a personal habit dashboard built as a vanilla HTML/CSS/JavaScript app
 - Added an entry calendar with entered/waiting/upcoming day states.
 - Added duplicate-date detection and overwrite confirmation for daily entries.
 - Added explicit past-entry editing from completed calendar dates with a visible editing state and cancel action.
+- Added a momentum panel with current and best check-in streaks, a seven-day logging trail, and per-habit progress bars against personal bests.
 - Added daily keyword and daily summary fields.
 - Added recent submission summary feedback after saving an entry.
 - Added dashboard section navigation so weekly summary and charts are separated.

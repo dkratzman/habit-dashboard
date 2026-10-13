@@ -1002,6 +1002,20 @@ function refreshHabitCoach() {
 
 window.refreshHabitCoach = refreshHabitCoach;
 
+function refreshMomentum() {
+  if (!IS_DASHBOARD || !window.Momentum) return;
+  const habitDefinitions = typeof getEnabledHabitDefinitions === "function"
+    ? getEnabledHabitDefinitions()
+    : [];
+  window.momentumSummary = window.Momentum.buildMomentum(
+    Array.isArray(window.allData) ? window.allData : [],
+    habitDefinitions
+  );
+  window.Momentum.render("momentum-panel", window.momentumSummary);
+}
+
+window.refreshMomentum = refreshMomentum;
+
 // -------------------------
 // Load data
 // -------------------------
@@ -1030,6 +1044,7 @@ window.addEventListener("load", async () => {
   // Weekly Summary is computed after data loads. No UI yet.
   window.weeklySummary = computeWeeklySummary(allData);
   refreshHabitCoach();
+  refreshMomentum();
   window.dispatchEvent(new CustomEvent("habitdash:weekly-summary-ready"));
   console.log("📊 weeklySummary", window.weeklySummary);
 });
@@ -1040,7 +1055,10 @@ window.addEventListener("habitdash:time-goals-updated", () => {
   }
 });
 
-window.addEventListener("habitdash:habit-preferences-updated", refreshHabitCoach);
+window.addEventListener("habitdash:habit-preferences-updated", () => {
+  refreshHabitCoach();
+  refreshMomentum();
+});
 
 // -------------------------
 // Weekly Summary UI Compatibility Layer

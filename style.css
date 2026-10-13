@@ -1570,8 +1570,9 @@ body.dark .header-right button:hover {
   }
 
   .dashboard-page-nav button {
-    font-size: 0.8rem;
+    font-size: 0.74rem;
     min-height: 38px;
+    padding-inline: 3px;
     padding-bottom: 8px;
   }
 
@@ -1990,6 +1991,365 @@ body.journal .auth-card::after {
   body.journal section:not(.weekly-summary),
   body.journal .chart-section {
     padding: 14px;
+  }
+}
+
+/* =========================
+   Momentum & Streaks
+========================= */
+
+.momentum-panel {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  padding: 20px;
+  border: 1px solid color-mix(in srgb, var(--border-color) 70%, #22c55e 30%);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 100% 0, rgba(34, 197, 94, 0.09), transparent 35%),
+    var(--card-bg);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+}
+
+.momentum-header,
+.momentum-subhead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.momentum-header h2 {
+  margin: 3px 0 0;
+  font-size: 1.2rem;
+}
+
+.momentum-label {
+  margin: 0;
+  color: #16803d;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.momentum-badge {
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  border: 1px solid color-mix(in srgb, var(--border-color) 72%, #22c55e 28%);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--muted-bg) 82%, #dcfce7 18%);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.momentum-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.momentum-metric {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--card-bg) 92%, var(--muted-bg) 8%);
+}
+
+.momentum-metric--current {
+  border-color: color-mix(in srgb, var(--border-color) 55%, #22c55e 45%);
+  background: color-mix(in srgb, var(--card-bg) 90%, #dcfce7 10%);
+}
+
+.momentum-metric > span {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  opacity: 0.7;
+}
+
+.momentum-metric strong {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-top: 7px;
+  font-variant-numeric: tabular-nums;
+}
+
+.momentum-metric strong b {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.momentum-metric strong small {
+  font-size: 0.82rem;
+  font-weight: 700;
+  opacity: 0.66;
+}
+
+.momentum-metric p {
+  margin: 8px 0 0;
+  font-size: 0.76rem;
+  line-height: 1.4;
+  opacity: 0.66;
+}
+
+.momentum-body {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.8fr) minmax(320px, 1.2fr);
+  gap: 20px;
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border-color);
+}
+
+.momentum-body h3 {
+  margin: 0 0 12px;
+  font-size: 0.88rem;
+}
+
+.momentum-subhead h3 {
+  margin-bottom: 12px;
+}
+
+.momentum-subhead span {
+  font-size: 0.7rem;
+  opacity: 0.58;
+}
+
+.momentum-week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.momentum-day {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 7px 2px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font-size: 0.68rem;
+  opacity: 0.63;
+}
+
+.momentum-day i {
+  width: 16px;
+  height: 16px;
+  border: 2px solid color-mix(in srgb, var(--border-color) 75%, var(--text-color) 25%);
+  border-radius: 50%;
+  background: var(--card-bg);
+}
+
+.momentum-day small {
+  font-size: 0.66rem;
+}
+
+.momentum-day.is-logged {
+  opacity: 1;
+}
+
+.momentum-day.is-logged i {
+  border-color: #22a653;
+  background: #22a653;
+  box-shadow: inset 0 0 0 3px var(--card-bg);
+}
+
+.momentum-day.is-today {
+  border-color: color-mix(in srgb, var(--border-color) 60%, #22c55e 40%);
+  background: color-mix(in srgb, var(--muted-bg) 80%, #dcfce7 20%);
+  opacity: 1;
+}
+
+.momentum-habits {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.momentum-habit {
+  min-width: 0;
+  padding: 11px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--card-bg) 93%, var(--muted-bg) 7%);
+}
+
+.momentum-habit__header,
+.momentum-habit__footer {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+}
+
+.momentum-habit strong {
+  overflow: hidden;
+  font-size: 0.78rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.momentum-habit__value {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  flex: 0 0 auto;
+  color: #16803d;
+  font-size: 1.25rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.momentum-habit__value em {
+  font-size: 0.64rem;
+  font-style: normal;
+  font-weight: 700;
+  opacity: 0.7;
+}
+
+.momentum-habit__track {
+  position: relative;
+  height: 9px;
+  margin-top: 10px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--border-color) 82%, var(--text-color) 18%);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--muted-bg) 86%, var(--card-bg) 14%);
+}
+
+.momentum-habit__track span {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #22a653, #69c77f);
+  transition: width 260ms ease-out;
+}
+
+.momentum-habit.is-personal-best .momentum-habit__track span {
+  background: linear-gradient(90deg, #16803d, #22c55e);
+}
+
+.momentum-habit.is-personal-best .momentum-habit__best::before {
+  content: "★ ";
+  color: #d49a18;
+}
+
+.momentum-habit__footer {
+  margin-top: 7px;
+}
+
+.momentum-habit__footer small {
+  font-size: 0.66rem;
+  opacity: 0.6;
+}
+
+.momentum-habit__best {
+  flex: 0 0 auto;
+  font-weight: 750;
+  opacity: 0.82 !important;
+}
+
+.momentum-empty {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 0.8rem;
+  opacity: 0.68;
+}
+
+body.dark .momentum-panel {
+  background:
+    radial-gradient(circle at 100% 0, rgba(34, 197, 94, 0.1), transparent 36%),
+    var(--card-bg);
+}
+
+body.dark .momentum-label,
+body.dark .momentum-habit__value {
+  color: #86efac;
+}
+
+body.dark .momentum-habit__track span {
+  background: linear-gradient(90deg, #4ade80, #86efac);
+}
+
+body.journal .momentum-panel {
+  border-color: var(--border-color);
+  border-left: 4px solid var(--journal-sage);
+  border-radius: 3px 9px 5px 3px;
+  background:
+    linear-gradient(90deg, rgba(100, 113, 91, 0.1), transparent 34%),
+    rgba(248, 241, 226, 0.94);
+  box-shadow: 3px 4px 0 rgba(84, 68, 48, 0.1);
+}
+
+body.journal .momentum-label,
+body.journal .momentum-habit__value {
+  color: var(--journal-sage);
+}
+
+body.journal .momentum-metric,
+body.journal .momentum-habit,
+body.journal .momentum-day.is-today {
+  border-color: rgba(100, 113, 91, 0.28);
+  border-radius: 2px 7px 4px 2px;
+  background: rgba(233, 222, 202, 0.56);
+}
+
+body.journal .momentum-day.is-logged i {
+  border-color: var(--journal-sage);
+  background: var(--journal-sage);
+  box-shadow: inset 0 0 0 3px var(--journal-paper);
+}
+
+body.journal .momentum-habit__track span,
+body.journal .momentum-habit.is-personal-best .momentum-habit__track span {
+  background: linear-gradient(90deg, var(--journal-sage), #89947f);
+}
+
+@media (max-width: 700px) {
+  .momentum-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .momentum-panel {
+    padding: 14px;
+  }
+
+  .momentum-header {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .momentum-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .momentum-metric {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    column-gap: 12px;
+  }
+
+  .momentum-metric strong {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    margin: 0;
+  }
+
+  .momentum-metric p {
+    margin-top: 3px;
+  }
+
+  .momentum-habits {
+    grid-template-columns: 1fr;
   }
 }
 

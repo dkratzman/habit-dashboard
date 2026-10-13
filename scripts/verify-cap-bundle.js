@@ -9,6 +9,7 @@ const requiredFiles = [
   "script.js",
   "habitPreferences.js",
   "habitCoach.js",
+  "momentum.js",
   "input.html",
   "input.js",
   "entryEditor.js",
@@ -27,6 +28,7 @@ requiredFiles.forEach(relativePath => {
 
 const bundledIndex = fs.readFileSync(path.join(rootDir, "www", "index.html"), "utf8");
 assert.match(bundledIndex, /<script src="habitCoach\.js"><\/script>/);
+assert.match(bundledIndex, /<script src="momentum\.js"><\/script>/);
 
 const bundledInput = fs.readFileSync(path.join(rootDir, "www", "input.html"), "utf8");
 assert.match(bundledInput, /<script src="entryEditor\.js"><\/script>/);
