@@ -99,8 +99,17 @@
     });
 
     const current = calculateCurrentStreak(successDays, trackedDays, todayKey);
+    const recentDays = recentDayNumbers.map(day => {
+      const date = fromDayNumber(day);
+      const entry = entryMap.get(date);
+      const value = entry?.[habit.dataKey];
+      if (typeof value !== "boolean") return { date, status: "remaining" };
+      const succeeded = habit.lowerIsBetter ? !value : value;
+      return { date, status: succeeded ? "success" : "remaining" };
+    });
     const recentTracked = recentDayNumbers.filter(day => trackedDays.has(day)).length;
-    const recentSuccess = recentDayNumbers.filter(day => successDays.has(day)).length;
+    const recentSuccess = recentDays.filter(day => day.status === "success").length;
+    const weeklyGoal = Math.min(7, Math.max(1, Math.round(Number(habit.weeklyGoal) || 1)));
 
     return {
       id: habit.id,
@@ -110,6 +119,9 @@
       longest: calculateLongestStreak(successDays),
       recentSuccess,
       recentTracked,
+      recentDays,
+      weeklyGoal,
+      goalMet: recentSuccess >= weeklyGoal,
     };
   }
 
@@ -119,9 +131,10 @@
     const entryMap = uniqueEntriesByDate(data, todayDay);
     const loggingDays = daySetsForEntries(entryMap);
     const current = calculateCurrentStreak(loggingDays, loggingDays, todayKey);
-    const recentDayNumbers = todayDay == null
+    const latestRecordedDay = loggingDays.size ? Math.max(...loggingDays) : todayDay;
+    const recentDayNumbers = latestRecordedDay == null
       ? []
-      : Array.from({ length: 7 }, (_unused, index) => todayDay - 6 + index);
+      : Array.from({ length: 7 }, (_unused, index) => latestRecordedDay - 6 + index);
     const recentDays = recentDayNumbers.map(day => {
       const date = fromDayNumber(day);
       return {
@@ -133,6 +146,7 @@
 
     return {
       today: todayKey,
+      recentWindowEnd: latestRecordedDay == null ? "" : fromDayNumber(latestRecordedDay),
       totalEntries: entryMap.size,
       currentCheckInStreak: current.count,
       currentCheckInThrough: current.anchorDate,
@@ -152,13 +166,6 @@
 
   function dayWord(count) {
     return count === 1 ? "day" : "days";
-  }
-
-  function streakProgress(current, longest) {
-    const safeCurrent = Math.max(0, Number(current) || 0);
-    const safeLongest = Math.max(safeCurrent, Number(longest) || 0);
-    if (!safeLongest) return 0;
-    return Math.round((safeCurrent / safeLongest) * 100);
   }
 
   function setText(id, text) {
@@ -195,7 +202,7 @@
     if (!habits.length) {
       const empty = document.createElement("p");
       empty.className = "momentum-empty";
-      empty.textContent = "Choose habits in Settings to see their streaks here.";
+      empty.textContent = "Choose habits in Settings to see their weekly goals here.";
       container.appendChild(empty);
       return;
     }
@@ -203,45 +210,39 @@
     habits.forEach(habit => {
       const card = document.createElement("article");
       card.className = "momentum-habit";
-      const progress = streakProgress(habit.current, habit.longest);
-      if (habit.current > 0 && habit.current === habit.longest) {
-        card.classList.add("is-personal-best");
-      }
+      if (habit.goalMet) card.classList.add("is-goal-met");
 
       const header = document.createElement("div");
       header.className = "momentum-habit__header";
+      const title = document.createElement("div");
+      title.className = "momentum-habit__title";
       const label = document.createElement("strong");
       label.textContent = habit.label;
-      const value = document.createElement("span");
-      value.className = "momentum-habit__value";
-      value.textContent = `${habit.current}`;
-      value.setAttribute("aria-label", `${habit.current} current ${dayWord(habit.current)}`);
-      const suffix = document.createElement("em");
-      suffix.textContent = dayWord(habit.current);
-      value.appendChild(suffix);
-      header.append(label, value);
+      const goal = document.createElement("span");
+      goal.className = "momentum-habit__goal";
+      goal.textContent = `Goal — ${habit.weeklyGoal} ${dayWord(habit.weeklyGoal)} / week`;
+      title.append(label, goal);
+      header.append(title);
 
       const track = document.createElement("div");
       track.className = "momentum-habit__track";
       track.setAttribute("role", "progressbar");
-      track.setAttribute("aria-label", `${habit.label}: current streak ${habit.current} ${dayWord(habit.current)}, personal best ${habit.longest} ${dayWord(habit.longest)}`);
+      track.setAttribute("aria-label", `${habit.label}: ${habit.recentSuccess} successful days out of 7; goal ${habit.weeklyGoal}`);
       track.setAttribute("aria-valuemin", "0");
-      track.setAttribute("aria-valuemax", String(Math.max(1, habit.longest)));
-      track.setAttribute("aria-valuenow", String(habit.current));
-      const fill = document.createElement("span");
-      fill.style.width = `${progress}%`;
-      track.appendChild(fill);
+      track.setAttribute("aria-valuemax", "7");
+      track.setAttribute("aria-valuenow", String(habit.recentSuccess));
+      const statusOrder = { success: 0, remaining: 1 };
+      const progressDays = [...habit.recentDays].sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
+      progressDays.forEach((day, index) => {
+        const segment = document.createElement("span");
+        segment.className = `momentum-habit__segment is-${day.status}`;
+        if (index === habit.weeklyGoal - 1) segment.classList.add("is-goal-boundary");
+        segment.title = day.status === "success" ? `${day.date}: successful` : "Available day";
+        segment.setAttribute("aria-hidden", "true");
+        track.appendChild(segment);
+      });
 
-      const footer = document.createElement("div");
-      footer.className = "momentum-habit__footer";
-      const recent = document.createElement("small");
-      recent.textContent = `${habit.recentSuccess}/${habit.recentTracked || 0} recent days`;
-      const best = document.createElement("small");
-      best.className = "momentum-habit__best";
-      best.textContent = `Best ${habit.longest} ${dayWord(habit.longest)}`;
-      footer.append(recent, best);
-
-      card.append(header, track, footer);
+      card.append(header, track);
       container.appendChild(card);
     });
   }
@@ -276,7 +277,6 @@
     calculateLongestStreak,
     normalizeDate,
     render,
-    streakProgress,
     toDayNumber,
   };
 

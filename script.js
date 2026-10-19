@@ -1004,9 +1004,16 @@ window.refreshHabitCoach = refreshHabitCoach;
 
 function refreshMomentum() {
   if (!IS_DASHBOARD || !window.Momentum) return;
-  const habitDefinitions = typeof getEnabledHabitDefinitions === "function"
+  const enabledHabitDefinitions = typeof getEnabledHabitDefinitions === "function"
     ? getEnabledHabitDefinitions()
     : [];
+  const weeklyGoals = typeof getWeeklyHabitGoals === "function"
+    ? getWeeklyHabitGoals()
+    : {};
+  const habitDefinitions = enabledHabitDefinitions.map(habit => ({
+    ...habit,
+    weeklyGoal: weeklyGoals[habit.id] ?? habit.defaultWeeklyGoal,
+  }));
   window.momentumSummary = window.Momentum.buildMomentum(
     Array.isArray(window.allData) ? window.allData : [],
     habitDefinitions
@@ -1019,17 +1026,42 @@ window.refreshMomentum = refreshMomentum;
 // -------------------------
 // Load data
 // -------------------------
+async function fetchAllDailyEntries(client, userId) {
+  const rows = [];
+  const pageSize = 500;
+  let total = null;
+
+  while (true) {
+    const { data, error, count } = await client
+      .from("daily_entries")
+      .select("*", rows.length === 0 ? { count: "exact" } : {})
+      .eq("user_id", userId)
+      .order("timestamp", { ascending: true })
+      .order("id", { ascending: true })
+      .range(rows.length, rows.length + pageSize - 1);
+
+    if (error) return { data: null, error };
+    if (total === null && typeof count === "number") total = count;
+    if (!data?.length) {
+      if (total !== null && rows.length < total) {
+        return { data: null, error: new Error("Entry history changed while loading. Refresh to try again.") };
+      }
+      return { data: rows, error: null };
+    }
+    rows.push(...data);
+    if (total !== null ? rows.length >= total : data.length < pageSize) {
+      return { data: rows, error: null };
+    }
+  }
+}
+
 window.addEventListener("load", async () => {
   const session = await requireDashboardAuth();
   if (!session) return;
 
   window.dispatchEvent(new CustomEvent("habitdash:dashboard-ready"));
 
-  const { data, error } = await supabaseClient
-    .from("daily_entries")
-    .select("*")
-    .eq("user_id", session.user.id)
-    .order("timestamp", { ascending: true });
+  const { data, error } = await fetchAllDailyEntries(supabaseClient, session.user.id);
 
   if (error) return console.error(error);
 
@@ -1059,6 +1091,8 @@ window.addEventListener("habitdash:habit-preferences-updated", () => {
   refreshHabitCoach();
   refreshMomentum();
 });
+
+window.addEventListener("habitdash:weekly-habit-goals-updated", refreshMomentum);
 
 // -------------------------
 // Weekly Summary UI Compatibility Layer

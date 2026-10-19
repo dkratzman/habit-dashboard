@@ -36,6 +36,10 @@
       <span>Goals</span>
       <strong>Time targets</strong>
     </button>
+    <button type="button" class="settings-action" data-open-weekly-habit-goals>
+      <span>Goals</span>
+      <strong>Weekly habit targets</strong>
+    </button>
     <button type="button" class="settings-action danger" id="logoutBtn">
       <span>Account</span>
       <strong>Log out</strong>
@@ -88,6 +92,21 @@
       <button type="button" class="btn-secondary" id="timeGoalsBack" hidden>Back</button>
       <button type="button" class="btn-secondary" id="timeGoalsCancel">Cancel</button>
       <button type="button" id="saveTimeGoals">Save goals</button>
+    </div>
+  </div>
+</div>
+
+<div class="walkthrough-overlay" id="weeklyHabitGoalsModal" hidden>
+  <div class="walkthrough-modal" role="dialog" aria-modal="true" aria-labelledby="weeklyHabitGoalsTitle">
+    <h2 id="weeklyHabitGoalsTitle">Set Weekly Habit Goals</h2>
+    <p class="setup-copy">
+      Choose how many successful days you want for each habit in its latest recorded 7-day window.
+    </p>
+    <div class="weekly-habit-goals-form" id="weeklyHabitGoalsForm"></div>
+    <div class="walkthrough-actions">
+      <span class="setup-status" id="weeklyHabitGoalsStatus"></span>
+      <button type="button" class="btn-secondary" id="weeklyHabitGoalsCancel">Cancel</button>
+      <button type="button" id="saveWeeklyHabitGoals">Save goals</button>
     </div>
   </div>
 </div>
@@ -193,6 +212,7 @@
 
     const habitSetup = document.getElementById("habitSetupModal");
     const timeGoals = document.getElementById("timeGoalsModal");
+    const weeklyHabitGoals = document.getElementById("weeklyHabitGoalsModal");
     if (typeof setupHabitPreferencesForm === "function") {
       setupHabitPreferencesForm({
         formId: "habitPreferencesForm",
@@ -209,6 +229,14 @@
         onSave: () => { timeGoals.hidden = true; },
       });
     }
+    const weeklyHabitGoalsController = typeof setupWeeklyHabitGoalsForm === "function"
+      ? setupWeeklyHabitGoalsForm({
+          formId: "weeklyHabitGoalsForm",
+          saveButtonId: "saveWeeklyHabitGoals",
+          statusId: "weeklyHabitGoalsStatus",
+          onSave: () => { weeklyHabitGoals.hidden = true; },
+        })
+      : null;
 
     const habitSetupBack = document.getElementById("habitSetupBack");
     const timeGoalsBack = document.getElementById("timeGoalsBack");
@@ -224,6 +252,12 @@
         timeGoals.hidden = false;
       });
     });
+    document.querySelectorAll("[data-open-weekly-habit-goals]").forEach(button => {
+      button.addEventListener("click", () => {
+        weeklyHabitGoalsController?.render();
+        weeklyHabitGoals.hidden = false;
+      });
+    });
 
     const walkthrough = document.getElementById("firstLoginWalkthrough");
     const exampleModal = document.getElementById("exampleDashboardModal");
@@ -232,6 +266,7 @@
       if (exampleModal) exampleModal.hidden = true;
       if (habitSetup) habitSetup.hidden = true;
       if (timeGoals) timeGoals.hidden = true;
+      if (weeklyHabitGoals) weeklyHabitGoals.hidden = true;
     };
 
     document.getElementById("openWalkthrough")?.addEventListener("click", () => {
@@ -265,6 +300,7 @@
       if (habitSetup) habitSetup.hidden = false;
     });
     document.getElementById("timeGoalsCancel")?.addEventListener("click", closeAllWalkthroughs);
+    document.getElementById("weeklyHabitGoalsCancel")?.addEventListener("click", closeAllWalkthroughs);
 
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape") closeAllWalkthroughs();

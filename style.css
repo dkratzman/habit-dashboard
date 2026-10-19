@@ -337,14 +337,16 @@ body.dark .control-btn {
   margin-top: 12px;
 }
 
-.time-goals-form {
+.time-goals-form,
+.weekly-habit-goals-form {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
   gap: 12px;
   margin-top: 12px;
 }
 
-.time-goals-form label {
+.time-goals-form label,
+.weekly-habit-goal {
   display: grid;
   gap: 6px;
   padding: 12px;
@@ -366,6 +368,35 @@ body.dark .control-btn {
   background: var(--card-bg);
   color: var(--text-color);
   font: inherit;
+}
+
+.weekly-habit-goal {
+  grid-template-columns: minmax(0, 1fr) 64px;
+  align-items: center;
+}
+
+.weekly-habit-goal > span {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.weekly-habit-goal small {
+  font-size: 0.72rem;
+  opacity: 0.64;
+}
+
+.weekly-habit-goal input {
+  width: 64px;
+  min-height: 40px;
+  padding: 6px 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--card-bg);
+  color: var(--text-color);
+  font: inherit;
+  font-weight: 750;
+  text-align: center;
 }
 
 .habit-choice {
@@ -1837,7 +1868,8 @@ body.journal .coach-card--focus {
 body.journal .form-row input,
 body.journal .form-row select,
 body.journal .form-row textarea,
-body.journal .time-goals-form input {
+body.journal .time-goals-form input,
+body.journal .weekly-habit-goal input {
   border-color: var(--border-color);
   border-radius: 2px;
   background: rgba(255, 250, 240, 0.72);
@@ -1848,7 +1880,8 @@ body.journal .time-goals-form input {
 body.journal .form-row input:focus,
 body.journal .form-row select:focus,
 body.journal .form-row textarea:focus,
-body.journal .time-goals-form input:focus {
+body.journal .time-goals-form input:focus,
+body.journal .weekly-habit-goal input:focus {
   outline: 2px solid rgba(100, 113, 91, 0.35);
   outline-offset: 1px;
 }
@@ -2167,92 +2200,105 @@ body.journal .auth-card::after {
 .momentum-habits {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  gap: 12px;
 }
 
 .momentum-habit {
+  --habit-gap: 6px;
+  --habit-accent: #27845b;
+  --habit-marker: #b68329;
   min-width: 0;
-  padding: 11px 12px;
-  border: 1px solid var(--border-color);
-  border-radius: 11px;
-  background: color-mix(in srgb, var(--card-bg) 93%, var(--muted-bg) 7%);
+  padding: 16px 16px 18px;
+  border: 1px solid color-mix(in srgb, var(--border-color) 78%, transparent);
+  border-radius: 14px;
+  background: linear-gradient(150deg, var(--card-bg), color-mix(in srgb, var(--card-bg) 94%, var(--muted-bg)));
+  box-shadow: 0 2px 5px rgba(15, 23, 42, 0.025);
 }
 
-.momentum-habit__header,
-.momentum-habit__footer {
+.momentum-habit.is-goal-met {
+  border-color: color-mix(in srgb, var(--border-color) 68%, #22a653 32%);
+}
+
+.momentum-habit__header {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 10px;
+  gap: 12px;
   min-width: 0;
 }
 
+.momentum-habit__title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  flex-wrap: wrap;
+  row-gap: 5px;
+}
+
 .momentum-habit strong {
-  overflow: hidden;
-  font-size: 0.78rem;
-  text-overflow: ellipsis;
+  min-width: 0;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.momentum-habit__goal {
+  color: color-mix(in srgb, var(--text-color) 70%, transparent);
+  font-size: 0.67rem;
+  font-weight: 500;
+  flex: 0 0 auto;
   white-space: nowrap;
 }
 
-.momentum-habit__value {
-  display: flex;
-  align-items: baseline;
-  gap: 3px;
-  flex: 0 0 auto;
-  color: #16803d;
-  font-size: 1.25rem;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-}
-
-.momentum-habit__value em {
-  font-size: 0.64rem;
-  font-style: normal;
-  font-weight: 700;
-  opacity: 0.7;
-}
-
 .momentum-habit__track {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--habit-gap);
+  height: 24px;
+  margin-top: 16px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.momentum-habit__segment {
+  box-sizing: border-box;
   position: relative;
-  height: 9px;
-  margin-top: 10px;
-  overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--border-color) 82%, var(--text-color) 18%);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--muted-bg) 86%, var(--card-bg) 14%);
-}
-
-.momentum-habit__track span {
   display: block;
-  width: 0;
   height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, #22a653, #69c77f);
-  transition: width 260ms ease-out;
+  border: 1px solid color-mix(in srgb, var(--border-color) 82%, var(--text-color) 18%);
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--muted-bg) 72%, var(--card-bg) 28%);
 }
 
-.momentum-habit.is-personal-best .momentum-habit__track span {
-  background: linear-gradient(90deg, #16803d, #22c55e);
+.momentum-habit__segment.is-success {
+  border-color: color-mix(in srgb, var(--habit-accent) 86%, black);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--habit-accent) 82%, white), var(--habit-accent));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 2px 3px rgba(15, 23, 42, 0.08);
 }
 
-.momentum-habit.is-personal-best .momentum-habit__best::before {
-  content: "★ ";
-  color: #d49a18;
+.momentum-habit__segment.is-remaining {
+  border-color: color-mix(in srgb, var(--border-color) 85%, transparent);
+  background: color-mix(in srgb, var(--muted-bg) 64%, var(--card-bg));
 }
 
-.momentum-habit__footer {
-  margin-top: 7px;
+.momentum-habit__segment.is-goal-boundary::after {
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: calc(100% + 1px + var(--habit-gap) / 2);
+  transform: translateX(-50%);
+  width: 2px;
+  border-radius: 999px;
+  background: var(--habit-marker);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--card-bg) 90%, transparent);
+  content: "";
 }
 
-.momentum-habit__footer small {
-  font-size: 0.66rem;
-  opacity: 0.6;
-}
-
-.momentum-habit__best {
-  flex: 0 0 auto;
-  font-weight: 750;
-  opacity: 0.82 !important;
+.momentum-habit__segment.is-goal-boundary:last-child::after {
+  left: calc(100% + 1px);
 }
 
 .momentum-empty {
@@ -2268,14 +2314,15 @@ body.dark .momentum-panel {
     var(--card-bg);
 }
 
-body.dark .momentum-label,
-body.dark .momentum-habit__value {
+body.dark .momentum-label {
   color: #86efac;
 }
 
-body.dark .momentum-habit__track span {
-  background: linear-gradient(90deg, #4ade80, #86efac);
+body.dark .momentum-habit__segment.is-success {
+  --habit-accent: #42ab7d;
 }
+
+body.dark .momentum-habit { --habit-marker: #e2b65d; }
 
 body.journal .momentum-panel {
   border-color: var(--border-color);
@@ -2287,8 +2334,7 @@ body.journal .momentum-panel {
   box-shadow: 3px 4px 0 rgba(84, 68, 48, 0.1);
 }
 
-body.journal .momentum-label,
-body.journal .momentum-habit__value {
+body.journal .momentum-label {
   color: var(--journal-sage);
 }
 
@@ -2306,9 +2352,17 @@ body.journal .momentum-day.is-logged i {
   box-shadow: inset 0 0 0 3px var(--journal-paper);
 }
 
-body.journal .momentum-habit__track span,
-body.journal .momentum-habit.is-personal-best .momentum-habit__track span {
-  background: linear-gradient(90deg, var(--journal-sage), #89947f);
+body.journal .momentum-habit__segment.is-success {
+  border-color: #68785e;
+}
+
+body.journal .momentum-habit {
+  --habit-accent: #76876b;
+  --habit-marker: #aa854f;
+  border-radius: 12px;
+  border-color: rgba(128, 110, 77, 0.2);
+  background: linear-gradient(145deg, rgba(255, 252, 244, 0.8), rgba(241, 231, 211, 0.65));
+  box-shadow: 0 2px 4px rgba(84, 68, 48, 0.035), inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 @media (max-width: 700px) {

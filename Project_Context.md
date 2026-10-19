@@ -1,6 +1,6 @@
 # DayMark Habit Dashboard - Project Context
 
-Last updated: October 12, 2026
+Last updated: October 15, 2026
 
 DayMark is a personal habit dashboard built as a vanilla HTML/CSS/JavaScript app with Supabase auth/database persistence and Chart.js visualizations. The browser app still lives at the repository root, and the current branch also includes a Capacitor iOS shell so the same local web files can be bundled into a mobile app.
 
@@ -24,12 +24,12 @@ DayMark is a personal habit dashboard built as a vanilla HTML/CSS/JavaScript app
 - `index.html`: main dashboard, dashboard section tabs, onboarding/walkthrough modals, weekly summary markup, chart canvases, Daily Notes table, mobile bottom nav.
 - `script.js`: dashboard data loading, data mapping, date filters, chart building, weekly summary computation, onboarding behavior, Daily Notes rendering.
 - `habitCoach.js`: local-only Habit Coach analysis and safe UI rendering for movement, habit associations, and a suggested focus.
-- `momentum.js`: local streak calculations and safe rendering for check-in consistency, recent logging, and enabled habits.
+- `momentum.js`: local streak calculations and safe rendering for check-in consistency, recent logging, and adjustable seven-day habit goals.
 - `input.html`: daily entry page with date calendar, habit toggles, time/number steppers, ratings, daily keyword/summary, overwrite modal, recent entry table, mobile bottom nav.
 - `input.js`: entry calendar behavior, habit toggle behavior, time and number steppers, goal comparison coloring, duplicate-date overwrite flow, Supabase insert/update, form reset and submission summary.
 - `entryEditor.js`: conversion and data-preservation helpers for loading and updating completed daily entries.
-- `settings.html`: habit choice setup, time-goal setup, walkthrough/example modals, settings actions, mobile bottom nav.
-- `habitPreferences.js`: fixed habit catalog, enabled habit preferences, local time-goal defaults, setup rendering, and app-wide preference update events.
+- `settings.html`: habit choice setup, time-goal and weekly habit-goal setup, walkthrough/example modals, settings actions, mobile bottom nav.
+- `habitPreferences.js`: fixed habit catalog, enabled habit preferences, local time and weekly habit-goal defaults, setup rendering, and app-wide preference update events.
 - `style.css`: shared responsive styling, dark/light theme variables, dashboard tabs, weekly summary, entry calendar, input controls, onboarding/settings modals, mobile bottom navigation.
 - `theme.js`: dark/light mode handling.
 - `supabaseClient.js`: Supabase initialization.
@@ -56,6 +56,9 @@ DayMark is a personal habit dashboard built as a vanilla HTML/CSS/JavaScript app
 
 ## Current Stable Behavior
 
+- Historical import: 763 spreadsheet entries were added to the requested account and verified field by field; all 309 prior entries were preserved. Another 33 spreadsheet rows remain unimported for date-conflict review. Backup, provenance, and review files are saved outside the repository in this chat's historical-import artifact directory.
+- The local dashboard/Data loader now fetches all entries in ordered pages, including history beyond the API's default 1,000-row limit. Pagination and later-page failure checks pass. This loader update is not yet deployed; the live app may truncate the account's 1,072 entries until it is published.
+
 - Supabase login works.
 - Dashboard charts work.
 - Date filters use `startMonth` and `endMonth`.
@@ -66,7 +69,7 @@ DayMark is a personal habit dashboard built as a vanilla HTML/CSS/JavaScript app
 - Dark mode affects chart colors through `getChartTheme()` and `body.dark`.
 - Appearance settings now cycle through Light, Dark, and a scoped Journal theme; Journal uses paper texture, ink typography, and muted chart colors without changing the original themes.
 - Dashboard can switch between weekly summary and chart sections.
-- Home opens with a dedicated momentum panel showing current/best check-in streaks, recent logging, and enabled-habit progress bars measured against each personal best; Trends remains a separate charts page.
+- Home opens with a dedicated momentum panel showing current/best check-in streaks, recent logging, and enabled-habit seven-day goal bars. Each bar ends on the newest saved entry, shows successful days against the remaining weekly capacity, and marks the adjustable target; Trends remains a separate charts page.
 - Mobile bottom navigation is present across main app pages.
 - Entry page supports one entry per day and asks before overwriting an existing entry.
 - Completed calendar dates can be opened for explicit editing, with saved values prefilled and disabled-habit data preserved.
@@ -81,7 +84,7 @@ DayMark is a personal habit dashboard built as a vanilla HTML/CSS/JavaScript app
 - Added an entry calendar with entered/waiting/upcoming day states.
 - Added duplicate-date detection and overwrite confirmation for daily entries.
 - Added explicit past-entry editing from completed calendar dates with a visible editing state and cancel action.
-- Added a momentum panel with current and best check-in streaks, a seven-day logging trail, and per-habit progress bars against personal bests.
+- Added a momentum panel with current and best check-in streaks, a seven-day logging trail, and per-habit weekly goal bars with adjustable 1–7 day targets.
 - Added daily keyword and daily summary fields.
 - Added recent submission summary feedback after saving an entry.
 - Added dashboard section navigation so weekly summary and charts are separated.
@@ -98,6 +101,8 @@ DayMark is a personal habit dashboard built as a vanilla HTML/CSS/JavaScript app
 - Added npm scripts for Capacitor build/sync/open workflows.
 
 ## Most Recent Local UI Tweaks
+
+- Refined weekly habit cards with softer surfaces, clearer spacing, standalone day bubbles, and theme-aware sage fills. Goal markers now center in segment gaps, with a dedicated seven-day end position. Automated checks pass; browser visual verification was unavailable because the local preview connection timed out.
 
 - Shortened rating button text from `3 Average` to `3 Avg.` on the input page.
 - Reduced habit grid minimum width and gaps so habit toggles fit better on smaller screens.

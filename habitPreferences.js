@@ -3,6 +3,7 @@
 
 const HABIT_PREFERENCES_STORAGE_KEY = "habitdash_enabled_habits_v1";
 const TIME_GOALS_STORAGE_KEY = "habitdash_time_goals_v1";
+const WEEKLY_HABIT_GOALS_STORAGE_KEY = "habitdash_weekly_habit_goals_v1";
 const DEFAULT_TIME_GOALS = {
   timeBed: "10:30p",
   timeUp: "7:00a",
@@ -20,6 +21,7 @@ const HABIT_DEFINITIONS = [
     summaryKey: "workouts",
     chartKey: "workout",
     color: "#10b981",
+    defaultWeeklyGoal: 3,
   },
   {
     id: "journal",
@@ -30,6 +32,7 @@ const HABIT_DEFINITIONS = [
     summaryKey: "journaling",
     chartKey: "journal",
     color: "#3b82f6",
+    defaultWeeklyGoal: 5,
   },
   {
     id: "read",
@@ -40,6 +43,7 @@ const HABIT_DEFINITIONS = [
     summaryKey: "reading",
     chartKey: "read",
     color: "#6366f1",
+    defaultWeeklyGoal: 6,
   },
   {
     id: "drink",
@@ -51,6 +55,7 @@ const HABIT_DEFINITIONS = [
     chartKey: "drink",
     color: "#ef4444",
     lowerIsBetter: true,
+    defaultWeeklyGoal: 7,
   },
   {
     id: "media",
@@ -61,6 +66,7 @@ const HABIT_DEFINITIONS = [
     summaryKey: "lowMedia",
     chartKey: "media",
     color: "#f59e0b",
+    defaultWeeklyGoal: 5,
   },
   {
     id: "piano",
@@ -71,6 +77,7 @@ const HABIT_DEFINITIONS = [
     summaryKey: "piano",
     chartKey: "piano",
     color: "#a855f7",
+    defaultWeeklyGoal: 3,
   },
   {
     id: "office",
@@ -81,6 +88,7 @@ const HABIT_DEFINITIONS = [
     summaryKey: "office",
     chartKey: "office",
     color: "#0ea5e9",
+    defaultWeeklyGoal: 3,
   },
   {
     id: "hitGoal",
@@ -91,8 +99,14 @@ const HABIT_DEFINITIONS = [
     summaryKey: "hitGoal",
     chartKey: "goal",
     color: "#22c55e",
+    defaultWeeklyGoal: 5,
   },
 ];
+
+const DEFAULT_WEEKLY_HABIT_GOALS = HABIT_DEFINITIONS.reduce((goals, habit) => {
+  goals[habit.id] = habit.defaultWeeklyGoal;
+  return goals;
+}, {});
 
 function getAllHabitIds() {
   return HABIT_DEFINITIONS.map(habit => habit.id);
@@ -181,6 +195,87 @@ function setupHabitPreferencesForm({ formId, saveButtonId, statusId, onSave } = 
   });
 
   render();
+}
+
+function normalizeWeeklyHabitGoal(habitId, value) {
+  const fallback = DEFAULT_WEEKLY_HABIT_GOALS[habitId] || 1;
+  const number = Number(value);
+  if (!Number.isFinite(number)) return fallback;
+  return Math.min(7, Math.max(1, Math.round(number)));
+}
+
+function getWeeklyHabitGoals() {
+  try {
+    const raw = localStorage.getItem(WEEKLY_HABIT_GOALS_STORAGE_KEY);
+    const stored = raw ? JSON.parse(raw) : {};
+    return HABIT_DEFINITIONS.reduce((goals, habit) => {
+      goals[habit.id] = normalizeWeeklyHabitGoal(habit.id, stored?.[habit.id]);
+      return goals;
+    }, {});
+  } catch (e) {
+    console.warn("Could not read weekly habit goals", e);
+    return { ...DEFAULT_WEEKLY_HABIT_GOALS };
+  }
+}
+
+function setWeeklyHabitGoals(nextGoals) {
+  const goals = HABIT_DEFINITIONS.reduce((cleanGoals, habit) => {
+    cleanGoals[habit.id] = normalizeWeeklyHabitGoal(habit.id, nextGoals?.[habit.id]);
+    return cleanGoals;
+  }, {});
+  localStorage.setItem(WEEKLY_HABIT_GOALS_STORAGE_KEY, JSON.stringify(goals));
+  window.dispatchEvent(new CustomEvent("habitdash:weekly-habit-goals-updated", { detail: goals }));
+  return goals;
+}
+
+function setupWeeklyHabitGoalsForm({ formId, saveButtonId, statusId, onSave } = {}) {
+  const form = document.getElementById(formId);
+  const saveBtn = document.getElementById(saveButtonId);
+  const status = document.getElementById(statusId);
+  if (!form || !saveBtn) return null;
+
+  function render() {
+    const enabled = new Set(getEnabledHabitIds());
+    const goals = getWeeklyHabitGoals();
+    form.innerHTML = HABIT_DEFINITIONS
+      .filter(habit => enabled.has(habit.id))
+      .map(habit => `
+        <label class="weekly-habit-goal">
+          <span>
+            <strong>${habit.id === "drink" ? "Alcohol-free" : habit.label}</strong>
+            <small>Successful days out of 7</small>
+          </span>
+          <input
+            type="number"
+            inputmode="numeric"
+            min="1"
+            max="7"
+            step="1"
+            value="${goals[habit.id]}"
+            data-weekly-habit-goal="${habit.id}"
+            aria-label="${habit.label} weekly goal"
+          >
+        </label>
+      `).join("");
+  }
+
+  saveBtn.addEventListener("click", () => {
+    const currentGoals = getWeeklyHabitGoals();
+    form.querySelectorAll("[data-weekly-habit-goal]").forEach(input => {
+      currentGoals[input.dataset.weeklyHabitGoal] = input.value;
+    });
+    setWeeklyHabitGoals(currentGoals);
+    render();
+    if (status) {
+      status.textContent = "Saved.";
+      setTimeout(() => { status.textContent = ""; }, 1800);
+    }
+    if (typeof onSave === "function") onSave();
+  });
+
+  window.addEventListener("habitdash:habit-preferences-updated", render);
+  render();
+  return { render };
 }
 
 function normalizeTimeGoalValue(goalId, value) {
@@ -287,7 +382,9 @@ function setupTimeGoalsForm({ formId, saveButtonId, statusId, onSave } = {}) {
 window.HABIT_DEFINITIONS = HABIT_DEFINITIONS;
 window.HABIT_PREFERENCES_STORAGE_KEY = HABIT_PREFERENCES_STORAGE_KEY;
 window.TIME_GOALS_STORAGE_KEY = TIME_GOALS_STORAGE_KEY;
+window.WEEKLY_HABIT_GOALS_STORAGE_KEY = WEEKLY_HABIT_GOALS_STORAGE_KEY;
 window.DEFAULT_TIME_GOALS = DEFAULT_TIME_GOALS;
+window.DEFAULT_WEEKLY_HABIT_GOALS = DEFAULT_WEEKLY_HABIT_GOALS;
 window.getEnabledHabitIds = getEnabledHabitIds;
 window.setEnabledHabitIds = setEnabledHabitIds;
 window.hasHabitPreferences = hasHabitPreferences;
@@ -295,6 +392,9 @@ window.getEnabledHabitDefinitions = getEnabledHabitDefinitions;
 window.isHabitEnabled = isHabitEnabled;
 window.applyHabitVisibility = applyHabitVisibility;
 window.setupHabitPreferencesForm = setupHabitPreferencesForm;
+window.getWeeklyHabitGoals = getWeeklyHabitGoals;
+window.setWeeklyHabitGoals = setWeeklyHabitGoals;
+window.setupWeeklyHabitGoalsForm = setupWeeklyHabitGoalsForm;
 window.getTimeGoals = getTimeGoals;
 window.setTimeGoals = setTimeGoals;
 window.hasTimeGoals = hasTimeGoals;
